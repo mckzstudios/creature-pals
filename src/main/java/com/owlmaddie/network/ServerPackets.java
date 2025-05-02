@@ -150,7 +150,7 @@ public class ServerPackets {
         // Handle packet for Open Chat
         ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_OPEN_CHAT, (server, player, handler, buf, responseSender) -> {
             UUID entityId = UUID.fromString(buf.readString());
-
+            // AAA when you right click and open chat 
             // Ensure that the task is synced with the server thread
             server.execute(() -> {
                 MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
@@ -188,6 +188,7 @@ public class ServerPackets {
                     if (chatData.characterSheet.isEmpty()) {
                         generate_character(userLanguage, chatData, player, entity);
                     } else {
+                        // AAA server side generate llm response on entity
                         generate_chat(userLanguage, chatData, player, entity, message, false);
                     }
                 }
@@ -387,7 +388,7 @@ public class ServerPackets {
     }
 
     // Send new message to all connected players
-    public static void BroadcastPlayerMessage(EntityChatData chatData, ServerPlayerEntity sender) {
+    public static void BroadcastPlayerMessage(EntityChatData chatData, ServerPlayerEntity sender, boolean fromMinecraftChat) {
         // Log the specific data being sent
         LOGGER.info("Broadcasting player message: senderUUID={}, message={}", sender.getUuidAsString(),
                 chatData.currentMessage);
@@ -399,6 +400,7 @@ public class ServerPackets {
         buffer.writeString(sender.getUuidAsString());
         buffer.writeString(sender.getDisplayName().getString());
         buffer.writeString(chatData.currentMessage);
+        buffer.writeBoolean(fromMinecraftChat);
 
         // Iterate over all connected players and send the packet
         for (ServerPlayerEntity serverPlayer : serverInstance.getPlayerManager().getPlayerList()) {

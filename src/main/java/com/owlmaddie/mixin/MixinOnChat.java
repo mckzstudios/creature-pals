@@ -12,32 +12,33 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.owlmaddie.network.ServerPackets.BroadcastPlayerMessage;
+import static com.owlmaddie.network.ServerPackets.LOGGER;
 
 /**
- * The {@code MixinOnChat} mixin class intercepts chat messages from players, and broadcasts them as chat bubbles
+ * The {@code MixinOnChat} mixin class intercepts chat messages from players,
+ * and broadcasts them as chat bubbles
  */
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class MixinOnChat {
 
     @Inject(method = "onChatMessage", at = @At("HEAD"), cancellable = true)
     private void onChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
+
+        // Get the player who sent the message
+        ServerPlayNetworkHandler handler = (ServerPlayNetworkHandler) (Object) this;
+        ServerPlayerEntity player = handler.player;
+
+        // Get the chat message
+        String chatMessage = packet.chatMessage();
         ConfigurationHandler.Config config = new ConfigurationHandler(ServerPackets.serverInstance).loadConfig();
+
         if (config.getChatBubbles()) {
-
-            // Get the player who sent the message
-            ServerPlayNetworkHandler handler = (ServerPlayNetworkHandler) (Object) this;
-            ServerPlayerEntity player = handler.player;
-
-            // Get the chat message
-            String chatMessage = packet.chatMessage();
-
             // Example: Call your broadcast function
             EntityChatData chatData = new EntityChatData(player.getUuidAsString());
             chatData.currentMessage = chatMessage;
-            BroadcastPlayerMessage(chatData, player);
-
+            BroadcastPlayerMessage(chatData, player, true);
             // Optionally, cancel the event to prevent the default behavior
-            //ci.cancel();
+            // ci.cancel();
         }
     }
 }

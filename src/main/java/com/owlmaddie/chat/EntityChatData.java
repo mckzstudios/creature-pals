@@ -635,7 +635,7 @@ public class EntityChatData {
 
         if (sender == ChatDataManager.ChatSender.USER && systemPrompt.equals("system-chat") && auto_generated == 0) {
             // Broadcast new player message (when not auto-generated)
-            ServerPackets.BroadcastPlayerMessage(this, player);
+            ServerPackets.BroadcastPlayerMessage(this, player, false);
         }
 
         // Broadcast new entity message status (i.e. pending)

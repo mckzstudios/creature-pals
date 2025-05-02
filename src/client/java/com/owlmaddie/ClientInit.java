@@ -41,6 +41,7 @@ public class ClientInit implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             tickCounter++;
             PlayerMessageManager.tickUpdate();
+            //AAA add client ontick handlers here  
         });
 
         // Register events
@@ -57,5 +58,7 @@ public class ClientInit implements ClientModInitializer {
             // Clear or reset the ChatDataManager
             ChatDataManager.getClientInstance().clearData();
         });
+
+
     }
 }

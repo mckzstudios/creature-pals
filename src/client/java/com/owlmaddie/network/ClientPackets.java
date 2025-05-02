@@ -80,6 +80,7 @@ public class ClientPackets {
     }
 
     public static void sendChat(Entity entity, String message) {
+        // AAA use this to actually send a chat msg to an entity.
         // Get user language
         String userLanguageCode = MinecraftClient.getInstance().getLanguageManager().getLanguage();
         String userLanguageName = MinecraftClient.getInstance().getLanguageManager().getLanguage(userLanguageCode).getDisplayText().getString();
@@ -154,6 +155,7 @@ public class ClientPackets {
             UUID senderPlayerId = UUID.fromString(buffer.readString());
             String senderPlayerName = buffer.readString(32767);
             String message = buffer.readString(32767);
+            boolean fromMinecraftChat = buffer.readBoolean();
 
             // Update the chat data manager on the client-side
             client.execute(() -> { // Make sure to run on the client thread
@@ -162,9 +164,19 @@ public class ClientPackets {
                     LOGGER.warn("Client not fully initialized. Dropping message for sender '{}'.", senderPlayerId);
                     return;
                 }
+                // AAA trigger for player message
+                LOGGER.info("Player message" + message);
 
                 // Add player message to queue for rendering
                 PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName, ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
+
+                // if the msg was from minecraft's chat, and this is the client for that player, then send to nearest entity with bubble open.
+                if(fromMinecraftChat && senderPlayerName.equals(client.player.getName().getString())){
+                    Optional<Entity> entityToSendChatTo = ClientEntityFinder.getClosestEntityToPlayerWithChatBubbleOpen();
+                    entityToSendChatTo.ifPresent(entity -> {
+                        ClientPackets.sendChat(entity, message);
+                    });
+                }
             });
         });
 
