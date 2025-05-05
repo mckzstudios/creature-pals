@@ -141,6 +141,7 @@ public class ChatGPTRequest {
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(timeout); // 10 seconds connection timeout
                 connection.setReadTimeout(timeout); // 10 seconds read timeout
+                connection.setRequestProperty("player2-game-key", "creature-chat-evolved");
 
                 // Create messages list (for chat history)
                 List<ChatGPTRequestMessage> messages = new ArrayList<>();
