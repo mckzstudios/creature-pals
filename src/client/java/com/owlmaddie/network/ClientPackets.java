@@ -14,10 +14,14 @@ import com.owlmaddie.utils.Decompression;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.message.LastSeenMessageList;
+import net.minecraft.network.message.MessageSignatureData;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 
@@ -26,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -150,14 +155,25 @@ public class ClientPackets {
                         chatData.sender = sender;
                         chatData.players = players;
 
-                        // Play sound with volume based on distance (from player or entity) and show message in chat:
+                        // Play sound with volume based on distance (from player or entity) and show
+                        // message in chat:
                         MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
                         if (entity != null) {
-                            // String charName = chatData.getCharacterProp("name"); // not updated when packet sent for some reason
+                            // String charName = chatData.getCharacterProp("name"); // not updated when
+                            // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                MinecraftClient.getInstance().player.sendMessage(Text.literal(String.format("<%s> %s", characterName, message)));
-                                // MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
+                                String formattedMsg = String.format("<%s> %s", characterName, message);
+                                // MessageSignatureData signature = null;
+                                // ClientPlayNetworkHandler handler = client.getNetworkHandler();
+                                // LastSeenMessageList.Acknowledgment acknowledgment =
+                                // client.getMessageHandler().collectLastSeenMessages();
+                                MinecraftClient.getInstance().player.networkHandler.sendChatMessage(formattedMsg);
+                                // MinecraftClient.getInstance().getNetworkHandler().sendPacket(new
+                                // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
+                                // signature ));
+                                MinecraftClient.getInstance().player.sendMessage(Text.literal(formattedMsg));
+                                // MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(formattedMsg));
                                 LOGGER.info("AAAA Character name here" + characterName + " " + message);
                             }
                             playNearbyUISound(client, entity, 0.2f);
@@ -172,6 +188,8 @@ public class ClientPackets {
                     UUID senderPlayerId = UUID.fromString(buffer.readString());
                     String senderPlayerName = buffer.readString(32767);
                     String message = buffer.readString(32767);
+
+                    // if from minecraft chat:
                     boolean fromMinecraftChat = buffer.readBoolean();
 
                     // Update the chat data manager on the client-side
