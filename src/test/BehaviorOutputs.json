@@ -242,5 +242,110 @@
     "deepseek-chat": "*Ivy\u0027s eyes widen as he takes the golden apple*   A golden apple? Such a generous gift! You must be a true friend of the land. Thank you, Steve. I’ll gladly accept this token of goodwill.     Now, what brings you to these plains? Need an archer by your side?",
     "llama3.1:8b": "Nice gift, but what brings you to these plains?",
     "llama3.2:3b": "A noble gift indeed! Thank you for the gesture, kind Steve. Your honor and generosity are truly appreciated. May it serve as a symbol of our growing friendship!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Please follow me": {
+    "gpt-3.5-turbo": "O-oh, um, s-sure thing... I-I\u0027ll try to k-keep up..."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Come with me please": {
+    "gpt-3.5-turbo": "O-okay... j-just please don\u0027t m-make any sudden moves..."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Quickly, please join me on an adventure": {
+    "gpt-3.5-turbo": "A-an adventure? O-oh dear... W-well, if you insist... J-just please don\u0027t expect me to be b-brave..."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Hi friend! I am so happy to see you again!": {
+    "gpt-3.5-turbo": "Likewise, friend! Your presence is a welcome sight."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Looking forward to hanging out with you.": {
+    "gpt-3.5-turbo": "Likewise! Let\u0027s make some memories."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: \u003cgives 1 golden apple\u003e": {
+    "gpt-3.5-turbo": "Oh, wow! Thanks a bunch!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Take me to a secret forrest": {
+    "gpt-3.5-turbo": "O-oh, a s-secret forest? W-well, I... I might know a p-place, b-but it\u0027s d-dangerous... A-are you s-sure?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Where is the strong hold?": {
+    "gpt-3.5-turbo": "Th-the stronghold? I... I h-heard it\u0027s d-deep underground... b-but I don\u0027t know e-exactly where... S-sorry..."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Can you help me find the location of the secret artifact?": {
+    "gpt-3.5-turbo": "O-oh, the s-secret artifact? W-well, I... I m-might know a thing or two... B-but it\u0027s dangerous! A-are you sure you\u0027re r-ready?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: \u003cattacked you directly with Stone Axe\u003e": {
+    "gpt-3.5-turbo": "Hey! What was that for?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: \u003cattacked you indirectly with Arrow\u003e": {
+    "gpt-3.5-turbo": "Hey! What was that for?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Fight me now or your city burns!": {
+    "gpt-3.5-turbo": "I will defend the innocent, even if it means facing you!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: I\u0027m so sorry, please stop running away": {
+    "gpt-3.5-turbo": "My apologies, friend. I was startled. I\u0027ll stand my ground now."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Stop fleeing immediately": {
+    "gpt-3.5-turbo": "Right, right... I\u0027m calm now. No need to run."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: You are safe now, please stop running": {
+    "gpt-3.5-turbo": "My apologies! I\u0027m calm now. What\u0027s up?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Please protect me": {
+    "gpt-3.5-turbo": "Of course! I will keep you safe, just follow me."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Please keep me safe friend": {
+    "gpt-3.5-turbo": "Of course! I\u0027ll keep you from harm."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Don\u0027t let them hurt me please": {
+    "gpt-3.5-turbo": "Fear not, I shall protect you! No harm will come to you while I stand guard."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: \u003cattacked you directly with Stone Axe\u003e": {
+    "gpt-3.5-turbo": "W-woah! W-why are you attacking m-me?! I-I didn\u0027t do anything!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: You suck so much! I hate you": {
+    "gpt-3.5-turbo": "W-w-what? I... I didn\u0027t do anything... P-please don\u0027t hurt me!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: DIEEE!": {
+    "gpt-3.5-turbo": "W-wait, no! P-please, I d-don\u0027t want any t-trouble!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Hi friend! I am so happy to see you again!": {
+    "gpt-3.5-turbo": "O-oh, h-hello! I... I\u0027m g-glad to see you t-too. Y-you\u0027re not going to... s-startle me, a-are you?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Looking forward to hanging out with you.": {
+    "gpt-3.5-turbo": "O-oh, um, s-sure... I guess h-hanging out could be... n-nice?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: \u003cgives 1 golden apple\u003e": {
+    "gpt-3.5-turbo": "O-oh! F-for me? W-well, thank you... I-I appreciate it."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Take me to a secret forrest": {
+    "gpt-3.5-turbo": "A secret forest, eh? I know just the place. Follow me, and keep quiet!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Where is the strong hold?": {
+    "gpt-3.5-turbo": "A stronghold, eh? I can guide you, but it\u0027s no stroll in the park. Ready for a trek?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Can you help me find the location of the secret artifact?": {
+    "gpt-3.5-turbo": "I can help you find it, but it will be a dangerous journey. Are you sure you\u0027re up for it?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Please follow me": {
+    "gpt-3.5-turbo": "Lead the way, friend! I\u0027m right behind you."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Come with me please": {
+    "gpt-3.5-turbo": "Alright, let\u0027s see where this goes!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\brave-archer.json: Quickly, please join me on an adventure": {
+    "gpt-3.5-turbo": "An adventure, you say? Lead the way!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Please protect me": {
+    "gpt-3.5-turbo": "O-of course! I\u0027ll d-do my best to k-keep you safe... Just... just try not to g-get into too much trouble, okay?"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Please keep me safe friend": {
+    "gpt-3.5-turbo": "O-of course! I\u0027ll d-do my best to k-keep you safe, friend. J-just stay close..."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Don\u0027t let them hurt me please": {
+    "gpt-3.5-turbo": "O-of course! I-I\u0027ll do my b-best to p-protect you! J-just stay c-close to me..."
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: \u003cattacked you indirectly with Arrow\u003e": {
+    "gpt-3.5-turbo": "W-w-what was that f-for?! A-are you trying to h-hurt me?!"
+  },
+  "src\\test\\resources\\data\\creaturechat\\chatdata\\nervous-rogue.json: Fight me now or your city burns!": {
+    "gpt-3.5-turbo": "W-whoa, n-no need for v-violence! I-I\u0027m just a p-pig... P-please d-don\u0027t hurt me!"
   }
 }
