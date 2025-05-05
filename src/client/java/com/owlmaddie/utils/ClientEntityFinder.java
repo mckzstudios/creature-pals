@@ -8,16 +8,13 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
-import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.ui.BubbleRenderer;
-import com.owlmaddie.ui.PlayerMessageManager;
 
 /**
  * The {@code ClientEntityFinder} class is used to find a specific MobEntity by
@@ -47,7 +44,6 @@ public class ClientEntityFinder {
      */
     public static Optional<Entity> getClosestEntityToPlayerWithChatBubbleOpen() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-
         Optional<Entity> closest = BubbleRenderer.getRelevantEntities().stream()
                 .filter(entity -> {
                     if (!(entity instanceof MobEntity))
