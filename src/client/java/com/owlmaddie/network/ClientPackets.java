@@ -156,7 +156,8 @@ public class ClientPackets {
                             // String charName = chatData.getCharacterProp("name"); // not updated when packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
+                                MinecraftClient.getInstance().player.sendMessage(Text.literal(String.format("<%s> %s", characterName, message)));
+                                // MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
                                 LOGGER.info("AAAA Character name here" + characterName + " " + message);
                             }
                             playNearbyUISound(client, entity, 0.2f);
