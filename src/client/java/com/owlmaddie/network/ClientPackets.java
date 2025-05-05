@@ -6,6 +6,7 @@ import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.chat.ChatDataManager.ChatSender;
+import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.PlayerMessageManager;
 import com.owlmaddie.utils.ClientEntityFinder;
@@ -125,6 +126,7 @@ public class ClientPackets {
                     ChatDataManager.ChatStatus status = ChatDataManager.ChatStatus.valueOf(status_name);
                     String sender_name = buffer.readString(32767);
                     ChatDataManager.ChatSender sender = ChatDataManager.ChatSender.valueOf(sender_name);
+                    String characterName = buffer.readString(32767); // "" if DNE
                     Map<String, PlayerData> players = readPlayerDataMap(buffer);
 
                     // Update the chat data manager on the client-side
@@ -148,12 +150,14 @@ public class ClientPackets {
                         chatData.sender = sender;
                         chatData.players = players;
 
-                        // Play sound with volume based on distance (from player or entity)
+                        // Play sound with volume based on distance (from player or entity) and show message in chat:
                         MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
                         if (entity != null) {
-                            String charName = chatData.getCharacterProp("name");
-                            if (sender != ChatSender.USER) {
-                                LOGGER.info("AAAA" + charName + " " + message);
+                            // String charName = chatData.getCharacterProp("name"); // not updated when packet sent for some reason
+                            if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
+                                // display the message in chat locally
+                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
+                                LOGGER.info("AAAA Character name here" + characterName + " " + message);
                             }
                             playNearbyUISound(client, entity, 0.2f);
                         }

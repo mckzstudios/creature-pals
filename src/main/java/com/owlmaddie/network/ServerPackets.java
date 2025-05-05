@@ -350,13 +350,14 @@ public class ServerPackets {
                 chatData.entityId, chatData.status,
                 chatData.currentMessage.length() > 24 ? chatData.currentMessage.substring(0, 24) + "..." : chatData.currentMessage,
                 chatData.currentLineNumber, chatData.sender);
-
+        String characterName = null;
+        
         for (ServerWorld world : serverInstance.getWorlds()) {
             // Find Entity by UUID and update custom name
             UUID entityId = UUID.fromString(chatData.entityId);
             MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(world, entityId);
             if (entity != null) {
-                String characterName = chatData.getCharacterProp("name");
+                characterName = chatData.getCharacterProp("name");
                 if (!characterName.isEmpty() && !characterName.equals("N/A") && entity.getCustomName() == null) {
                     LOGGER.debug("Setting entity name to " + characterName + " for " + chatData.entityId);
                     entity.setCustomName(Text.literal(characterName));
@@ -378,6 +379,7 @@ public class ServerPackets {
                 buffer.writeInt(chatData.currentLineNumber);
                 buffer.writeString(chatData.status.toString());
                 buffer.writeString(chatData.sender.toString());
+                buffer.writeString(characterName != null ? characterName : "");
                 writePlayerDataMap(buffer, chatData.players);
 
                 // Send message to player
