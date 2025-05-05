@@ -4,6 +4,7 @@ import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.network.ClientPackets;
 import com.owlmaddie.particle.CreatureParticleFactory;
 import com.owlmaddie.particle.LeadParticleFactory;
+import com.owlmaddie.player2.HeartbeatManager;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.ClickHandler;
 import com.owlmaddie.ui.PlayerMessageManager;
@@ -16,7 +17,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import static com.owlmaddie.network.ServerPackets.*;
 
 /**
- * The {@code ClientInit} class initializes this mod in the client and defines all hooks into the
+ * The {@code ClientInit} class initializes this mod in the client and defines
+ * all hooks into the
  * render pipeline to draw chat bubbles, text, and entity icons.
  */
 public class ClientInit implements ClientModInitializer {
@@ -41,7 +43,8 @@ public class ClientInit implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             tickCounter++;
             PlayerMessageManager.tickUpdate();
-            //AAA add client ontick handlers here  
+            // AAA add client ontick handlers here
+            HeartbeatManager.injectIntoOnTick();
         });
 
         // Register events
@@ -53,12 +56,12 @@ public class ClientInit implements ClientModInitializer {
             BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickDelta());
         });
 
-        // Register an event callback for when the client disconnects from a server or changes worlds
+        // Register an event callback for when the client disconnects from a server or
+        // changes worlds
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             // Clear or reset the ChatDataManager
             ChatDataManager.getClientInstance().clearData();
         });
-
 
     }
 }
