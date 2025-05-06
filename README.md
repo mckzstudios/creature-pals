@@ -3,6 +3,12 @@
 <img src="https://cdn.elefant.gg/image/png/creaturechatevolved.png" width="45%"/>
 </p>
 
+Download the [Player2 app](https://player2.game), install the Fabric API, and play this mod in Minecraft. 
+
+Create meaningful conversations and enduring friendships? Watch the mobs and AI players interact with each other in chaos.
+
+👉 [Check releases](https://github.com/elefant-ai/creature-chat-evolved/releases)
+
 ## What is CreatureChat Evolved?
 **CreatureChat Evolved** is a Minecraft mod that lets you chat with any creature in the game using AI. With built-in [Player2](https://player2.game/) integration, creatures can speak, remember past interactions, and react dynamically to your actions — no extra setup required. 
 
