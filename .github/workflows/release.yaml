@@ -34,6 +34,12 @@ jobs:
           echo "tag=v${new_version}" >> "$GITHUB_ENV"
           echo "version=${new_version}" >> "$GITHUB_ENV"
 
+      - name: Update Gradle version
+        run: |
+          # actually change  "mod_version=x.y.z" -> "mod_version=x.y.z+1" in gradle.properties
+          sed -i "s/^mod_version=.*/mod_version=${{ env.version }}/" gradle.properties
+          echo "Bumped version to ${{ env.version }}"
+      
       - name: Gradle perms
         run: chmod +x ./gradlew
 
@@ -45,12 +51,6 @@ jobs:
         run: |
           branch="action/release-to-${{ env.tag }}"
 
-
-          # actually change  "mod_version=x.y.z" -> "mod_version=x.y.z+1" in gradle.properties
-          sed -i "s/^mod_version=.*/mod_version=${{ env.version }}/" gradle.properties
-          echo "Bumped version to ${{ env.version }}"
-
-          
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
