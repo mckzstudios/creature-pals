@@ -1,15 +1,15 @@
 {
 	"schemaVersion": 1,
-	"id": "creaturechat",
+	"id": "creaturechatevolved",
 	"version": "${version}",
-	"name": "CreatureChat",
+	"name": "CreatureChatEvolved",
 	"description": "Chat, befriend, and interact with a rich world of creatures like never before! All creatures can talk and respond naturally using AI.",
 	"authors": [
 		"Jonathan Thomas <jonathan@openshot.org>",
 		"owlmaddie <owlmaddie@gmail.com>"
 	],
 	"contact": {
-		"homepage": "http://discord.creaturechat.com",
+		"homepage": "https://elefant.gg/discord",
 		"sources": "http://gitlab.openshot.org/minecraft/creature-chat"
 	},
 	"license": "GPLv3",
