@@ -13,6 +13,7 @@ import com.owlmaddie.utils.ChatProcessor;
 import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.Decompression;
 import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -204,18 +205,18 @@ public class ClientPackets {
                         
                         // AAA trigger for player message
                         LOGGER.info("Player message" + message);
+                        if (ChatProcessor.isFormatted(message)) {
+                            // String front = ChatProcessor.getFront(message);
+                            // String back = ChatProcessor.getBack(message);
+                            LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
+                            // MinecraftClient.getInstance().player.sendMessage(Text.of(front + back));
+                            return;
+                        }
                         
                         // Add player message to queue for rendering
                         PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName,
                         ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
                         
-                        if (ChatProcessor.isFormatted(message)) {
-                            String front = ChatProcessor.getFront(message);
-                            String back = ChatProcessor.getBack(message);
-
-                            MinecraftClient.getInstance().player.sendMessage(Text.of(front + back));
-                            return;
-                        }
 
                         // if the msg was from minecraft's chat, and this is the client for that player,
                         // then send to nearest entity with bubble open.

@@ -10,14 +10,13 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.text.Text;
 
 @Mixin(ChatScreen.class)
-public class MixinChatPreProcess {
-
+public class MixinChatSendMessage {
     @Inject(at = @At("HEAD"), method = "sendMessage")
     private void sendMessage(String chatText, boolean addToHistory, CallbackInfoReturnable<Boolean> cir) {
-        String visible = ChatProcessor.getBack(chatText);
-        MinecraftClient.getInstance().player.sendMessage(Text.of("Chat message recieved: " + visible));
-        if (cir.isCancellable()) {
-            cir.cancel();
-        }
+        // String visible = ChatProcessor.getBack(chatText);
+        // MinecraftClient.getInstance().player.sendMessage(Text.of("Chat message recieved: " + visible));
+        // if (cir.isCancellable()) {
+        //     cir.cancel();
+        // }
     }
 }

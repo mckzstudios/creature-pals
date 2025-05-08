@@ -6,7 +6,8 @@
 		"EntityRendererMixin",
 		"MixinPlayerCustomTexture",
 		"MixinPlayerSkinTexture",
-		"MixinChatPreProcess"
+		"MixinChatOnMessage",
+		"MixinChatSendMessage"
 	],
 	"env": {
 		"client.MixinPlayerCustomTexture": {
@@ -15,7 +16,10 @@
 		"client.MixinPlayerSkinTexture": {
 			"minVersion": "1.20"
 		},
-		"client.MixinChatPreProcess" : {
+		"client.MixinChatSendMessage": {
+			"minVersion": "1.20"
+		},
+		"client.MixinChatOnMessage" : {
 			"minVersion": "1.20"
 		}
 	},

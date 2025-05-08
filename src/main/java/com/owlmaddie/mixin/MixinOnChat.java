@@ -38,7 +38,7 @@ public abstract class MixinOnChat {
             chatData.currentMessage = chatMessage;
             BroadcastPlayerMessage(chatData, player, true);
             // Optionally, cancel the event to prevent the default behavior
-            // ci.cancel();
+            //ci.cancel();
         }
     }
 }
