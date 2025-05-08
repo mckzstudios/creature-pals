@@ -8,6 +8,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,5 +55,15 @@ public class ClientEntityFinder {
                 })
                 .min(Comparator.comparingDouble(e -> e.getPos().distanceTo(player.getPos())));
         return closest;
+    }
+
+    public static List<Entity> getCloseEntities(double maxDistance) {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+
+        return BubbleRenderer.getRelevantEntities().stream().filter(
+                entity -> {
+                    return entity.getPos().distanceTo(player.getPos()) > 20;
+                }).toList();
+
     }
 }

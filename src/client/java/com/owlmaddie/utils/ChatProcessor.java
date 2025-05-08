@@ -20,4 +20,7 @@ public class ChatProcessor {
                 }
                 return input.split(splitter)[0].trim();
         }
+        public static String encode(String front, String back){
+                return front + splitter + back;
+        }
 }

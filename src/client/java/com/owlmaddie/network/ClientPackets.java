@@ -165,18 +165,17 @@ public class ClientPackets {
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                String formattedMsg = String.format("bAAA<%s> %s", characterName, message);
+                                String encodedMessage = ChatProcessor.encode(String.format("<%s>", characterName), message);
                                 // MessageSignatureData signature = null;
                                 // ClientPlayNetworkHandler handler = client.getNetworkHandler();
                                 // LastSeenMessageList.Acknowledgment acknowledgment =
                                 // client.getMessageHandler().collectLastSeenMessages();
-                                MinecraftClient.getInstance().player.networkHandler.sendChatMessage(formattedMsg);
+                                MinecraftClient.getInstance().player.networkHandler.sendChatMessage(encodedMessage);
                                 // MinecraftClient.getInstance().getNetworkHandler().sendPacket(new
                                 // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
                                 // signature ));
                                 // MinecraftClient.getInstance().player.sendMessage(Text.literal(formattedMsg));
-                                // MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(formattedMsg));
-                                LOGGER.info("AAAA Character name here" + characterName + " " + message);
+                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
                             }
                             playNearbyUISound(client, entity, 0.2f);
                         }

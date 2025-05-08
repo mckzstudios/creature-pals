@@ -50,8 +50,8 @@ public final class MixinChatOnMessage {
     public void addMessage(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator,
             boolean refresh, CallbackInfo ci) {
         if (ChatProcessor.isFormatted(message.getString())) {
-            System.out.println("ACTUALLY CANCELLING MSG BECAUSE IT IS FORMATTED");
-            if(ci.isCancellable()){
+            // System.out.println("ACTUALLY CANCELLING MSG BECAUSE IT IS FORMATTED");
+            if (ci.isCancellable()) {
                 ci.cancel();
             }
         }
