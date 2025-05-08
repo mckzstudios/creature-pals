@@ -9,6 +9,7 @@ import com.owlmaddie.chat.ChatDataManager.ChatSender;
 import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.PlayerMessageManager;
+import com.owlmaddie.utils.ChatProcessor;
 import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.Decompression;
 import io.netty.buffer.Unpooled;
@@ -163,7 +164,7 @@ public class ClientPackets {
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                String formattedMsg = String.format("<%s> %s", characterName, message);
+                                String formattedMsg = String.format("bAAA<%s> %s", characterName, message);
                                 // MessageSignatureData signature = null;
                                 // ClientPlayNetworkHandler handler = client.getNetworkHandler();
                                 // LastSeenMessageList.Acknowledgment acknowledgment =
@@ -172,7 +173,7 @@ public class ClientPackets {
                                 // MinecraftClient.getInstance().getNetworkHandler().sendPacket(new
                                 // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
                                 // signature ));
-                                MinecraftClient.getInstance().player.sendMessage(Text.literal(formattedMsg));
+                                // MinecraftClient.getInstance().player.sendMessage(Text.literal(formattedMsg));
                                 // MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(formattedMsg));
                                 LOGGER.info("AAAA Character name here" + characterName + " " + message);
                             }
@@ -200,12 +201,21 @@ public class ClientPackets {
                                     senderPlayerId);
                             return;
                         }
+                        
                         // AAA trigger for player message
                         LOGGER.info("Player message" + message);
-
+                        
                         // Add player message to queue for rendering
                         PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName,
-                                ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
+                        ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
+                        
+                        if (ChatProcessor.isFormatted(message)) {
+                            String front = ChatProcessor.getFront(message);
+                            String back = ChatProcessor.getBack(message);
+
+                            MinecraftClient.getInstance().player.sendMessage(Text.of(front + back));
+                            return;
+                        }
 
                         // if the msg was from minecraft's chat, and this is the client for that player,
                         // then send to nearest entity with bubble open.

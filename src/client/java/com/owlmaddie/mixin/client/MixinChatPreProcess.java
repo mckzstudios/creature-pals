@@ -14,12 +14,10 @@ public class MixinChatPreProcess {
 
     @Inject(at = @At("HEAD"), method = "sendMessage")
     private void sendMessage(String chatText, boolean addToHistory, CallbackInfoReturnable<Boolean> cir) {
-        if (chatText.contains(ChatProcessor.splitter)) {
-            String visible = chatText.split(ChatProcessor.splitter)[0].trim();
-            MinecraftClient.getInstance().player.sendMessage(Text.of("Chat message recieved: " + visible));
-            if (cir.isCancellable()) {
-                cir.cancel();
-            }
+        String visible = ChatProcessor.getBack(chatText);
+        MinecraftClient.getInstance().player.sendMessage(Text.of("Chat message recieved: " + visible));
+        if (cir.isCancellable()) {
+            cir.cancel();
         }
     }
 }
