@@ -206,10 +206,10 @@ public class ClientPackets {
                         
                         // AAA trigger for player message
                         LOGGER.info("Player message" + message);
-                        if (ChatProcessor.isFormatted(message)) {
-                            LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
-                            return;
-                        }
+                        // if (ChatProcessor.isFormatted(message)) {
+                        //     LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
+                        //     return;
+                        // }
                         
                         // Add player message to queue for rendering
                         PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName,
