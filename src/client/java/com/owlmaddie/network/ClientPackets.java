@@ -177,7 +177,8 @@ public class ClientPackets {
                                 // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
                                 // signature ));
                                 // MinecraftClient.getInstance().player.sendMessage(Text.literal(formattedMsg));
-                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
+                                MinecraftClient.getInstance().inGameHud.getChatHud()
+                                        .addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
                             }
                             playNearbyUISound(client, entity, 0.2f);
                         }
@@ -203,28 +204,44 @@ public class ClientPackets {
                                     senderPlayerId);
                             return;
                         }
-                        
+
                         // AAA trigger for player message
                         LOGGER.info("Player message" + message);
                         // if (ChatProcessor.isFormatted(message)) {
-                        //     LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
-                        //     return;
+                        // LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
+                        // return;
                         // }
-                        
+
                         // Add player message to queue for rendering
                         PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName,
-                        ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
-                        
+                                ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
+
+                        // dont send entity msg if not from minecraft chat
+                        if (!fromMinecraftChat) {
+                            return;
+                        }
+                        // dont send entity msg if this client is not the sender
+                        if(!senderPlayerName.equals(client.player.getName().getString())){
+                            return;
+                        }
+                        // NOW SEND ENTITY MESSAGE:
 
                         // if the msg was from minecraft's chat, and this is the client for that player,
                         // then send to nearest entity with bubble open.
-                        if (fromMinecraftChat && senderPlayerName.equals(client.player.getName().getString())) {
-                            Optional<Entity> entityToSendChatTo = ClientEntityFinder
-                                    .getClosestEntityToPlayerWithChatBubbleOpen();
-                            entityToSendChatTo.ifPresent(entity -> {
-                                ClientPackets.sendChat(entity, message);
-                            });
-                        }
+                        // if (fromMinecraftChat &&
+                        // senderPlayerName.equals(client.player.getName().getString())) {
+                        // Optional<Entity> entityToSendChatTo = ClientEntityFinder
+                        // .getClosestEntityToPlayerWithChatBubbleOpen();
+                        // entityToSendChatTo.ifPresent(entity -> {
+                        // ClientPackets.sendChat(entity, message);
+                        // });
+                        // }
+                        // AAA when sending to specific entity, maybe filter here:
+                        List<Entity> entities = ClientEntityFinder.getCloseEntities(12);
+                        entities.forEach(entity -> {
+                            ClientPackets.sendChat(entity, message);
+                        });
+
                     });
                 });
 

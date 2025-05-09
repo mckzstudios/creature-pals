@@ -59,10 +59,9 @@ public class ClientEntityFinder {
 
     public static List<Entity> getCloseEntities(double maxDistance) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-
         return BubbleRenderer.getRelevantEntities().stream().filter(
                 entity -> {
-                    return entity.getPos().distanceTo(player.getPos()) > 20;
+                    return entity.getPos().distanceTo(player.getPos()) < maxDistance;
                 }).toList();
 
     }

@@ -218,11 +218,11 @@ public class ServerPackets {
                                 if (entitySenderName.equals(characterName)
                                         || entity.getCustomName().toString().equals(entitySenderName)) {
 
-                                    LOGGER.info("CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",entitySenderName, characterName, entity.getCustomName().toString());
+                                    LOGGER.info(String.format("CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",entitySenderName, characterName, entity.getCustomName().toString()));
                                     return; // do not generate message
                                 }
                                 else{
-                                    LOGGER.info("FORWARDING MSG TO ENTITY: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",entitySenderName, characterName, entity.getCustomName().toString());
+                                    LOGGER.info(String.format("FORWARDING MSG TO ENTITY: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",entitySenderName, characterName, entity.getCustomName().toString()));
                                 }
                                 String newMessage = String.format(
                                         "another creatured named %s said: %s",
