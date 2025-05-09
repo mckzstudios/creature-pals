@@ -165,11 +165,13 @@ public class ClientPackets {
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                String encodedMessage = ChatProcessor.encode(String.format("<%s>", characterName), message);
+                                String encodedMessage = ChatProcessor.encode(characterName, message);
                                 // MessageSignatureData signature = null;
                                 // ClientPlayNetworkHandler handler = client.getNetworkHandler();
                                 // LastSeenMessageList.Acknowledgment acknowledgment =
                                 // client.getMessageHandler().collectLastSeenMessages();
+
+                                // send encoded message to server:
                                 MinecraftClient.getInstance().player.networkHandler.sendChatMessage(encodedMessage);
                                 // MinecraftClient.getInstance().getNetworkHandler().sendPacket(new
                                 // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
@@ -205,10 +207,7 @@ public class ClientPackets {
                         // AAA trigger for player message
                         LOGGER.info("Player message" + message);
                         if (ChatProcessor.isFormatted(message)) {
-                            // String front = ChatProcessor.getFront(message);
-                            // String back = ChatProcessor.getBack(message);
                             LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
-                            // MinecraftClient.getInstance().player.sendMessage(Text.of(front + back));
                             return;
                         }
                         
