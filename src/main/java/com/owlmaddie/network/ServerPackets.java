@@ -243,8 +243,8 @@ public class ServerPackets {
                             return; // do not generate message
                         } else {
                             LOGGER.info(String.format(
-                                    "FORWARDING MSG TO ENTITY: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
-                                    entitySenderName, characterName, entity.getCustomName().toString()));
+                                    "FORWARDING MSG TO ENTITY: MESSAGE(%s) ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
+                                    message, entitySenderName, characterName, entity.getCustomName().toString()));
                             eventQueueData.addExternalEntityMessage(userLanguage, player,
                                     ChatProcessor.getBack(message),
                                     entitySenderName);

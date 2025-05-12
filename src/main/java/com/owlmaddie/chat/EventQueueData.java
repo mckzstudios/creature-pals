@@ -134,8 +134,6 @@ public class EventQueueData {
                             "EventQueueData/injectOnServerTick(entity %s) ERROR GENERATING MESSAGE: errMsg: (%s)",
                             entityId, errMsg));
                 });
-        // }
-
     }
 
 }
