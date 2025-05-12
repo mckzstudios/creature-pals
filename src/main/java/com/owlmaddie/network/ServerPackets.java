@@ -3,6 +3,8 @@ package com.owlmaddie.network;
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.ChatDataSaverScheduler;
 import com.owlmaddie.chat.EntityChatData;
+import com.owlmaddie.chat.EventQueueData;
+import com.owlmaddie.chat.EventQueueManager;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.commands.ConfigurationHandler;
 import com.owlmaddie.goals.EntityBehaviorManager;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * The {@code ServerPackets} class provides methods to send packets to/from the
@@ -207,44 +210,45 @@ public class ServerPackets {
                     server.execute(() -> {
                         MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
                                 entityId);
-                        if (entity != null) {
-                            EntityChatData chatData = ChatDataManager.getServerInstance()
-                                    .getOrCreateChatData(entity.getUuidAsString());
-                            if (ChatProcessor.isFormatted(message)) {
-                                String entitySenderName = ChatProcessor.getFront(message);
-                                // => message is from another entity, only try to generate if entity is
-                                // different:
-                                String characterName = chatData.getCharacterProp("name");
-                                if (entitySenderName.equals(characterName)
-                                        || (entity.getCustomName() != null
-                                                && entity.getCustomName().toString().equals(entitySenderName))) {
+                        if (entity == null) {
+                            return;
+                        }
 
-                                    LOGGER.info(String.format(
-                                            "CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
-                                            entitySenderName, characterName, entity.getCustomName().toString()));
-                                    return; // do not generate message
-                                } else {
-                                    LOGGER.info(String.format(
-                                            "FORWARDING MSG TO ENTITY: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
-                                            entitySenderName, characterName, entity.getCustomName().toString()));
-                                }
-                                String newMessage = String.format(
-                                        "another creatured named %s said: %s",
-                                        entitySenderName, ChatProcessor.getBack(message));
-                                if (chatData.characterSheet.isEmpty()) {
-                                    generate_character(userLanguage, chatData, player, entity);
-                                } else {
-                                    // AAA server side generate llm response on entity
-                                    generate_chat(userLanguage, chatData, player, entity, newMessage, false);
-                                }
-                                return;
-                            }
-                            if (chatData.characterSheet.isEmpty()) {
-                                generate_character(userLanguage, chatData, player, entity);
-                            } else {
-                                // AAA server side generate llm response on entity
-                                generate_chat(userLanguage, chatData, player, entity, message, false);
-                            }
+                        EventQueueData eventQueueData = EventQueueManager.getOrCreateQueueData(entity.getUuidAsString(), entity);
+
+                        EntityChatData chatData = ChatDataManager.getServerInstance()
+                                .getOrCreateChatData(entity.getUuidAsString());
+                        if (chatData.characterSheet.isEmpty()) {
+                            generate_character(userLanguage, chatData, player, entity);
+                            return;
+                        }
+                        if (!ChatProcessor.isFormatted(message)) {
+                            // add user msg to queue
+                            eventQueueData.addUserMessage(userLanguage, player, message, false);
+                            return;
+                        }
+                        // else add entity message to queue
+
+                        String entitySenderName = ChatProcessor.getFront(message);
+                        // => message is from another entity, only try to generate if entity is
+                        // different:
+                        String characterName = chatData.getCharacterProp("name");
+                        if (entitySenderName.equals(characterName)
+                                || (entity.getCustomName() != null
+                                        && entity.getCustomName().toString().equals(entitySenderName))) {
+
+                            LOGGER.info(String.format(
+                                    "CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
+                                    entitySenderName, characterName, entity.getCustomName().toString()));
+                            return; // do not generate message
+                        } else {
+                            LOGGER.info(String.format(
+                                    "FORWARDING MSG TO ENTITY: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
+                                    entitySenderName, characterName, entity.getCustomName().toString()));
+                            eventQueueData.addExternalEntityMessage(userLanguage, player,
+                                    ChatProcessor.getBack(message),
+                                    entitySenderName);
+                            return;
                         }
                     });
                 });
@@ -383,16 +387,6 @@ public class ServerPackets {
 
         // Generate new character
         chatData.generateCharacter(userLanguage, player, userMessageBuilder.toString(), false);
-    }
-
-    public static void generate_chat(String userLanguage, EntityChatData chatData, ServerPlayerEntity player,
-            MobEntity entity, String message, boolean is_auto_message) {
-        // Set talk to player goal (prevent entity from walking off)
-        TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
-        EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
-
-        // Add new message
-        chatData.generateMessage(userLanguage, player, message, is_auto_message);
     }
 
     // Writing a Map<String, PlayerData> to the buffer

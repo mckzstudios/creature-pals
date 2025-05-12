@@ -2,6 +2,7 @@ package com.owlmaddie.goals;
 
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
+import com.owlmaddie.chat.EventQueueManager;
 import com.owlmaddie.controls.LookControls;
 import com.owlmaddie.network.ServerPackets;
 import com.owlmaddie.particle.LeadParticleEffect;
@@ -73,7 +74,7 @@ public class LeadPlayerGoal extends PlayerBaseGoal {
                 ChatDataManager chatDataManager = ChatDataManager.getServerInstance();
                 EntityChatData chatData = chatDataManager.getOrCreateChatData(this.entity.getUuidAsString());
                 if (!chatData.characterSheet.isEmpty() && chatData.auto_generated < chatDataManager.MAX_AUTOGENERATE_RESPONSES) {
-                    ServerPackets.generate_chat("N/A", chatData, (ServerPlayerEntity) this.targetEntity, this.entity, arrivedMessage, true);
+                    EventQueueManager.addUserMessage(this.entity, "N/A", (ServerPlayerEntity) this.targetEntity, arrivedMessage, true);
                 }
             });
 

@@ -78,6 +78,7 @@ public class ChatDataManager {
 
     // Update the UUID in the map (i.e. bucketed entity and then released, changes their UUID)
     public void updateUUID(String oldUUID, String newUUID) {
+        EventQueueManager.updateUUID(oldUUID, newUUID);
         EntityChatData data = entityChatDataMap.remove(oldUUID);
         if (data != null) {
             data.entityId = newUUID;

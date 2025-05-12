@@ -1,14 +1,20 @@
 package com.owlmaddie;
 
+import com.owlmaddie.chat.EventQueueData;
+import com.owlmaddie.chat.EventQueueManager;
 import com.owlmaddie.commands.CreatureChatCommands;
 import com.owlmaddie.network.ServerPackets;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@code ModInit} class initializes this mod on the server and defines all the server message
- * identifiers. It also listens for messages from the client, and has code to send
+ * The {@code ModInit} class initializes this mod on the server and defines all
+ * the server message
+ * identifiers. It also listens for messages from the client, and has code to
+ * send
  * messages to the client.
  */
 public class ModInit implements ModInitializer {
@@ -25,6 +31,14 @@ public class ModInit implements ModInitializer {
 
 		// Register events
 		ServerPackets.register();
+
+		// ontick handling for server
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (EventQueueData data : EventQueueManager.queueData.values()) {
+				data.injectOnServerTick(server);
+			}
+
+		});
 
 		LOGGER.info("CreatureChat MOD Initialized!");
 	}
