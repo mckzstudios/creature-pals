@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 // SERVER ONLY
@@ -37,5 +38,16 @@ public class EventQueueManager {
             boolean is_auto_message) {
         EventQueueData q = getOrCreateQueueData(entity.getUuidAsString(), entity);
         q.addUserMessage(userLanguage, player, userMessage, is_auto_message);
+    }
+    public static void injectOnServerTick(){
+        if(llmProcessing) return;
+    for (EventQueueData queueData : queueData.values()) {
+        if (queueData.shouldPoll()) {
+            llmProcessing = true;
+            queueData.poll();
+            // only process one at a time:
+            break; 
+        }
+    }
     }
 }

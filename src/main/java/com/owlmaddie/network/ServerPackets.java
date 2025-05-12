@@ -117,6 +117,9 @@ public class ServerPackets {
                             EntityChatData chatData = ChatDataManager.getServerInstance()
                                     .getOrCreateChatData(entity.getUuidAsString());
                             if (chatData.characterSheet.isEmpty()) {
+
+                                LOGGER.info(
+                                        "ServerPackets/C2S_Greeting : CHARACTER SHEET IS EMPTY, calling generate_character");
                                 generate_character(userLanguage, chatData, player, entity);
                             }
                         }
@@ -214,11 +217,14 @@ public class ServerPackets {
                             return;
                         }
 
-                        EventQueueData eventQueueData = EventQueueManager.getOrCreateQueueData(entity.getUuidAsString(), entity);
+                        EventQueueData eventQueueData = EventQueueManager.getOrCreateQueueData(entity.getUuidAsString(),
+                                entity);
 
                         EntityChatData chatData = ChatDataManager.getServerInstance()
                                 .getOrCreateChatData(entity.getUuidAsString());
                         if (chatData.characterSheet.isEmpty()) {
+                            LOGGER.info(
+                                    "ServerPackets/C2S_SendChat : CHARACTER SHEET IS EMPTY, calling generate_character");
                             generate_character(userLanguage, chatData, player, entity);
                             return;
                         }
@@ -241,6 +247,11 @@ public class ServerPackets {
                                     "CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
                                     entitySenderName, characterName, entity.getCustomName().toString()));
                             return; // do not generate message
+                        }
+                        if (entitySenderName.equals("N/A")) {
+                            LOGGER.info(
+                                    String.format("CANCELLING C2S sendChat, entityName from msg (%s) is N/A", message));
+                            return;
                         } else {
                             LOGGER.info(String.format(
                                     "FORWARDING MSG TO ENTITY: MESSAGE(%s) ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",

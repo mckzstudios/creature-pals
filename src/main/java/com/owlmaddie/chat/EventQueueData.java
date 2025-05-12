@@ -26,7 +26,6 @@ public class EventQueueData {
     Deque<MessageData> eventQueue;
     long lastTimePolled;
     long randomInterval;
-    boolean isPolling;
     MessageData lastMessageData;
 
     private class MessageData {
@@ -51,18 +50,16 @@ public class EventQueueData {
         lastTimePolled = System.nanoTime();
         // poll between 45 ms -> 55 ms
         randomInterval = ThreadLocalRandom.current().nextLong(45_000_000L, 55_000_001L);
-        isPolling = false;
     }
 
     public void updateUUID(String newUUID) {
         this.entityId = newUUID;
     }
 
-    private boolean shouldPoll() {
+    public boolean shouldPoll() {
         boolean shouldPoll = entity != null &&
                 lastMessageData != null &&
                 lastMessageData.player != null &&
-                !isPolling &&
                 !eventQueue.isEmpty() &&
                 !EventQueueManager.llmProcessing &&
                 System.nanoTime() > lastTimePolled + randomInterval &&
@@ -71,7 +68,6 @@ public class EventQueueData {
             return false;
         }
         // start polling:
-        isPolling = true;
         lastTimePolled = System.nanoTime();
         return true;
     }
@@ -101,10 +97,7 @@ public class EventQueueData {
         lastMessageData = toAdd;
     }
 
-    public void injectOnServerTick(MinecraftServer server) {
-        if (!shouldPoll()) {
-            return;
-        }
+    public void poll() {
         LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) polling event queue", entityId));
         EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
         while (!eventQueue.isEmpty()) {
@@ -121,13 +114,11 @@ public class EventQueueData {
         EntityBehaviorManager.addGoal((MobEntity) entity, talkGoal, GoalPriority.TALK_PLAYER);
         chatData.generateMessage(lastMessageData.userLanguage, lastMessageData.player,
                 lastMessageData.is_auto_message, message -> {
-                    isPolling = false;
                     EventQueueManager.llmProcessing = false;
 
                     LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) generated message (%s)",
                             entityId, message));
                 }, errMsg -> {
-                    isPolling = false;
                     EventQueueManager.llmProcessing = false;
 
                     LOGGER.info(String.format(
