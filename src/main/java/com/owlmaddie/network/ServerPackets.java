@@ -13,7 +13,6 @@ import com.owlmaddie.goals.TalkPlayerGoal;
 import com.owlmaddie.particle.LeadParticleEffect;
 import com.owlmaddie.utils.ChatProcessor;
 import com.owlmaddie.utils.Compression;
-import com.owlmaddie.utils.Randomizer;
 import com.owlmaddie.utils.ServerEntityFinder;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * The {@code ServerPackets} class provides methods to send packets to/from the
@@ -116,12 +114,10 @@ public class ServerPackets {
                         if (entity != null) {
                             EntityChatData chatData = ChatDataManager.getServerInstance()
                                     .getOrCreateChatData(entity.getUuidAsString());
-                            if (chatData.characterSheet.isEmpty()) {
-
-                                LOGGER.info(
-                                        "ServerPackets/C2S_Greeting : CHARACTER SHEET IS EMPTY, calling generate_character");
-                                generate_character(userLanguage, chatData, player, entity);
-                            }
+                            EventQueueData eventQueueData = EventQueueManager.getOrCreateQueueData(
+                                    entity.getUuidAsString(),
+                                    entity);
+                            eventQueueData.addGreetingIfNeeded(userLanguage, chatData, player, entity);
                         }
                     });
                 });
@@ -222,12 +218,7 @@ public class ServerPackets {
 
                         EntityChatData chatData = ChatDataManager.getServerInstance()
                                 .getOrCreateChatData(entity.getUuidAsString());
-                        if (chatData.characterSheet.isEmpty()) {
-                            LOGGER.info(
-                                    "ServerPackets/C2S_SendChat : CHARACTER SHEET IS EMPTY, calling generate_character");
-                            generate_character(userLanguage, chatData, player, entity);
-                            return;
-                        }
+                        eventQueueData.addGreetingIfNeeded(userLanguage, chatData, player, entity);
                         if (!ChatProcessor.isFormatted(message)) {
                             // add user msg to queue
                             eventQueueData.addUserMessage(userLanguage, player, message, false);
@@ -250,7 +241,9 @@ public class ServerPackets {
                         }
                         if (entitySenderName.equals("N/A") || entity.getCustomName() == null) {
                             LOGGER.info(
-                                    String.format("CANCELLING C2S sendChat, entityName from msg (%s) is N/A or entity custom name is null", message));
+                                    String.format(
+                                            "CANCELLING C2S sendChat, entityName from msg (%s) is N/A or entity custom name is null",
+                                            message));
                             return;
                         } else {
                             LOGGER.info(String.format(
@@ -364,40 +357,6 @@ public class ServerPackets {
                 ServerPlayNetworking.send(serverPlayer, PACKET_S2C_WHITELIST, buffer);
             }
         }
-    }
-
-    public static void generate_character(String userLanguage, EntityChatData chatData, ServerPlayerEntity player,
-            MobEntity entity) {
-        // Set talk to player goal (prevent entity from walking off)
-        TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
-        EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
-
-        // Grab random adjective
-        String randomAdjective = Randomizer.getRandomMessage(Randomizer.RandomType.ADJECTIVE);
-        String randomClass = Randomizer.getRandomMessage(Randomizer.RandomType.CLASS);
-        String randomAlignment = Randomizer.getRandomMessage(Randomizer.RandomType.ALIGNMENT);
-        String randomSpeakingStyle = Randomizer.getRandomMessage(Randomizer.RandomType.SPEAKING_STYLE);
-
-        // Generate random name parameters
-        String randomLetter = Randomizer.RandomLetter();
-        int randomSyllables = Randomizer.RandomNumber(5) + 1;
-
-        // Build the message
-        StringBuilder userMessageBuilder = new StringBuilder();
-        userMessageBuilder.append("Please generate a ").append(randomAdjective).append(" character. ");
-        userMessageBuilder.append("This character is a ").append(randomClass).append(" class, who is ")
-                .append(randomAlignment).append(". ");
-        if (entity.getCustomName() != null && !entity.getCustomName().getString().equals("N/A")) {
-            userMessageBuilder.append("Their name is '").append(entity.getCustomName().getString()).append("'. ");
-        } else {
-            userMessageBuilder.append("Their name starts with the letter '").append(randomLetter)
-                    .append("' and is ").append(randomSyllables).append(" syllables long. ");
-        }
-        userMessageBuilder.append("They speak in '").append(userLanguage).append("' with a ")
-                .append(randomSpeakingStyle).append(" style.");
-
-        // Generate new character
-        chatData.generateCharacter(userLanguage, player, userMessageBuilder.toString(), false);
     }
 
     // Writing a Map<String, PlayerData> to the buffer

@@ -265,7 +265,7 @@ public class EntityChatData {
 
     // Generate a new character
     public void generateCharacter(String userLanguage, ServerPlayerEntity player, String userMessage,
-            boolean is_auto_message) {
+            boolean is_auto_message, Consumer<String> onSuccess, Consumer<String> onError) {
         String systemPrompt = "system-character";
         if (is_auto_message) {
             // Increment an auto-generated message
@@ -301,7 +301,7 @@ public class EntityChatData {
                                     .orElse(Randomizer.getRandomMessage(Randomizer.RandomType.NO_RESPONSE))
                                     .replace("\n", " ");
                             this.addMessage(shortGreeting, ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
-
+                            onSuccess.accept(shortGreeting);
                         } else {
                             // No valid LLM response
                             throw new RuntimeException(ChatGPTRequest.lastErrorMessage);
@@ -328,6 +328,7 @@ public class EntityChatData {
                         }
                         errorMessage += "Help is available at elefant.gg/discord";
                         ServerPackets.SendClickableError(player, errorMessage, "https://elefant.gg/discord");
+                        onError.accept(errorMessage);
                     }
                 });
     }
