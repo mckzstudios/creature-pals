@@ -1,7 +1,7 @@
 package com.owlmaddie.utils;
 
 public class ChatProcessor {
-        public static String splitter = "BBB";
+        public static String splitter = " wants to say ";
 
         public static boolean isFormatted(String input) {
                 return input.contains(splitter);
