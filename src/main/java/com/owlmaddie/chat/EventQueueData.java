@@ -3,19 +3,13 @@ package com.owlmaddie.chat;
 import static com.owlmaddie.network.ServerPackets.LOGGER;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
-
 import com.owlmaddie.goals.EntityBehaviorManager;
 import com.owlmaddie.goals.GoalPriority;
 import com.owlmaddie.goals.TalkPlayerGoal;
-import com.owlmaddie.utils.ChatProcessor;
-import com.owlmaddie.utils.ServerEntityFinder;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -63,7 +57,8 @@ public class EventQueueData {
                 !eventQueue.isEmpty() &&
                 !EventQueueManager.llmProcessing &&
                 System.nanoTime() > lastTimePolled + randomInterval &&
-                lastMessageData.player.distanceTo(entity) < EventQueueManager.maxDistance;
+                lastMessageData.player.distanceTo(entity) < EventQueueManager.maxDistance &&
+                !EventQueueManager.shouldWaitBecauseOfError();
         if (!shouldPoll) {
             return false;
         }
@@ -115,15 +110,14 @@ public class EventQueueData {
         chatData.generateMessage(lastMessageData.userLanguage, lastMessageData.player,
                 lastMessageData.is_auto_message, message -> {
                     EventQueueManager.llmProcessing = false;
-
                     LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) generated message (%s)",
                             entityId, message));
                 }, errMsg -> {
                     EventQueueManager.llmProcessing = false;
-
                     LOGGER.info(String.format(
                             "EventQueueData/injectOnServerTick(entity %s) ERROR GENERATING MESSAGE: errMsg: (%s)",
                             entityId, errMsg));
+                            EventQueueManager.onError();
                 });
     }
 

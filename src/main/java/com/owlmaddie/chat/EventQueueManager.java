@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 // SERVER ONLY
@@ -15,6 +14,18 @@ public class EventQueueManager {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
     public static final long maxDistance = 12;
     public static boolean llmProcessing = false;
+
+
+    private static long lastErrorTime = 0L;
+    private static long waitTimeAfterError = 3_000_000_000L; // wait 3 sec after err before doing any polling
+
+    public static void onError(){
+        lastErrorTime = System.nanoTime();
+    }
+
+    public static boolean shouldWaitBecauseOfError(){
+        return System.nanoTime() <= lastErrorTime + waitTimeAfterError;
+    }
 
     public static void updateUUID(String oldUUID, String newUUID) {
         EventQueueData data = queueData.remove(oldUUID);

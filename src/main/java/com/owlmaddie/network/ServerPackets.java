@@ -248,9 +248,9 @@ public class ServerPackets {
                                     entitySenderName, characterName, entity.getCustomName().toString()));
                             return; // do not generate message
                         }
-                        if (entitySenderName.equals("N/A")) {
+                        if (entitySenderName.equals("N/A") || entity.getCustomName() == null) {
                             LOGGER.info(
-                                    String.format("CANCELLING C2S sendChat, entityName from msg (%s) is N/A", message));
+                                    String.format("CANCELLING C2S sendChat, entityName from msg (%s) is N/A or entity custom name is null", message));
                             return;
                         } else {
                             LOGGER.info(String.format(
