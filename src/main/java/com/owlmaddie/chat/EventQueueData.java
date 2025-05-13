@@ -105,6 +105,7 @@ public class EventQueueData {
         if (isGreetingInQueue() || !chatData.characterSheet.isEmpty()) {
             // if already have a greeting then dont generate.
             // also if its already in queue dont add another one.
+            LOGGER.info("[EventQueueData/addGreetingIfNeeded]: Not generating greeting because one already exists.");
             return;
         }
         // make sure greeting is first in queue:
@@ -130,8 +131,9 @@ public class EventQueueData {
         }
         userMessageBuilder.append("They speak in '").append(userLanguage).append("' with a ")
                 .append(randomSpeakingStyle).append(" style.");
-
-        eventQueue.addFirst(new MessageData(userLanguage, player, userMessageBuilder.toString(), false, true));
+        MessageData toAdd = new MessageData(userLanguage, player, userMessageBuilder.toString(), false, true);
+        lastMessageData = toAdd;
+        eventQueue.addFirst(toAdd);
 
     }
 
