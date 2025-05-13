@@ -45,8 +45,8 @@ public class EventQueueData {
         this.entity = entity;
         eventQueue = new ArrayDeque<>();
         lastTimePolled = System.nanoTime();
-        // poll between 500 ms -> 1s
-        randomInterval = ThreadLocalRandom.current().nextLong(500_000_000L, 1_000_000_001L);
+        // poll between 1000 ms -> 1500s
+        randomInterval = ThreadLocalRandom.current().nextLong(1_000_000_000L, 1_500_000_001L);
     }
 
     public void updateUUID(String newUUID) {
