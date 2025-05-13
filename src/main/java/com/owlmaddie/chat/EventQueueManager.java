@@ -17,7 +17,7 @@ public class EventQueueManager {
 
 
     private static long lastErrorTime = 0L;
-    private static long waitTimeAfterError = 3_000_000_000L; // wait 3 sec after err before doing any polling
+    private static long waitTimeAfterError = 10_000_000_000L; // wait 3 sec after err before doing any polling
 
     public static void onError(){
         lastErrorTime = System.nanoTime();

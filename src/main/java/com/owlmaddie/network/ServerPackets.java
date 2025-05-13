@@ -230,6 +230,13 @@ public class ServerPackets {
                         // => message is from another entity, only try to generate if entity is
                         // different:
                         String characterName = chatData.getCharacterProp("name");
+                        if (entitySenderName.equals("N/A") || entity.getCustomName() == null) {
+                            LOGGER.info(
+                                    String.format(
+                                            "CANCELLING C2S sendChat, entityName from msg (%s) is N/A or entity custom name is null",
+                                            message));
+                            return;
+                        }
                         if (entitySenderName.equals(characterName)
                                 || (entity.getCustomName() != null
                                         && entity.getCustomName().toString().equals(entitySenderName))) {
@@ -238,13 +245,6 @@ public class ServerPackets {
                                     "CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
                                     entitySenderName, characterName, entity.getCustomName().toString()));
                             return; // do not generate message
-                        }
-                        if (entitySenderName.equals("N/A") || entity.getCustomName() == null) {
-                            LOGGER.info(
-                                    String.format(
-                                            "CANCELLING C2S sendChat, entityName from msg (%s) is N/A or entity custom name is null",
-                                            message));
-                            return;
                         } else {
                             LOGGER.info(String.format(
                                     "FORWARDING MSG TO ENTITY: MESSAGE(%s) ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
