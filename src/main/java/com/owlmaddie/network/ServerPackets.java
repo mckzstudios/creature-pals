@@ -226,7 +226,7 @@ public class ServerPackets {
                         }
                         // else add entity message to queue
 
-                        String entitySenderName = ChatProcessor.getFront(message);
+                        String entitySenderName = ChatProcessor.getCustomName(message);
                         // => message is from another entity, only try to generate if entity is
                         // different:
                         String characterName = chatData.getCharacterProp("name");
@@ -249,9 +249,10 @@ public class ServerPackets {
                             LOGGER.info(String.format(
                                     "FORWARDING MSG TO ENTITY: MESSAGE(%s) ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
                                     message, entitySenderName, characterName, entity.getCustomName().toString()));
+                            
                             eventQueueData.addExternalEntityMessage(userLanguage, player,
-                                    ChatProcessor.getBack(message),
-                                    entitySenderName);
+                                    ChatProcessor.getMessage(message),
+                                    entitySenderName, ChatProcessor.getEntityName(message));
                             return;
                         }
                     });

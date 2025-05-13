@@ -79,8 +79,8 @@ public class EventQueueData {
 
     // MAKE SURE THAT EXTERNAL ENTITY IS DIFFERENT FROM CURRENT WHEN CALLING THIS:
     public void addExternalEntityMessage(String userLanguage, ServerPlayerEntity player, String entityMessage,
-            String entityName) {
-        String newMessage = String.format("another creature named %s said %s", entityName, entityMessage);
+            String entityCustomName, String entityName) {
+        String newMessage = String.format("[%s the %s] said %s", entityCustomName, entityName, entityMessage);
         MessageData toAdd = new MessageData(userLanguage, player, newMessage, false, false);
         add(toAdd);
         lastMessageData = toAdd;
@@ -188,6 +188,7 @@ public class EventQueueData {
                     EventQueueManager.onError();
                     lastTimePolled = System.nanoTime();
                 });
+        chatData.logConversationHistory();
     }
 
 }

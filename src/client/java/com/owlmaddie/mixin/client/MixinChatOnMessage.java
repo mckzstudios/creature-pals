@@ -49,7 +49,20 @@ public final class MixinChatOnMessage {
     @Inject(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At("HEAD"), cancellable = true)
     public void addMessage(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator,
             boolean refresh, CallbackInfo ci) {
-        if (ChatProcessor.isFormatted(message.getString())) {
+        String msgString = message.getString();
+        int index = message.getString().indexOf('>'); // need to remove <playerName> text
+        if (index == -1 || index == msgString.length() - 1) {
+            System.out.println("ZZZZ IS FORMATTED ON " + msgString);
+            if (ChatProcessor.isFormatted(msgString)) {
+                if (ci.isCancellable()) {
+                    ci.cancel();
+                }
+            }
+            return;
+        }
+        String newMsgToCheck = msgString.substring(index + 1).trim();
+
+        if (ChatProcessor.isFormatted(newMsgToCheck)) {
             // System.out.println("ACTUALLY CANCELLING MSG BECAUSE IT IS FORMATTED");
             if (ci.isCancellable()) {
                 ci.cancel();

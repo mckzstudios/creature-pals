@@ -87,6 +87,15 @@ public class EntityChatData {
         this.legacyFriendship = null;
     }
 
+    public void logConversationHistory() {
+        LOGGER.info("--- BEGIN CONVERSATION HISTORY ----");
+        for (ChatMessage msg : previousMessages) {
+            LOGGER.info(String.format("%s:'%s'", msg.sender.toString(), msg.message));
+        }
+
+        LOGGER.info("--- END CONVERSATION HISTORY ---");
+    }
+
     // Post-deserialization initialization
     public void postDeserializeInitialization() {
         if (this.players == null) {
@@ -333,7 +342,7 @@ public class EntityChatData {
                 });
     }
 
-    public void addUserMessage(String userMessage, ServerPlayerEntity player, boolean is_auto_message){
+    public void addUserMessage(String userMessage, ServerPlayerEntity player, boolean is_auto_message) {
         String systemPrompt = "system-chat";
         if (is_auto_message) {
             // Increment an auto-generated message
@@ -342,13 +351,13 @@ public class EntityChatData {
             // Reset auto-generated counter
             this.auto_generated = 0;
         }
-    
+
         // Add USER Message
         this.addMessage(userMessage, ChatDataManager.ChatSender.USER, player, systemPrompt);
     }
 
     // Generate greeting
-    public void generateMessage(String userLanguage, ServerPlayerEntity player, 
+    public void generateMessage(String userLanguage, ServerPlayerEntity player,
             boolean is_auto_message, Consumer<String> onSuccess, Consumer<String> onError) {
         String systemPrompt = "system-chat";
         // Get config (api key, url, settings)
@@ -613,12 +622,11 @@ public class EntityChatData {
                             // Add ASSISTANT message to history
                             this.addMessage(cleanedMessage, ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
 
-                            
                             // Update the last entry in previousMessages to use the original message
                             this.previousMessages.set(this.previousMessages.size() - 1,
-                            new ChatMessage(result.getOriginalMessage(), ChatDataManager.ChatSender.ASSISTANT,
-                            player.getDisplayName().getString()));
-                            
+                                    new ChatMessage(result.getOriginalMessage(), ChatDataManager.ChatSender.ASSISTANT,
+                                            player.getDisplayName().getString()));
+
                             onSuccess.accept(cleanedMessage);
                         } else {
                             // No valid LLM response

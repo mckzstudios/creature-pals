@@ -165,7 +165,7 @@ public class ClientPackets {
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                String encodedMessage = ChatProcessor.encode(characterName, message);
+                                String encodedMessage = ChatProcessor.encode(characterName, entity.getName().getString(), message);
                                 // MessageSignatureData signature = null;
                                 // ClientPlayNetworkHandler handler = client.getNetworkHandler();
                                 // LastSeenMessageList.Acknowledgment acknowledgment =
