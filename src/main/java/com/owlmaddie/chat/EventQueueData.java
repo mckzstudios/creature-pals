@@ -105,7 +105,7 @@ public class EventQueueData {
         if (isGreetingInQueue() || !chatData.characterSheet.isEmpty()) {
             // if already have a greeting then dont generate.
             // also if its already in queue dont add another one.
-            LOGGER.info("[EventQueueData/addGreetingIfNeeded]: Not generating greeting because one already exists.");
+            // LOGGER.info("[EventQueueData/addGreetingIfNeeded]: Not generating greeting because one already exists.");
             return;
         }
         // make sure greeting is first in queue:
