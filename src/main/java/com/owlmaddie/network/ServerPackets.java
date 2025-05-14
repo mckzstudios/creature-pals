@@ -112,12 +112,10 @@ public class ServerPackets {
                         MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
                                 entityId);
                         if (entity != null) {
-                            EntityChatData chatData = ChatDataManager.getServerInstance()
-                                    .getOrCreateChatData(entity.getUuidAsString());
                             EventQueueData eventQueueData = EventQueueManager.getOrCreateQueueData(
                                     entity.getUuidAsString(),
                                     entity);
-                            eventQueueData.addGreetingIfNeeded(userLanguage, chatData, player, entity);
+                            eventQueueData.addGreeting(userLanguage,  player);
                         }
                     });
                 });
@@ -218,7 +216,6 @@ public class ServerPackets {
 
                         EntityChatData chatData = ChatDataManager.getServerInstance()
                                 .getOrCreateChatData(entity.getUuidAsString());
-                        eventQueueData.addGreetingIfNeeded(userLanguage, chatData, player, entity);
 
                         if (!ChatProcessor.isFormatted(message)) {
                             // add user msg to queue

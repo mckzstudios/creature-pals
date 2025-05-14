@@ -92,7 +92,6 @@ public class EntityChatData {
         for (ChatMessage msg : previousMessages) {
             LOGGER.info(String.format("%s:'%s'", msg.sender.toString(), msg.message));
         }
-
         LOGGER.info("--- END CONVERSATION HISTORY ---");
     }
 
@@ -272,10 +271,56 @@ public class EntityChatData {
         return contextData;
     }
 
-    // Generate a new character
     public void generateCharacter(String userLanguage, ServerPlayerEntity player, String userMessage,
             boolean is_auto_message, Consumer<String> onSuccess, Consumer<String> onError) {
-        LOGGER.info("GENERATING CHARACTER!!!!");
+        String systemPrompt = "system-character";
+        if (is_auto_message) {
+            // Increment an auto-generated message
+            this.auto_generated++;
+        } else {
+            // Reset auto-generated counter
+            this.auto_generated = 0;
+        }
+        this.addMessage(userMessage, ChatDataManager.ChatSender.USER, player, systemPrompt);
+        ConfigurationHandler.Config config = new ConfigurationHandler(ServerPackets.serverInstance).loadConfig();
+        String promptText = ChatPrompt.loadPromptFromResource(ServerPackets.serverInstance.getResourceManager(),
+                systemPrompt);
+        Map<String, String> contextData = getPlayerContext(player, userLanguage, config);
+        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false)
+                .thenAccept(output_message -> {
+                    try {
+                        if (output_message != null) {
+                            previousMessages.clear();
+                            this.characterSheet = output_message;
+                            String characterName = Optional.ofNullable(getCharacterProp("name"))
+                                    .filter(s -> !s.isEmpty())
+                                    .orElse("N/A");
+                            onSuccess.accept(characterName);
+                        } else {
+                            // No valid LLM response
+                            throw new RuntimeException(ChatGPTRequest.lastErrorMessage);
+                        }
+
+                    } catch (Exception e) {
+                        // Log the exception for debugging
+                        LOGGER.error("Error processing LLM response, clearing msg. Error:", e);
+                        previousMessages.clear();
+
+                        String errorMessage = "Error: ";
+                        if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+                            errorMessage += truncateString(e.getMessage(), 55) + "\n";
+                        }
+                        errorMessage += "Help is available at elefant.gg/discord";
+                        ServerPackets.SendClickableError(player, errorMessage, "https://elefant.gg/discord");
+                        onError.accept(errorMessage);
+                    }
+                });
+
+    }
+
+    // Generate and send greeting
+    public void generateCharacterAndSendGreeting(String userLanguage, ServerPlayerEntity player, String userMessage,
+            boolean is_auto_message, Consumer<String> onSuccess, Consumer<String> onError) {
         String systemPrompt = "system-character";
         if (is_auto_message) {
             // Increment an auto-generated message
@@ -313,8 +358,8 @@ public class EntityChatData {
                             this.addMessage(shortGreeting, ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
 
                             String characterName = Optional.ofNullable(getCharacterProp("name"))
-                            .filter(s -> !s.isEmpty())
-                            .orElse("N/A");
+                                    .filter(s -> !s.isEmpty())
+                                    .orElse("N/A");
                             onSuccess.accept(characterName);
                         } else {
                             // No valid LLM response

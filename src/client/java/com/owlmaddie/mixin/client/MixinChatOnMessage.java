@@ -52,7 +52,6 @@ public final class MixinChatOnMessage {
         String msgString = message.getString();
         int index = message.getString().indexOf('>'); // need to remove <playerName> text
         if (index == -1 || index == msgString.length() - 1) {
-            System.out.println("ZZZZ IS FORMATTED ON " + msgString);
             if (ChatProcessor.isFormatted(msgString)) {
                 if (ci.isCancellable()) {
                     ci.cancel();
