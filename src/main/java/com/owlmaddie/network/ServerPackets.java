@@ -219,6 +219,7 @@ public class ServerPackets {
                         EntityChatData chatData = ChatDataManager.getServerInstance()
                                 .getOrCreateChatData(entity.getUuidAsString());
                         eventQueueData.addGreetingIfNeeded(userLanguage, chatData, player, entity);
+
                         if (!ChatProcessor.isFormatted(message)) {
                             // add user msg to queue
                             eventQueueData.addUserMessage(userLanguage, player, message, false);
@@ -249,7 +250,7 @@ public class ServerPackets {
                             LOGGER.info(String.format(
                                     "FORWARDING MSG TO ENTITY: MESSAGE(%s) ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
                                     message, entitySenderName, characterName, entity.getCustomName().toString()));
-                            
+
                             eventQueueData.addExternalEntityMessage(userLanguage, player,
                                     ChatProcessor.getMessage(message),
                                     entitySenderName, ChatProcessor.getEntityName(message));

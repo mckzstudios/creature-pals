@@ -22,6 +22,7 @@ public class EventQueueData {
     long lastTimePolled;
     long randomInterval;
     MessageData lastMessageData;
+    String characterName = null;
 
     private class MessageData {
         public String userLanguage;
@@ -105,7 +106,8 @@ public class EventQueueData {
         if (isGreetingInQueue() || !chatData.characterSheet.isEmpty()) {
             // if already have a greeting then dont generate.
             // also if its already in queue dont add another one.
-            // LOGGER.info("[EventQueueData/addGreetingIfNeeded]: Not generating greeting because one already exists.");
+            // LOGGER.info("[EventQueueData/addGreetingIfNeeded]: Not generating greeting
+            // because one already exists.");
             return;
         }
         // make sure greeting is first in queue:
@@ -136,7 +138,7 @@ public class EventQueueData {
         eventQueue.addFirst(toAdd);
 
     }
-
+    
     public void poll() {
         LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) process event queue", entityId));
         EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
@@ -146,12 +148,15 @@ public class EventQueueData {
             String.format("EventQueueData/injectOnServerTick(entity %s) generating greeting", entityId);
             MessageData greetingMsg = eventQueue.poll();
             chatData.generateCharacter(greetingMsg.userLanguage, greetingMsg.player, greetingMsg.userMessage,
-                    greetingMsg.is_auto_message, (message) -> {
+                    greetingMsg.is_auto_message, (characterName) -> {
                         EventQueueManager.llmProcessing = false;
 
-                        LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) generated message (%s)",
-                                entityId, message));
-
+                        LOGGER.info(String.format(
+                                "EventQueueData/injectOnServerTick(entity %s) generated character with name (%s)",
+                                entityId, characterName));
+                        if (characterName != "N/A") {
+                            this.characterName = characterName;
+                        }
                     }, (errMsg) -> {
                         EventQueueManager.llmProcessing = false;
 

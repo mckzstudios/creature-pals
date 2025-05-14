@@ -310,7 +310,11 @@ public class EntityChatData {
                                     .orElse(Randomizer.getRandomMessage(Randomizer.RandomType.NO_RESPONSE))
                                     .replace("\n", " ");
                             this.addMessage(shortGreeting, ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
-                            onSuccess.accept(shortGreeting);
+
+                            String characterName = Optional.ofNullable(getCharacterProp("name"))
+                            .filter(s -> !s.isEmpty())
+                            .orElse("N/A");
+                            onSuccess.accept(characterName);
                         } else {
                             // No valid LLM response
                             throw new RuntimeException(ChatGPTRequest.lastErrorMessage);
