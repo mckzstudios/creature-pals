@@ -4,10 +4,13 @@ import static com.owlmaddie.network.ServerPackets.LOGGER;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.UUID;
+
 import com.owlmaddie.goals.EntityBehaviorManager;
 import com.owlmaddie.goals.GoalPriority;
 import com.owlmaddie.goals.TalkPlayerGoal;
 import com.owlmaddie.utils.Randomizer;
+import com.owlmaddie.utils.ServerEntityFinder;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
@@ -138,7 +141,15 @@ public class EventQueueData {
         eventQueue.addFirst(toAdd);
 
     }
-    
+
+    public boolean shouldDelete() {
+        if (lastMessageData != null && lastMessageData.player != null) {
+            return ServerEntityFinder.getEntityByUUID(lastMessageData.player.getServerWorld(),
+                    UUID.fromString(entityId)) == null;
+        }
+        return false;
+    }
+
     public void poll() {
         LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) process event queue", entityId));
         EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
@@ -147,6 +158,7 @@ public class EventQueueData {
         if (isGreetingInQueue()) {
             String.format("EventQueueData/injectOnServerTick(entity %s) generating greeting", entityId);
             MessageData greetingMsg = eventQueue.poll();
+            String.format("... usr msg for greeting: (%s)", greetingMsg.userMessage);
             chatData.generateCharacter(greetingMsg.userLanguage, greetingMsg.player, greetingMsg.userMessage,
                     greetingMsg.is_auto_message, (characterName) -> {
                         EventQueueManager.llmProcessing = false;

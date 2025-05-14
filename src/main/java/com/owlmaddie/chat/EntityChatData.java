@@ -275,6 +275,7 @@ public class EntityChatData {
     // Generate a new character
     public void generateCharacter(String userLanguage, ServerPlayerEntity player, String userMessage,
             boolean is_auto_message, Consumer<String> onSuccess, Consumer<String> onError) {
+        LOGGER.info("GENERATING CHARACTER!!!!");
         String systemPrompt = "system-character";
         if (is_auto_message) {
             // Increment an auto-generated message

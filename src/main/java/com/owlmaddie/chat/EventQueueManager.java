@@ -1,9 +1,12 @@
 package com.owlmaddie.chat;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.owlmaddie.utils.ServerEntityFinder;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -52,10 +55,16 @@ public class EventQueueManager {
     }
     public static void injectOnServerTick(){
         if(llmProcessing) return;
-    for (EventQueueData queueData : queueData.values()) {
-        if (queueData.shouldPoll()) {
+    for (EventQueueData curQueue : queueData.values()) {
+        // remove entity if despawn/died so dont poll and err:
+        
+        if(curQueue.shouldDelete()){
+            queueData.remove(curQueue.entityId);
+            continue;
+        }
+        if (curQueue.shouldPoll()) {
             llmProcessing = true;
-            queueData.poll();
+            curQueue.poll();
             // only process one at a time:
             break; 
         }
