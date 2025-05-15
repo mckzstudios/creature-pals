@@ -158,7 +158,6 @@ public class ClientPackets {
                         chatData.status = status;
                         chatData.sender = sender;
                         chatData.players = players;
-
                         // Play sound with volume based on distance (from player or entity) and show
                         // message in chat:
                         MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
@@ -166,21 +165,18 @@ public class ClientPackets {
                             // String charName = chatData.getCharacterProp("name"); // not updated when
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
-                                // display the message in chat locally
-                                String entityType = EntityTypes.getEntityType(entity); // should return: "sheep", "cow", etc.
-                                String encodedMessage = ChatProcessor.encode(characterName, entityType, message);
-                                // MessageSignatureData signature = null;
-                                // ClientPlayNetworkHandler handler = client.getNetworkHandler();
-                                // LastSeenMessageList.Acknowledgment acknowledgment =
-                                // client.getMessageHandler().collectLastSeenMessages();
+
+                                String entityType = EntityTypes.getEntityType(entity); // should return: "sheep", "cow",
+                                                                                       // etc.
+                                String playerName = MinecraftClient.getInstance().player.getName().getString();
+
+                                String encodedMessage = ChatProcessor.encode(characterName, entityType, message,
+                                        playerName);
 
                                 // send encoded message to server:
                                 MinecraftClient.getInstance().player.networkHandler.sendChatMessage(encodedMessage);
-                                
-                                // MinecraftClient.getInstance().getNetworkHandler().sendPacket(new
-                                // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
-                                // signature ));
-                                // MinecraftClient.getInstance().player.sendMessage(Text.literal(formattedMsg));
+
+                                // display the message in chat locally
                                 MinecraftClient.getInstance().inGameHud.getChatHud()
                                         .addMessage(Text.literal(String.format("<%s> %s", characterName, message)));
                             }
@@ -225,7 +221,7 @@ public class ClientPackets {
                             return;
                         }
                         // dont send entity msg if this client is not the sender
-                        if(!senderPlayerName.equals(client.player.getName().getString())){
+                        if (!senderPlayerName.equals(client.player.getName().getString())) {
                             return;
                         }
                         // NOW SEND ENTITY MESSAGE:
