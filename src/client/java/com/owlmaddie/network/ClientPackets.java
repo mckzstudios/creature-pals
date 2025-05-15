@@ -12,6 +12,8 @@ import com.owlmaddie.ui.PlayerMessageManager;
 import com.owlmaddie.utils.ChatProcessor;
 import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.Decompression;
+import com.owlmaddie.utils.EntityTypes;
+
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -165,7 +167,8 @@ public class ClientPackets {
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {
                                 // display the message in chat locally
-                                String encodedMessage = ChatProcessor.encode(characterName, entity.getName().getString(), message);
+                                String entityType = EntityTypes.getEntityType(entity); // should return: "sheep", "cow", etc.
+                                String encodedMessage = ChatProcessor.encode(characterName, entityType, message);
                                 // MessageSignatureData signature = null;
                                 // ClientPlayNetworkHandler handler = client.getNetworkHandler();
                                 // LastSeenMessageList.Acknowledgment acknowledgment =
@@ -173,6 +176,7 @@ public class ClientPackets {
 
                                 // send encoded message to server:
                                 MinecraftClient.getInstance().player.networkHandler.sendChatMessage(encodedMessage);
+                                
                                 // MinecraftClient.getInstance().getNetworkHandler().sendPacket(new
                                 // ChatMessageC2SPacket(formattedMsg, Instant.now(),new Random().nextLong(),
                                 // signature ));
