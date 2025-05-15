@@ -205,7 +205,7 @@ public class ServerPackets {
 
                     // Ensure that the task is synced with the server thread
                     server.execute(() -> {
-                        MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
+                        Entity entity =  ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
                                 entityId);
                         if (entity == null) {
                             return;
@@ -237,16 +237,16 @@ public class ServerPackets {
                         }
                         if (entitySenderName.equals(characterName)
                                 || (entity.getCustomName() != null
-                                        && entity.getCustomName().toString().equals(entitySenderName))) {
+                                        && entity.getCustomName().getString().equals(entitySenderName))) {
 
                             LOGGER.info(String.format(
                                     "CANCELLING C2S sendChat, ONE OF THESE ARE THE SAME: ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
-                                    entitySenderName, characterName, entity.getCustomName().toString()));
+                                    entitySenderName, characterName, entity.getCustomName().getString()));
                             return; // do not generate message
                         } else {
                             LOGGER.info(String.format(
                                     "FORWARDING MSG TO ENTITY: MESSAGE(%s) ENTITYSENDERNAME(%s) CHATDATACHARACTERPROP(%s) CUSTOMNAME(%s)",
-                                    message, entitySenderName, characterName, entity.getCustomName().toString()));
+                                    message, entitySenderName, characterName, entity.getCustomName().getString()));
 
                             eventQueueData.addExternalEntityMessage(userLanguage, player,
                                     ChatProcessor.getMessage(message),

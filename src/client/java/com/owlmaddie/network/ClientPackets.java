@@ -207,6 +207,9 @@ public class ClientPackets {
 
                         // AAA trigger for player message
                         LOGGER.info("Player message" + message);
+
+                        LOGGER.info(String.format("ClientPackets/S2C Player msg (%s) (%s)",
+                                fromMinecraftChat ? "fromChat" : "notFromChat", message));
                         // if (ChatProcessor.isFormatted(message)) {
                         // LOGGER.info("CANCELLING MSG BECAUSE IT IS FORMATTED");
                         // return;
@@ -221,24 +224,16 @@ public class ClientPackets {
                             return;
                         }
                         // dont send entity msg if this client is not the sender
-                        if (!senderPlayerName.equals(client.player.getName().getString())) {
-                            return;
-                        }
-                        // NOW SEND ENTITY MESSAGE:
-
-                        // if the msg was from minecraft's chat, and this is the client for that player,
-                        // then send to nearest entity with bubble open.
-                        // if (fromMinecraftChat &&
-                        // senderPlayerName.equals(client.player.getName().getString())) {
-                        // Optional<Entity> entityToSendChatTo = ClientEntityFinder
-                        // .getClosestEntityToPlayerWithChatBubbleOpen();
-                        // entityToSendChatTo.ifPresent(entity -> {
-                        // ClientPackets.sendChat(entity, message);
-                        // });
+                        // if (!senderPlayerName.equals(client.player.getName().getString())) {
+                        // return;
                         // }
-                        // AAA when sending to specific entity, maybe filter here:
+
                         List<Entity> entities = ClientEntityFinder.getCloseEntities(12);
                         entities.forEach(entity -> {
+                            // ignore players
+                            if (entity.isPlayer())
+                                return;
+
                             ClientPackets.sendChat(entity, message);
                         });
 
