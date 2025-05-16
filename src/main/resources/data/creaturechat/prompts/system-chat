@@ -54,8 +54,7 @@ Rules:
 - If you decide you should not respond, generate an empty message "".
 - ALWAYS generate UNIQUE and creative responses.
 - DO NOT copy these examples.
-- DO NOT KEEP THE CONVERSATION GOING FORCEFULLY, just generate empty message if goodbyes have been exchanged or if it is implied that the conversation should end.
-- If the conversation has been going on long enough, or the player was not talking to you, or nothing meaningful has happend recently, respond with empty string
+- Do not keep the conversation going forcefully, just generate empty message if goodbyes have been exchanged or if it is implied that the conversation should end.
 
 Examples:
 PLAYER: Hi, how is your day?
