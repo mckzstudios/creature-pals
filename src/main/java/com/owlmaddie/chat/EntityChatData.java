@@ -429,7 +429,7 @@ public class EntityChatData {
         }
 
         // fetch HTTP response from ChatGPT
-        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false, "Reminder: Do not engage in repetitive or filler content. Respond with a empty message \\\"\\\" when that happens.")
+        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false, "Reminder: Respond with a empty message only when \\\"\\\" you detect repetitive or filler content in conversations.")
                 .thenAccept(output_message -> {
                     try {
                         if (output_message != null) {
