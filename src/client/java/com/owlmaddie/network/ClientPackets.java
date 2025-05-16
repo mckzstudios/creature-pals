@@ -162,6 +162,10 @@ public class ClientPackets {
                         // message in chat:
                         MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
                         if (entity != null) {
+                            if(message.isBlank()){
+                                // Do not send msg if it is blank
+                                return;
+                            }
                             // String charName = chatData.getCharacterProp("name"); // not updated when
                             // packet sent for some reason
                             if (sender != ChatSender.USER && status == ChatStatus.DISPLAY && line == 0) {

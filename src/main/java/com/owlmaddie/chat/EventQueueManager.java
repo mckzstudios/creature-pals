@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.owlmaddie.utils.ServerEntityFinder;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,6 +16,8 @@ public class EventQueueManager {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
     public static final long maxDistance = 12;
     public static boolean llmProcessing = false;
+
+    public static String blacklistedEntityId = null;
 
 
     private static long lastErrorTime = 0L;

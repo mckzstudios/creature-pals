@@ -286,7 +286,7 @@ public class EntityChatData {
         String promptText = ChatPrompt.loadPromptFromResource(ServerPackets.serverInstance.getResourceManager(),
                 systemPrompt);
         Map<String, String> contextData = getPlayerContext(player, userLanguage, config);
-        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false)
+        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false,"" )
                 .thenAccept(output_message -> {
                     try {
                         if (output_message != null) {
@@ -342,7 +342,7 @@ public class EntityChatData {
         Map<String, String> contextData = getPlayerContext(player, userLanguage, config);
 
         // fetch HTTP response from ChatGPT
-        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false)
+        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false, "")
                 .thenAccept(output_message -> {
                     try {
                         if (output_message != null) {
@@ -429,7 +429,7 @@ public class EntityChatData {
         }
 
         // fetch HTTP response from ChatGPT
-        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false)
+        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false, "Reminder: Do not engage in repetitive or filler content. Respond with a empty message \\\"\\\" when that happens.")
                 .thenAccept(output_message -> {
                     try {
                         if (output_message != null) {
@@ -666,7 +666,8 @@ public class EntityChatData {
                             // Get cleaned message (i.e. no <BEHAVIOR> strings)
                             String cleanedMessage = result.getCleanedMessage();
                             if (cleanedMessage.isEmpty()) {
-                                cleanedMessage = Randomizer.getRandomMessage(Randomizer.RandomType.NO_RESPONSE);
+                                onSuccess.accept("");
+                                return;
                             }
 
                             // Add ASSISTANT message to history

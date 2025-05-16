@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.UUID;
 
+import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.goals.EntityBehaviorManager;
 import com.owlmaddie.goals.GoalPriority;
 import com.owlmaddie.goals.TalkPlayerGoal;
@@ -63,6 +64,7 @@ public class EventQueueData {
 
     public boolean shouldPoll() {
         boolean shouldPoll = entity != null &&
+                entityId != EventQueueManager.blacklistedEntityId &&
                 lastMessageData != null &&
                 lastMessageData.player != null &&
                 !eventQueue.isEmpty() &&
@@ -79,7 +81,7 @@ public class EventQueueData {
 
     public void add(MessageData toAdd) {
         eventQueue.addLast(toAdd);
-        // if there is a message, and we need to 
+        // if there is a message, and we need to
         if (needToGenCharacter() && !isGreetingInQueue()) {
             addCharacterAndMaybeGreeting(toAdd.userLanguage, toAdd.player, MessageDataType.Character);
         } else if (eventQueue.size() > 3) {
@@ -91,6 +93,7 @@ public class EventQueueData {
     // MAKE SURE THAT EXTERNAL ENTITY IS DIFFERENT FROM CURRENT WHEN CALLING THIS:
     public void addExternalEntityMessage(String userLanguage, ServerPlayerEntity player, String entityMessage,
             String entityCustomName, String entityName) {
+        EventQueueManager.blacklistedEntityId = null;
         String newMessage = String.format("[%s the %s] said %s", entityCustomName, entityName, entityMessage);
         MessageData toAdd = new MessageData(userLanguage, player, newMessage, false, MessageDataType.Normal);
         add(toAdd);
@@ -99,6 +102,7 @@ public class EventQueueData {
 
     public void addUserMessage(String userLanguage, ServerPlayerEntity player, String userMessage,
             boolean is_auto_message) {
+        EventQueueManager.blacklistedEntityId = null;
         LOGGER.info(String.format("EventQueueData/addUserMessage (%s) to entity (%s)", userMessage, entityId));
         MessageData toAdd = new MessageData(userLanguage, player, userMessage, is_auto_message, MessageDataType.Normal);
         add(toAdd);
@@ -262,6 +266,13 @@ public class EventQueueData {
                     LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) generated message (%s)",
                             entityId, message));
                     lastTimePolled = System.nanoTime();
+                    if (message.isEmpty()) {
+                        LOGGER.info("Assistant generated empty message");
+                        EventQueueManager.blacklistedEntityId = entityId;
+                        chatData.setStatus(ChatStatus.NONE);
+                    } else {
+                        EventQueueManager.blacklistedEntityId = null;
+                    }
                 }, errMsg -> {
                     EventQueueManager.llmProcessing = false;
                     LOGGER.info(String.format(
@@ -270,7 +281,7 @@ public class EventQueueData {
                     EventQueueManager.onError();
                     lastTimePolled = System.nanoTime();
                 });
-        chatData.logConversationHistory();
+        // chatData.logConversationHistory();
     }
 
 }

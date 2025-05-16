@@ -16,7 +16,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
- * The {@code ChatGPTRequest} class is used to send HTTP requests to our LLM to generate
+ * The {@code ChatGPTRequest} class is used to send HTTP requests to our LLM to
+ * generate
  * messages.
  */
 public class ChatGPTRequest {
@@ -41,7 +42,8 @@ public class ChatGPTRequest {
         int max_tokens;
         boolean stream;
 
-        public ChatGPTRequestPayload(String model, List<ChatGPTRequestMessage> messages, Boolean jsonMode, float temperature, int maxTokens) {
+        public ChatGPTRequestPayload(String model, List<ChatGPTRequestMessage> messages, Boolean jsonMode,
+                float temperature, int maxTokens) {
             this.model = model;
             this.messages = messages;
             this.temperature = temperature;
@@ -110,7 +112,7 @@ public class ChatGPTRequest {
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
             result = result.replaceAll(Pattern.quote("{{" + entry.getKey() + "}}"), entry.getValue());
         }
-        return result.replace("\"", "") ;
+        return result.replace("\"", "");
     }
 
     // Function to roughly estimate # of OpenAI tokens in String
@@ -118,7 +120,9 @@ public class ChatGPTRequest {
         return (int) Math.round(text.length() / 3.5);
     }
 
-    public static CompletableFuture<String> fetchMessageFromChatGPT(ConfigurationHandler.Config config, String systemPrompt, Map<String, String> contextData, List<ChatMessage> messageHistory, Boolean jsonMode) {
+    public static CompletableFuture<String> fetchMessageFromChatGPT(ConfigurationHandler.Config config,
+            String systemPrompt, Map<String, String> contextData, List<ChatMessage> messageHistory, Boolean jsonMode,
+            String wrapMsg) {
         // Init API & LLM details
         String apiUrl = config.getUrl();
         String apiKey = config.getApiKey();
@@ -147,7 +151,8 @@ public class ChatGPTRequest {
                 // Create messages list (for chat history)
                 List<ChatGPTRequestMessage> messages = new ArrayList<>();
 
-                // Don't exceed a specific % of total context window (to limit message history in request)
+                // Don't exceed a specific % of total context window (to limit message history
+                // in request)
                 int remainingContextTokens = (int) ((maxContextTokens - maxOutputTokens) * percentOfContext);
                 int usedTokens = estimateTokenSize("system: " + systemMessage);
 
@@ -159,7 +164,8 @@ public class ChatGPTRequest {
                     int messageTokens = estimateTokenSize(senderName + ": " + messageText);
 
                     if (usedTokens + messageTokens > remainingContextTokens) {
-                        break;  // If adding this message would exceed the token limit, stop adding more messages
+                        break; // If adding this message would exceed the token limit, stop adding more
+                               // messages
                     }
 
                     // Add the message to the temporary list
@@ -171,11 +177,24 @@ public class ChatGPTRequest {
                 messages.add(new ChatGPTRequestMessage("system", systemMessage));
 
                 // Reverse the list to restore chronological order
-                // This is needed since we build the list in reverse order for token restricting above
+                // This is needed since we build the list in reverse order for token restricting
+                // above
                 Collections.reverse(messages);
 
+                if (wrapMsg != null && !wrapMsg.isBlank() && messages.size() > 0) {
+                    messages.get(messages.size() - 1).content = String.format("|%s|\nUser message: %s", wrapMsg,
+                            messages.get(messages.size() - 1).content);
+                }
+                LOGGER.info("---- CONVERSATION HISTORY SENT TO LLM -----");
+                for (ChatGPTRequestMessage msg : messages) {
+                    LOGGER.info(String.format("%s:'%s'", msg.role.toString(), msg.content));
+                }
+
+                LOGGER.info("---- END CONVERSATION HISTORY SENT ---------");
+
                 // Convert JSON to String
-                ChatGPTRequestPayload payload = new ChatGPTRequestPayload(modelName, messages, jsonMode, 1.0f, maxOutputTokens);
+                ChatGPTRequestPayload payload = new ChatGPTRequestPayload(modelName, messages, jsonMode, 1.0f,
+                        maxOutputTokens);
                 Gson gsonInput = new Gson();
                 String jsonInputString = gsonInput.toJson(payload);
 
@@ -186,7 +205,8 @@ public class ChatGPTRequest {
 
                 // Check for error message in response
                 if (connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
-                    try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
+                    try (BufferedReader errorReader = new BufferedReader(
+                            new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
                         String errorLine;
                         StringBuilder errorResponse = new StringBuilder();
                         while ((errorLine = errorReader.readLine()) != null) {
@@ -205,7 +225,8 @@ public class ChatGPTRequest {
                     lastErrorMessage = null;
                 }
 
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                try (BufferedReader br = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
                     StringBuilder response = new StringBuilder();
                     String responseLine;
                     while ((responseLine = br.readLine()) != null) {
@@ -214,7 +235,8 @@ public class ChatGPTRequest {
 
                     Gson gsonOutput = new Gson();
                     ChatGPTResponse chatGPTResponse = gsonOutput.fromJson(response.toString(), ChatGPTResponse.class);
-                    if (chatGPTResponse != null && chatGPTResponse.choices != null && !chatGPTResponse.choices.isEmpty()) {
+                    if (chatGPTResponse != null && chatGPTResponse.choices != null
+                            && !chatGPTResponse.choices.isEmpty()) {
                         String content = chatGPTResponse.choices.get(0).message.content;
                         return content;
                     } else {
@@ -230,4 +252,3 @@ public class ChatGPTRequest {
         });
     }
 }
-
