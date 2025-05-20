@@ -74,7 +74,7 @@ public class MixinLivingEntity {
                 String directness = isIndirect ? "indirectly" : "directly";
 
                 String attackedMessage = "<" + player.getName().getString() + " attacked you " + directness + " with " + weaponName + ">";
-                ServerPackets.generate_chat("N/A", chatData, player, (MobEntity) thisEntity, attackedMessage, true);
+                ServerPackets.generate_chat("N/A", chatData, player, (MobEntity) thisEntity, attackedMessage, true, false);
             }
         }
     }

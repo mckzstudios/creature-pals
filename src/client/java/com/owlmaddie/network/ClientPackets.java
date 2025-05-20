@@ -79,7 +79,7 @@ public class ClientPackets {
         ClientPlayNetworking.send(ServerPackets.PACKET_C2S_SET_STATUS, buf);
     }
 
-    public static void sendChat(Entity entity, String message) {
+    public static void sendChat(Entity entity, String message, boolean fromMinecraftChat) {
         // AAA use this to actually send a chat msg to an entity.
         // Get user language
         String userLanguageCode = MinecraftClient.getInstance().getLanguageManager().getLanguage();
@@ -89,6 +89,7 @@ public class ClientPackets {
         buf.writeString(entity.getUuidAsString());
         buf.writeString(message);
         buf.writeString(userLanguageName);
+        buf.writeBoolean(fromMinecraftChat);
 
         // Send C2S packet
         ClientPlayNetworking.send(ServerPackets.PACKET_C2S_SEND_CHAT, buf);
@@ -174,7 +175,7 @@ public class ClientPackets {
                 if(fromMinecraftChat && senderPlayerName.equals(client.player.getName().getString())){
                     Optional<Entity> entityToSendChatTo = ClientEntityFinder.getClosestEntityToPlayerWithChatBubbleOpen();
                     entityToSendChatTo.ifPresent(entity -> {
-                        ClientPackets.sendChat(entity, message);
+                        ClientPackets.sendChat(entity, message, fromMinecraftChat);
                     });
                 }
             });

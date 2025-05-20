@@ -25,6 +25,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.VillageGossipType;
 import net.minecraft.world.GameRules;
@@ -318,7 +319,7 @@ public class EntityChatData {
     }
 
     // Generate greeting
-    public void generateMessage(String userLanguage, ServerPlayerEntity player, String userMessage, boolean is_auto_message) {
+    public void generateMessage(String userLanguage, ServerPlayerEntity player, String userMessage, boolean is_auto_message, boolean isFromChat) {
         String systemPrompt = "system-chat";
         if (is_auto_message) {
             // Increment an auto-generated message
@@ -326,6 +327,11 @@ public class EntityChatData {
         } else {
             // Reset auto-generated counter
             this.auto_generated = 0;
+        }
+
+        System.out.println(is_auto_message + " " + isFromChat);
+        if (!is_auto_message && !isFromChat) {
+            player.server.getPlayerManager().broadcast(Text.literal("<" + player.getName().getString() + "> " + userMessage),false);
         }
 
         // Add USER Message
@@ -559,7 +565,7 @@ public class EntityChatData {
                     // Update the last entry in previousMessages to use the original message
                     this.previousMessages.set(this.previousMessages.size() - 1,
                             new ChatMessage(result.getOriginalMessage(), ChatDataManager.ChatSender.ASSISTANT, player.getDisplayName().getString()));
-
+                        player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString() + " the " +entity.getType().getName().getString() + "> " + cleanedMessage), false);
                 } else {
                     // No valid LLM response
                     throw new RuntimeException(ChatGPTRequest.lastErrorMessage);

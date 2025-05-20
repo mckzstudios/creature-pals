@@ -179,6 +179,7 @@ public class ServerPackets {
             UUID entityId = UUID.fromString(buf.readString());
             String message = buf.readString(32767);
             String userLanguage = buf.readString(32767);
+            boolean fromMinecraftChat = buf.readBoolean();
 
             // Ensure that the task is synced with the server thread
             server.execute(() -> {
@@ -189,7 +190,7 @@ public class ServerPackets {
                         generate_character(userLanguage, chatData, player, entity);
                     } else {
                         // AAA server side generate llm response on entity
-                        generate_chat(userLanguage, chatData, player, entity, message, false);
+                        generate_chat(userLanguage, chatData, player, entity, message, false, fromMinecraftChat);
                     }
                 }
             });
@@ -324,13 +325,13 @@ public class ServerPackets {
         chatData.generateCharacter(userLanguage, player, userMessageBuilder.toString(), false);
     }
 
-    public static void generate_chat(String userLanguage, EntityChatData chatData, ServerPlayerEntity player, MobEntity entity, String message, boolean is_auto_message) {
+    public static void generate_chat(String userLanguage, EntityChatData chatData, ServerPlayerEntity player, MobEntity entity, String message, boolean is_auto_message, boolean isFromChat) {
         // Set talk to player goal (prevent entity from walking off)
         TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
         EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
 
         // Add new message
-        chatData.generateMessage(userLanguage, player, message, is_auto_message);
+        chatData.generateMessage(userLanguage, player, message, is_auto_message, isFromChat);
     }
 
     // Writing a Map<String, PlayerData> to the buffer
@@ -350,6 +351,9 @@ public class ServerPackets {
                 chatData.entityId, chatData.status,
                 chatData.currentMessage.length() > 24 ? chatData.currentMessage.substring(0, 24) + "..." : chatData.currentMessage,
                 chatData.currentLineNumber, chatData.sender);
+
+
+
 
         for (ServerWorld world : serverInstance.getWorlds()) {
             // Find Entity by UUID and update custom name
