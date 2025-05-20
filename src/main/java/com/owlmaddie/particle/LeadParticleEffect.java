@@ -2,55 +2,47 @@ package com.owlmaddie.particle;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.*;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleType;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.particle.*;
+import net.minecraft.util.dynamic.Codecs;
 
-import static com.owlmaddie.network.ServerPackets.LEAD_PARTICLE;
+import java.util.stream.Stream;
 
 /**
  * The {@code LeadParticleEffect} class allows for an 'angle' to be passed along with the Particle, to rotate it in the direction of LEAD behavior.
  */
-public class LeadParticleEffect implements ParticleEffect {
-    public static final ParticleEffect.Factory<LeadParticleEffect> DESERIALIZER = new Factory<>() {
-        @Override
-        public LeadParticleEffect read(ParticleType<LeadParticleEffect> particleType, PacketByteBuf buf) {
-            // Read the angle (or any other data) from the packet
-            double angle = buf.readDouble();
-            return new LeadParticleEffect(angle);
-        }
+static class LeadParticle implements ParticleEffect {
+    private final float angle;
 
-        @Override
-        public LeadParticleEffect read(ParticleType<LeadParticleEffect> particleType, StringReader reader) throws CommandSyntaxException {
-            // Read the angle from a string
-            double angle = reader.readDouble();
-            return new LeadParticleEffect(angle);
-        }
-    };
 
-    private final double angle;
-
-    public LeadParticleEffect(double angle) {
+    public static final MapCodec<LeadParticle> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> instance.group(
+                            Codecs.POSITIVE_FLOAT.fieldOf("angle").forGetter(effect -> effect.angle), SCALE_CODEC.fieldOf("scale").forGetter(AbstractDustParticleEffect::getScale)
+                    )
+                    .apply(instance, LeadParticle::new)
+    );
+    public static final PacketCodec<RegistryByteBuf, LeadParticle> PACKET_CODEC = PacketCodec.tuple(
+            PacketCodecs.FLOAT, effect -> effect.angle, LeadParticle::new
+    );
+    LeadParticle(float angle) {
         this.angle = angle;
     }
 
     @Override
-    public ParticleType<?> getType() {
+    public ParticleType<LeadParticle> getType() {
         return LEAD_PARTICLE;
     }
 
-    public double getAngle() {
-        return angle;
-    }
-
-    @Override
-    public void write(PacketByteBuf buf) {
-        // Write the angle to the packet
-        buf.writeDouble(angle);
-    }
-
-    @Override
-    public String asString() {
-        return Double.toString(angle);
-    }
 }
+public static final ParticleType<LeadParticle> LEAD_PARTICLE = FabricParticleTypes.complex(
+        type -> LeadParticle.CODEC,
+        type -> LeadParticle.PACKET_CODEC
+);
+

@@ -22,8 +22,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleType;
+import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.MinecraftServer;
@@ -62,17 +62,17 @@ public class ServerPackets {
     public static final Identifier PACKET_S2C_LOGIN = new Identifier("creaturechat", "packet_s2c_login");
     public static final Identifier PACKET_S2C_WHITELIST = new Identifier("creaturechat", "packet_s2c_whitelist");
     public static final Identifier PACKET_S2C_PLAYER_STATUS = new Identifier("creaturechat", "packet_s2c_player_status");
-    public static final DefaultParticleType HEART_SMALL_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType HEART_BIG_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType FIRE_SMALL_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType FIRE_BIG_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType ATTACK_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType FLEE_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType FOLLOW_FRIEND_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType FOLLOW_ENEMY_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType PROTECT_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType LEAD_FRIEND_PARTICLE = FabricParticleTypes.simple();
-    public static final DefaultParticleType LEAD_ENEMY_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType HEART_SMALL_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType HEART_BIG_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType FIRE_SMALL_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType FIRE_BIG_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType ATTACK_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType FLEE_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType FOLLOW_FRIEND_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType FOLLOW_ENEMY_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType PROTECT_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType LEAD_FRIEND_PARTICLE = FabricParticleTypes.simple();
+    public static final SimpleParticleType LEAD_ENEMY_PARTICLE = FabricParticleTypes.simple();
     public static final ParticleType<LeadParticleEffect> LEAD_PARTICLE = FabricParticleTypes.complex(LeadParticleEffect.DESERIALIZER);
 
     public static void register() {

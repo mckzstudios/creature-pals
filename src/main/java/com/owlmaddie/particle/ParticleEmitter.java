@@ -1,7 +1,7 @@
 package com.owlmaddie.particle;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -15,7 +15,7 @@ import static com.owlmaddie.network.ServerPackets.*;
  * and triggers sound effects based on particle type and count.
  */
 public class ParticleEmitter {
-    public static void emitCreatureParticle(ServerWorld world, Entity entity, DefaultParticleType particleType, double spawnSize, int count) {
+    public static void emitCreatureParticle(ServerWorld world, Entity entity, SimpleParticleType particleType, double spawnSize, int count) {
         // Calculate the offset for the particle to appear above and in front of the entity
         float yaw = entity.getHeadYaw();
         double offsetX = -MathHelper.sin(yaw * ((float) Math.PI / 180F)) * 0.9;
