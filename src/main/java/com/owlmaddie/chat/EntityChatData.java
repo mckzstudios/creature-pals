@@ -566,6 +566,9 @@ public class EntityChatData {
                     this.previousMessages.set(this.previousMessages.size() - 1,
                             new ChatMessage(result.getOriginalMessage(), ChatDataManager.ChatSender.ASSISTANT, player.getDisplayName().getString()));
                         player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString() + " the " +entity.getType().getName().getString() + "> " + cleanedMessage), false);
+
+                        // Nearby entities may respond to this message
+                        ServerPackets.generate_nearby_chat(userLanguage, player, entity, cleanedMessage);
                 } else {
                     // No valid LLM response
                     throw new RuntimeException(ChatGPTRequest.lastErrorMessage);

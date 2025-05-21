@@ -334,6 +334,24 @@ public class ServerPackets {
         chatData.generateMessage(userLanguage, player, message, is_auto_message, isFromChat);
     }
 
+    // Trigger nearby entities to potentially respond to a message
+    public static void generate_nearby_chat(String userLanguage, ServerPlayerEntity player, MobEntity speakingEntity, String message) {
+        ServerWorld world = (ServerWorld) speakingEntity.getWorld();
+        double radius = 8.0;
+        for (Entity entity : world.iterateEntities()) {
+            if (entity instanceof MobEntity other && entity != speakingEntity) {
+                if (speakingEntity.distanceTo(other) <= radius) {
+                    EntityChatData otherData = ChatDataManager.getServerInstance().getOrCreateChatData(other.getUuidAsString());
+                    if (!otherData.characterSheet.isEmpty() && Math.random() < 0.5) {
+                        String sourceName = speakingEntity.getDisplayName().getString();
+                        String userMessage = "<" + sourceName + " said: " + message + ">";
+                        generate_chat(userLanguage, otherData, player, other, userMessage, true, false);
+                    }
+                }
+            }
+        }
+    }
+
     // Writing a Map<String, PlayerData> to the buffer
     public static void writePlayerDataMap(PacketByteBuf buffer, Map<String, PlayerData> map) {
         buffer.writeInt(map.size()); // Write the size of the map
