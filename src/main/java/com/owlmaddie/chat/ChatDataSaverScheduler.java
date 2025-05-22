@@ -23,8 +23,13 @@ public class ChatDataSaverScheduler {
         scheduler.shutdown();
     }
 
-    // Schedule a task to run after 1 tick (basically immediately)
+    // Schedule a task to run after a short delay (basically immediately)
     public void scheduleTask(Runnable task) {
-        scheduler.schedule(() -> server.execute(task), 50, TimeUnit.MILLISECONDS);
+        scheduleTask(task, 50);
+    }
+
+    // Schedule a task to run after a custom delay
+    public void scheduleTask(Runnable task, long delayMs) {
+        scheduler.schedule(() -> server.execute(task), delayMs, TimeUnit.MILLISECONDS);
     }
 }

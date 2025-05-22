@@ -86,7 +86,7 @@ public class MixinMobEntity {
                         action_verb + "you " + itemCount + " " + itemName + ">";
 
                 if (!entityData.characterSheet.isEmpty() && entityData.auto_generated < chatDataManager.MAX_AUTOGENERATE_RESPONSES) {
-                    ServerPackets.generate_chat("N/A", entityData, serverPlayer, thisEntity, giveItemMessage, true,false);
+                    ServerPackets.generate_chat("N/A", entityData, serverPlayer, thisEntity, giveItemMessage, true,false,false);
                 }
 
             } else if (itemStack.isEmpty() && playerData.friendship == 3) {
