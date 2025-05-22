@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.owlmaddie.network.ServerPackets.*;
+import static com.owlmaddie.particle.Particles.*;
 
 /**
  * The {@code EntityChatData} class represents a conversation between an
@@ -186,7 +187,7 @@ public class EntityChatData {
 
         // Get active player effects
         String effectsString = player.getActiveStatusEffects().entrySet().stream()
-                .map(entry -> entry.getKey().getTranslationKey() + " x" + (entry.getValue().getAmplifier() + 1))
+                .map(entry -> entry.getKey().getKey().get() + " x" + (entry.getValue().getAmplifier() + 1))
                 .collect(Collectors.joining(", "));
         contextData.put("player_active_effects", effectsString);
 
@@ -517,7 +518,7 @@ public class EntityChatData {
                                 if (new_friendship == 3 && !tamableEntity.isTamed()) {
                                     tamableEntity.setOwner(player);
                                 } else if (new_friendship == -3 && tamableEntity.isTamed()) {
-                                    tamableEntity.setTamed(false);
+                                    tamableEntity.setTamed(false, false);
                                     tamableEntity.setOwnerUuid(null);
                                 }
                             }

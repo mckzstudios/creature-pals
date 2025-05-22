@@ -8,6 +8,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
 import static com.owlmaddie.network.ServerPackets.*;
+import static com.owlmaddie.particle.Particles.*;
 
 /**
  * The {@code ParticleEmitter} class provides utility methods for emitting custom particles and sounds

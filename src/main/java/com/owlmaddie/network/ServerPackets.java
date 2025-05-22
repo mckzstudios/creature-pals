@@ -22,7 +22,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -51,44 +50,21 @@ public class ServerPackets {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
     public static MinecraftServer serverInstance;
     public static ChatDataSaverScheduler scheduler = null;
-    public static final Identifier PACKET_C2S_GREETING = new Identifier("creaturechat", "packet_c2s_greeting");
-    public static final Identifier PACKET_C2S_READ_NEXT = new Identifier("creaturechat", "packet_c2s_read_next");
-    public static final Identifier PACKET_C2S_SET_STATUS = new Identifier("creaturechat", "packet_c2s_set_status");
-    public static final Identifier PACKET_C2S_OPEN_CHAT = new Identifier("creaturechat", "packet_c2s_open_chat");
-    public static final Identifier PACKET_C2S_CLOSE_CHAT = new Identifier("creaturechat", "packet_c2s_close_chat");
-    public static final Identifier PACKET_C2S_SEND_CHAT = new Identifier("creaturechat", "packet_c2s_send_chat");
-    public static final Identifier PACKET_S2C_ENTITY_MESSAGE = new Identifier("creaturechat", "packet_s2c_entity_message");
-    public static final Identifier PACKET_S2C_PLAYER_MESSAGE = new Identifier("creaturechat", "packet_s2c_player_message");
-    public static final Identifier PACKET_S2C_LOGIN = new Identifier("creaturechat", "packet_s2c_login");
-    public static final Identifier PACKET_S2C_WHITELIST = new Identifier("creaturechat", "packet_s2c_whitelist");
-    public static final Identifier PACKET_S2C_PLAYER_STATUS = new Identifier("creaturechat", "packet_s2c_player_status");
-    public static final SimpleParticleType HEART_SMALL_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType HEART_BIG_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType FIRE_SMALL_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType FIRE_BIG_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType ATTACK_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType FLEE_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType FOLLOW_FRIEND_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType FOLLOW_ENEMY_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType PROTECT_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType LEAD_FRIEND_PARTICLE = FabricParticleTypes.simple();
-    public static final SimpleParticleType LEAD_ENEMY_PARTICLE = FabricParticleTypes.simple();
-    public static final ParticleType<LeadParticleEffect> LEAD_PARTICLE = FabricParticleTypes.complex(LeadParticleEffect.DESERIALIZER);
+    public static final Identifier PACKET_C2S_GREETING = Identifier.of("creaturechat", "packet_c2s_greeting");
+    public static final Identifier PACKET_C2S_READ_NEXT = Identifier.of("creaturechat", "packet_c2s_read_next");
+    public static final Identifier PACKET_C2S_SET_STATUS =  Identifier.of("creaturechat", "packet_c2s_set_status");
+    public static final Identifier PACKET_C2S_OPEN_CHAT =  Identifier.of("creaturechat", "packet_c2s_open_chat");
+    public static final Identifier PACKET_C2S_CLOSE_CHAT = Identifier.of("creaturechat", "packet_c2s_close_chat");
+    public static final Identifier PACKET_C2S_SEND_CHAT =  Identifier.of("creaturechat", "packet_c2s_send_chat");
+    public static final Identifier PACKET_S2C_ENTITY_MESSAGE = Identifier.of("creaturechat", "packet_s2c_entity_message");
+    public static final Identifier PACKET_S2C_PLAYER_MESSAGE = Identifier.of("creaturechat", "packet_s2c_player_message");
+    public static final Identifier PACKET_S2C_LOGIN = Identifier.of("creaturechat", "packet_s2c_login");
+    public static final Identifier PACKET_S2C_WHITELIST =  Identifier.of("creaturechat", "packet_s2c_whitelist");
+    public static final Identifier PACKET_S2C_PLAYER_STATUS = Identifier.of("creaturechat", "packet_s2c_player_status");
+
 
     public static void register() {
-        // Register custom particles
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "heart_small"), HEART_SMALL_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "heart_big"), HEART_BIG_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "fire_small"), FIRE_SMALL_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "fire_big"), FIRE_BIG_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "attack"), ATTACK_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "flee"), FLEE_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "follow_enemy"), FOLLOW_ENEMY_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "follow_friend"), FOLLOW_FRIEND_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "protect"), PROTECT_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "lead_enemy"), LEAD_ENEMY_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "lead_friend"), LEAD_FRIEND_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, new Identifier("creaturechat", "lead"), LEAD_PARTICLE);
+
 
         // Handle packet for Greeting
         ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_GREETING, (server, player, handler, buf, responseSender) -> {
