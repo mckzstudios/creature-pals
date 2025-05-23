@@ -81,8 +81,8 @@ public class EventQueueData {
         return firstType == MessageDataType.GreetingAndCharacter || firstType == MessageDataType.Character;
     }
 
-    public void addGreeting(String userLanguage, ServerPlayerEntity player){
-        addCharacterAndMaybeGreeting(userLanguage,player,MessageDataType.GreetingAndCharacter);
+    public void addGreeting(String userLanguage, ServerPlayerEntity player) {
+        addCharacterAndMaybeGreeting(userLanguage, player, MessageDataType.GreetingAndCharacter);
     }
 
     private void addCharacterAndMaybeGreeting(String userLanguage, ServerPlayerEntity player,
@@ -101,19 +101,29 @@ public class EventQueueData {
         if (queueContainsCharacterGen()) {
             if (queue.getFirst().type == MessageDataType.Character) {
                 // already have Character queued up
+                LOGGER.info("Cancelling addGreeting, already have characterQueued up");
                 return;
             }
             // removes character gen so that can be replaced with greeting
             queue.pollFirst();
         }
+        LOGGER.info("Adding/updating queue to contain greeting/characterGen");
         MessageData toAdd = MessageData.genCharacterAndOrGreetingMessage(userLanguage, player, entity, type);
         lastMessageData = toAdd;
         queue.addFirst(toAdd);
     }
 
     private boolean needToGenCharacter() {
-        // prerequisite before anything:
-        return characterName == null || characterName.equals("N/A");
+        if (characterName != null && !characterName.equals("N/A")) {
+            return false;
+        }
+        EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
+        String name = chatData.getCharacterProp("name");
+        if (name == null) {
+            return true;
+        }
+        characterName = name;
+        return true;
     }
 
     // MAKE SURE THAT EXTERNAL ENTITY IS DIFFERENT FROM CURRENT WHEN CALLING THIS:
@@ -146,6 +156,7 @@ public class EventQueueData {
     public void poll() {
         LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) process event queue", entityId));
         EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
+        startPolling(chatData);
         TalkPlayerGoal talkGoal = new TalkPlayerGoal(lastMessageData.player, (MobEntity) entity, 3.5F);
         EntityBehaviorManager.addGoal((MobEntity) entity, talkGoal, GoalPriority.TALK_PLAYER);
 
@@ -208,7 +219,8 @@ public class EventQueueData {
     public void donePolling() {
         lastTimePolled = System.nanoTime();
         EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
-        chatData.setStatus(ChatStatus.DISPLAY);
+        // chatData.setStatus(ChatStatus.DISPLAY); // do not set this here. Need to set
+        // on client after message is generated.
         EventQueueManager.llmProcessing = false;
     }
 
@@ -222,7 +234,8 @@ public class EventQueueData {
             return;
         }
         // TODO: BROADCAST ENTITY MESSAGE HERE:
-        lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString() + " the " +entity.getType().getName().getString() + "> " + message), false);
+        lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString()
+                + " the " + entity.getType().getName().getString() + "> " + message), false);
     }
 
     public void onGreetingGenerated(String message) {

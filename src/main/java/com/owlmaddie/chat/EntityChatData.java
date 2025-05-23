@@ -330,7 +330,7 @@ public class EntityChatData {
         // Get messages for player
 
         ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false,
-                "Reminder: Respond with a empty message only when \\\"\\\" you detect repetitive or filler content in conversations.")
+                "Reminder: Respond with a empty message only when \\\"\\\" you detect repetitive content in conversations.")
                 .thenAccept(ent_msg -> {
                     try {
                         if (ent_msg != null) {
@@ -341,6 +341,7 @@ public class EntityChatData {
                             String cleanedMessage = result.getCleanedMessage();
                             if (cleanedMessage.isEmpty()) {
                                 // do not call addMessage
+                                this.addMessage("...", ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
                                 onGenerate.accept("");
                                 return;
                             }

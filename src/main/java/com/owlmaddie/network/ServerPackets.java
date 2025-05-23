@@ -103,6 +103,7 @@ public class ServerPackets {
                 if (entity != null) {
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
                     if (chatData.characterSheet.isEmpty()) {
+                        LOGGER.info("C2S_GREETING");
                        EventQueueManager.addGreeting(entity, userLanguage, player); 
                     }
                 }
