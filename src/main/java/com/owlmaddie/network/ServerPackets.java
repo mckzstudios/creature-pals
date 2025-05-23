@@ -17,12 +17,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.MinecraftServer;
@@ -50,50 +53,278 @@ public class ServerPackets {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
     public static MinecraftServer serverInstance;
     public static ChatDataSaverScheduler scheduler = null;
-    public static final Identifier PACKET_C2S_GREETING = Identifier.of("creaturechat", "packet_c2s_greeting");
-    public static final Identifier PACKET_C2S_READ_NEXT = Identifier.of("creaturechat", "packet_c2s_read_next");
-    public static final Identifier PACKET_C2S_SET_STATUS =  Identifier.of("creaturechat", "packet_c2s_set_status");
-    public static final Identifier PACKET_C2S_OPEN_CHAT =  Identifier.of("creaturechat", "packet_c2s_open_chat");
-    public static final Identifier PACKET_C2S_CLOSE_CHAT = Identifier.of("creaturechat", "packet_c2s_close_chat");
-    public static final Identifier PACKET_C2S_SEND_CHAT =  Identifier.of("creaturechat", "packet_c2s_send_chat");
-    public static final Identifier PACKET_S2C_ENTITY_MESSAGE = Identifier.of("creaturechat", "packet_s2c_entity_message");
-    public static final Identifier PACKET_S2C_PLAYER_MESSAGE = Identifier.of("creaturechat", "packet_s2c_player_message");
-    public static final Identifier PACKET_S2C_LOGIN = Identifier.of("creaturechat", "packet_s2c_login");
-    public static final Identifier PACKET_S2C_WHITELIST =  Identifier.of("creaturechat", "packet_s2c_whitelist");
-    public static final Identifier PACKET_S2C_PLAYER_STATUS = Identifier.of("creaturechat", "packet_s2c_player_status");
+
+    /**
+     * Packet payload definitions used for network communication.
+     */
+    public record GreetingC2SPayload(String entityId, String language) implements CustomPayload {
+        public static final Id<GreetingC2SPayload> ID = CustomPayload.id("creaturechat:packet_c2s_greeting");
+        public static final PacketCodec<PacketByteBuf, GreetingC2SPayload> CODEC =
+                CustomPayload.codecOf(GreetingC2SPayload::write, GreetingC2SPayload::new);
+
+        private GreetingC2SPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readString());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.entityId);
+            buf.writeString(this.language);
+        }
+
+        @Override
+        public Id<GreetingC2SPayload> getId() { return ID; }
+    }
+
+    public record ReadNextC2SPayload(String entityId, int lineNumber) implements CustomPayload {
+        public static final Id<ReadNextC2SPayload> ID = CustomPayload.id("creaturechat:packet_c2s_read_next");
+        public static final PacketCodec<PacketByteBuf, ReadNextC2SPayload> CODEC =
+                CustomPayload.codecOf(ReadNextC2SPayload::write, ReadNextC2SPayload::new);
+
+        private ReadNextC2SPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readInt());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.entityId);
+            buf.writeInt(this.lineNumber);
+        }
+
+        @Override
+        public Id<ReadNextC2SPayload> getId() { return ID; }
+    }
+
+    public record SetStatusC2SPayload(String entityId, String status) implements CustomPayload {
+        public static final Id<SetStatusC2SPayload> ID = CustomPayload.id("creaturechat:packet_c2s_set_status");
+        public static final PacketCodec<PacketByteBuf, SetStatusC2SPayload> CODEC =
+                CustomPayload.codecOf(SetStatusC2SPayload::write, SetStatusC2SPayload::new);
+
+        private SetStatusC2SPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readString());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.entityId);
+            buf.writeString(this.status);
+        }
+
+        @Override
+        public Id<SetStatusC2SPayload> getId() { return ID; }
+    }
+
+    public record OpenChatC2SPayload(String entityId) implements CustomPayload {
+        public static final Id<OpenChatC2SPayload> ID = CustomPayload.id("creaturechat:packet_c2s_open_chat");
+        public static final PacketCodec<PacketByteBuf, OpenChatC2SPayload> CODEC =
+                CustomPayload.codecOf(OpenChatC2SPayload::write, OpenChatC2SPayload::new);
+
+        private OpenChatC2SPayload(PacketByteBuf buf) {
+            this(buf.readString());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.entityId);
+        }
+
+        @Override
+        public Id<OpenChatC2SPayload> getId() { return ID; }
+    }
+
+    public record CloseChatC2SPayload() implements CustomPayload {
+        public static final Id<CloseChatC2SPayload> ID = CustomPayload.id("creaturechat:packet_c2s_close_chat");
+        public static final PacketCodec<PacketByteBuf, CloseChatC2SPayload> CODEC =
+                CustomPayload.codecOf((buf, payload) -> {}, buf -> new CloseChatC2SPayload());
+
+        @Override
+        public Id<CloseChatC2SPayload> getId() { return ID; }
+    }
+
+    public record SendChatC2SPayload(String entityId, String message, String language) implements CustomPayload {
+        public static final Id<SendChatC2SPayload> ID = CustomPayload.id("creaturechat:packet_c2s_send_chat");
+        public static final PacketCodec<PacketByteBuf, SendChatC2SPayload> CODEC =
+                CustomPayload.codecOf(SendChatC2SPayload::write, SendChatC2SPayload::new);
+
+        private SendChatC2SPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readString(), buf.readString());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.entityId);
+            buf.writeString(this.message);
+            buf.writeString(this.language);
+        }
+
+        @Override
+        public Id<SendChatC2SPayload> getId() { return ID; }
+    }
+
+    public record EntityMessageS2CPayload(String entityId, String message, int lineNumber,
+                                           String status, String sender,
+                                           Map<String, PlayerData> players) implements CustomPayload {
+        public static final Id<EntityMessageS2CPayload> ID = CustomPayload.id("creaturechat:packet_s2c_entity_message");
+        public static final PacketCodec<PacketByteBuf, EntityMessageS2CPayload> CODEC =
+                CustomPayload.codecOf(EntityMessageS2CPayload::write, EntityMessageS2CPayload::new);
+
+        private EntityMessageS2CPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readString(), buf.readInt(), buf.readString(), buf.readString(), readPlayerDataMap(buf));
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.entityId);
+            buf.writeString(this.message);
+            buf.writeInt(this.lineNumber);
+            buf.writeString(this.status);
+            buf.writeString(this.sender);
+            writePlayerDataMap(buf, this.players);
+        }
+
+        @Override
+        public Id<EntityMessageS2CPayload> getId() { return ID; }
+    }
+
+    public record PlayerMessageS2CPayload(String senderUuid, String senderName, String message,
+                                           boolean fromMinecraftChat) implements CustomPayload {
+        public static final Id<PlayerMessageS2CPayload> ID = CustomPayload.id("creaturechat:packet_s2c_player_message");
+        public static final PacketCodec<PacketByteBuf, PlayerMessageS2CPayload> CODEC =
+                CustomPayload.codecOf(PlayerMessageS2CPayload::write, PlayerMessageS2CPayload::new);
+
+        private PlayerMessageS2CPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readString(), buf.readString(), buf.readBoolean());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.senderUuid);
+            buf.writeString(this.senderName);
+            buf.writeString(this.message);
+            buf.writeBoolean(this.fromMinecraftChat);
+        }
+
+        @Override
+        public Id<PlayerMessageS2CPayload> getId() { return ID; }
+    }
+
+    public record LoginChunkS2CPayload(int sequenceNumber, int totalPackets, byte[] chunk) implements CustomPayload {
+        public static final Id<LoginChunkS2CPayload> ID = CustomPayload.id("creaturechat:packet_s2c_login");
+        public static final PacketCodec<PacketByteBuf, LoginChunkS2CPayload> CODEC =
+                CustomPayload.codecOf(LoginChunkS2CPayload::write, LoginChunkS2CPayload::new);
+
+        private LoginChunkS2CPayload(PacketByteBuf buf) {
+            this(buf.readInt(), buf.readInt(), buf.readByteArray());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeInt(this.sequenceNumber);
+            buf.writeInt(this.totalPackets);
+            buf.writeByteArray(this.chunk);
+        }
+
+        @Override
+        public Id<LoginChunkS2CPayload> getId() { return ID; }
+    }
+
+    public record WhitelistS2CPayload(List<String> whitelist, List<String> blacklist) implements CustomPayload {
+        public static final Id<WhitelistS2CPayload> ID = CustomPayload.id("creaturechat:packet_s2c_whitelist");
+        public static final PacketCodec<PacketByteBuf, WhitelistS2CPayload> CODEC =
+                CustomPayload.codecOf(WhitelistS2CPayload::write, WhitelistS2CPayload::new);
+
+        private WhitelistS2CPayload(PacketByteBuf buf) {
+            this(readStringList(buf), readStringList(buf));
+        }
+
+        private void write(PacketByteBuf buf) {
+            writeStringList(buf, this.whitelist);
+            writeStringList(buf, this.blacklist);
+        }
+
+        @Override
+        public Id<WhitelistS2CPayload> getId() { return ID; }
+    }
+
+    public record PlayerStatusS2CPayload(String playerUuid, boolean isChatOpen) implements CustomPayload {
+        public static final Id<PlayerStatusS2CPayload> ID = CustomPayload.id("creaturechat:packet_s2c_player_status");
+        public static final PacketCodec<PacketByteBuf, PlayerStatusS2CPayload> CODEC =
+                CustomPayload.codecOf(PlayerStatusS2CPayload::write, PlayerStatusS2CPayload::new);
+
+        private PlayerStatusS2CPayload(PacketByteBuf buf) {
+            this(buf.readString(), buf.readBoolean());
+        }
+
+        private void write(PacketByteBuf buf) {
+            buf.writeString(this.playerUuid);
+            buf.writeBoolean(this.isChatOpen);
+        }
+
+        @Override
+        public Id<PlayerStatusS2CPayload> getId() { return ID; }
+    }
+
+    private static List<String> readStringList(PacketByteBuf buf) {
+        int size = buf.readInt();
+        List<String> list = new java.util.ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            list.add(buf.readString());
+        }
+        return list;
+    }
+
+    private static void writeStringList(PacketByteBuf buf, List<String> list) {
+        buf.writeInt(list.size());
+        for (String s : list) {
+            buf.writeString(s);
+        }
+    }
+
+    private static Map<String, PlayerData> readPlayerDataMap(PacketByteBuf buffer) {
+        int size = buffer.readInt();
+        Map<String, PlayerData> map = new java.util.HashMap<>();
+        for (int i = 0; i < size; i++) {
+            String key = buffer.readString();
+            PlayerData data = new PlayerData();
+            data.friendship = buffer.readInt();
+            map.put(key, data);
+        }
+        return map;
+    }
 
 
     public static void register() {
+        // Register payload codecs
+        PayloadTypeRegistry.playC2S().register(GreetingC2SPayload.ID, GreetingC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(ReadNextC2SPayload.ID, ReadNextC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SetStatusC2SPayload.ID, SetStatusC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(OpenChatC2SPayload.ID, OpenChatC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(CloseChatC2SPayload.ID, CloseChatC2SPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(SendChatC2SPayload.ID, SendChatC2SPayload.CODEC);
 
+        PayloadTypeRegistry.playS2C().register(EntityMessageS2CPayload.ID, EntityMessageS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(PlayerMessageS2CPayload.ID, PlayerMessageS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(LoginChunkS2CPayload.ID, LoginChunkS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(WhitelistS2CPayload.ID, WhitelistS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(PlayerStatusS2CPayload.ID, PlayerStatusS2CPayload.CODEC);
 
         // Handle packet for Greeting
-        ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_GREETING, (server, player, handler, buf, responseSender) -> {
-            UUID entityId = UUID.fromString(buf.readString());
-            String userLanguage = buf.readString(32767);
+        ServerPlayNetworking.registerGlobalReceiver(GreetingC2SPayload.ID, (payload, ctx) -> {
+            UUID entityId = UUID.fromString(payload.entityId());
+            String userLanguage = payload.language();
 
-            // Ensure that the task is synced with the server thread
-            server.execute(() -> {
-                MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            ctx.server().execute(() -> {
+                MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(ctx.player().getServerWorld(), entityId);
                 if (entity != null) {
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
                     if (chatData.characterSheet.isEmpty()) {
-                        generate_character(userLanguage, chatData, player, entity);
+                        generate_character(userLanguage, chatData, ctx.player(), entity);
                     }
                 }
             });
         });
 
         // Handle packet for reading lines of message
-        ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_READ_NEXT, (server, player, handler, buf, responseSender) -> {
-            UUID entityId = UUID.fromString(buf.readString());
-            int lineNumber = buf.readInt();
+        ServerPlayNetworking.registerGlobalReceiver(ReadNextC2SPayload.ID, (payload, ctx) -> {
+            UUID entityId = UUID.fromString(payload.entityId());
+            int lineNumber = payload.lineNumber();
 
-            // Ensure that the task is synced with the server thread
-            server.execute(() -> {
-                MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            ctx.server().execute(() -> {
+                MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(ctx.player().getServerWorld(), entityId);
                 if (entity != null) {
-                    // Set talk to player goal (prevent entity from walking off)
-                    TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
+                    TalkPlayerGoal talkGoal = new TalkPlayerGoal(ctx.player(), entity, 3.5F);
                     EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
 
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
@@ -104,16 +335,15 @@ public class ServerPackets {
         });
 
         // Handle packet for setting status of chat bubbles
-        ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_SET_STATUS, (server, player, handler, buf, responseSender) -> {
-            UUID entityId = UUID.fromString(buf.readString());
-            String status_name = buf.readString(32767);
+        ServerPlayNetworking.registerGlobalReceiver(SetStatusC2SPayload.ID, (payload, ctx) -> {
+            UUID entityId = UUID.fromString(payload.entityId());
+            String status_name = payload.status();
 
-            // Ensure that the task is synced with the server thread
-            server.execute(() -> {
-                MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            ctx.server().execute(() -> {
+                MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(ctx.player().getServerWorld(), entityId);
                 if (entity != null) {
                     // Set talk to player goal (prevent entity from walking off)
-                    TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
+                    TalkPlayerGoal talkGoal = new TalkPlayerGoal(ctx.player(), entity, 3.5F);
                     EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
 
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
@@ -124,48 +354,44 @@ public class ServerPackets {
         });
 
         // Handle packet for Open Chat
-        ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_OPEN_CHAT, (server, player, handler, buf, responseSender) -> {
-            UUID entityId = UUID.fromString(buf.readString());
+        ServerPlayNetworking.registerGlobalReceiver(OpenChatC2SPayload.ID, (payload, ctx) -> {
+            UUID entityId = UUID.fromString(payload.entityId());
             // AAA when you right click and open chat 
-            // Ensure that the task is synced with the server thread
-            server.execute(() -> {
-                MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            ctx.server().execute(() -> {
+                MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(ctx.player().getServerWorld(), entityId);
                 if (entity != null) {
-                    // Set talk to player goal (prevent entity from walking off)
-                    TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 7F);
+                    TalkPlayerGoal talkGoal = new TalkPlayerGoal(ctx.player(), entity, 7F);
                     EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
                 }
 
                 // Sync player UI status to all clients
-                BroadcastPlayerStatus(player, true);
+                BroadcastPlayerStatus(ctx.player(), true);
             });
         });
 
         // Handle packet for Close Chat
-        ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_CLOSE_CHAT, (server, player, handler, buf, responseSender) -> {
-
-            server.execute(() -> {
+        ServerPlayNetworking.registerGlobalReceiver(CloseChatC2SPayload.ID, (payload, ctx) -> {
+            ctx.server().execute(() -> {
                 // Sync player UI status to all clients
-                BroadcastPlayerStatus(player, false);
+                BroadcastPlayerStatus(ctx.player(), false);
             });
         });
 
         // Handle packet for new chat message
-        ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_SEND_CHAT, (server, player, handler, buf, responseSender) -> {
-            UUID entityId = UUID.fromString(buf.readString());
-            String message = buf.readString(32767);
-            String userLanguage = buf.readString(32767);
+        ServerPlayNetworking.registerGlobalReceiver(SendChatC2SPayload.ID, (payload, ctx) -> {
+            UUID entityId = UUID.fromString(payload.entityId());
+            String message = payload.message();
+            String userLanguage = payload.language();
 
-            // Ensure that the task is synced with the server thread
-            server.execute(() -> {
-                MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            ctx.server().execute(() -> {
+                MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(ctx.player().getServerWorld(), entityId);
                 if (entity != null) {
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
                     if (chatData.characterSheet.isEmpty()) {
-                        generate_character(userLanguage, chatData, player, entity);
+                        generate_character(userLanguage, chatData, ctx.player(), entity);
                     } else {
                         // AAA server side generate llm response on entity
-                        generate_chat(userLanguage, chatData, player, entity, message, false);
+                        generate_chat(userLanguage, chatData, ctx.player(), entity, message, false);
                     }
                 }
             });
@@ -196,15 +422,8 @@ public class ServerPackets {
                 int start = i * chunkSize;
                 int end = Math.min(compressedData.length, start + chunkSize);
 
-                PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-                buffer.writeInt(i); // Packet sequence number
-                buffer.writeInt(totalPackets); // Total number of packets
-
-                // Write chunk as byte array
                 byte[] chunk = Arrays.copyOfRange(compressedData, start, end);
-                buffer.writeByteArray(chunk);
-
-                ServerPlayNetworking.send(player, PACKET_S2C_LOGIN, buffer);
+                ServerPlayNetworking.send(player, new LoginChunkS2CPayload(i, totalPackets, chunk));
             }
         });
 
@@ -241,30 +460,18 @@ public class ServerPackets {
 
     public static void send_whitelist_blacklist(ServerPlayerEntity player) {
         ConfigurationHandler.Config config = new ConfigurationHandler(ServerPackets.serverInstance).loadConfig();
-        PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
 
-        // Write the whitelist data to the buffer
         List<String> whitelist = config.getWhitelist();
-        buffer.writeInt(whitelist.size());
-        for (String entry : whitelist) {
-            buffer.writeString(entry);
-        }
-
-        // Write the blacklist data to the buffer
         List<String> blacklist = config.getBlacklist();
-        buffer.writeInt(blacklist.size());
-        for (String entry : blacklist) {
-            buffer.writeString(entry);
-        }
+
+        WhitelistS2CPayload payload = new WhitelistS2CPayload(whitelist, blacklist);
 
         if (player != null) {
-            // Send packet to specific player
             LOGGER.info("Sending whitelist / blacklist packet to player: " + player.getName().getString());
-            ServerPlayNetworking.send(player, PACKET_S2C_WHITELIST, buffer);
+            ServerPlayNetworking.send(player, payload);
         } else {
-            // Iterate over all players and send the packet
             for (ServerPlayerEntity serverPlayer : serverInstance.getPlayerManager().getPlayerList()) {
-                ServerPlayNetworking.send(serverPlayer, PACKET_S2C_WHITELIST, buffer);
+                ServerPlayNetworking.send(serverPlayer, payload);
             }
         }
     }
@@ -348,16 +555,14 @@ public class ServerPackets {
 
             // Iterate over all players and send the packet
             for (ServerPlayerEntity player : serverInstance.getPlayerManager().getPlayerList()) {
-                PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-                buffer.writeString(chatData.entityId);
-                buffer.writeString(chatData.currentMessage);
-                buffer.writeInt(chatData.currentLineNumber);
-                buffer.writeString(chatData.status.toString());
-                buffer.writeString(chatData.sender.toString());
-                writePlayerDataMap(buffer, chatData.players);
-
-                // Send message to player
-                ServerPlayNetworking.send(player, PACKET_S2C_ENTITY_MESSAGE, buffer);
+                EntityMessageS2CPayload payload = new EntityMessageS2CPayload(
+                        chatData.entityId,
+                        chatData.currentMessage,
+                        chatData.currentLineNumber,
+                        chatData.status.toString(),
+                        chatData.sender.toString(),
+                        chatData.players);
+                ServerPlayNetworking.send(player, payload);
             }
             break;
         }
@@ -369,33 +574,24 @@ public class ServerPackets {
         LOGGER.info("Broadcasting player message: senderUUID={}, message={}", sender.getUuidAsString(),
                 chatData.currentMessage);
 
-        // Create the buffer for the packet
-        PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+        PlayerMessageS2CPayload payload = new PlayerMessageS2CPayload(
+                sender.getUuidAsString(),
+                sender.getDisplayName().getString(),
+                chatData.currentMessage,
+                fromMinecraftChat);
 
-        // Write the sender's UUID and the chat message to the buffer
-        buffer.writeString(sender.getUuidAsString());
-        buffer.writeString(sender.getDisplayName().getString());
-        buffer.writeString(chatData.currentMessage);
-        buffer.writeBoolean(fromMinecraftChat);
-
-        // Iterate over all connected players and send the packet
         for (ServerPlayerEntity serverPlayer : serverInstance.getPlayerManager().getPlayerList()) {
-            ServerPlayNetworking.send(serverPlayer, PACKET_S2C_PLAYER_MESSAGE, buffer);
+            ServerPlayNetworking.send(serverPlayer, payload);
         }
     }
 
     // Send new message to all connected players
     public static void BroadcastPlayerStatus(PlayerEntity player, boolean isChatOpen) {
-        PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+        PlayerStatusS2CPayload payload = new PlayerStatusS2CPayload(player.getUuidAsString(), isChatOpen);
 
-        // Write the entity's chat updated data
-        buffer.writeString(player.getUuidAsString());
-        buffer.writeBoolean(isChatOpen);
-
-        // Iterate over all players and send the packet
         for (ServerPlayerEntity serverPlayer : serverInstance.getPlayerManager().getPlayerList()) {
             LOGGER.debug("Server broadcast " + player.getName().getString() + " player status to client: " + serverPlayer.getName().getString() + " | isChatOpen: " + isChatOpen);
-            ServerPlayNetworking.send(serverPlayer, PACKET_S2C_PLAYER_STATUS, buffer);
+            ServerPlayNetworking.send(serverPlayer, payload);
         }
     }
 
