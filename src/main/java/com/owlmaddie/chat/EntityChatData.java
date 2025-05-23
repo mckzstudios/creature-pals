@@ -330,7 +330,7 @@ public class EntityChatData {
         // Get messages for player
 
         ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false,
-                "Reminder: Respond with a empty message only when \\\"\\\" you detect repetitive content in conversations.")
+                "Reminder: Respond with a empty message only when \\\"\\\" you detect a lot of repetitive content in conversations (multiple byes, etc.).")
                 .thenAccept(ent_msg -> {
                     try {
                         if (ent_msg != null) {

@@ -182,8 +182,8 @@ public class ChatGPTRequest {
                 Collections.reverse(messages);
 
                 if (wrapMsg != null && !wrapMsg.isBlank() && messages.size() > 0) {
-                    messages.get(messages.size() - 1).content = String.format("|%s|\nUser message: %s", wrapMsg,
-                            messages.get(messages.size() - 1).content);
+                    messages.get(messages.size() - 1).content = String.format("User message: '%s' |%s|",
+                            messages.get(messages.size() - 1).content, wrapMsg);
                 }
                 LOGGER.info("---- CONVERSATION HISTORY SENT TO LLM -----");
                 for (ChatGPTRequestMessage msg : messages) {
