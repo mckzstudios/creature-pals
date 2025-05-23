@@ -98,4 +98,16 @@ public class Player2APIService {
             System.err.printf("Heartbeat Fail: %s",e.getMessage());
         }
     }
+
+    /**
+     * Send a chat completion request to the local LLM.
+     *
+     * @param requestBody JSON request body following the OpenAI chat completion
+     *                    schema.
+     * @return Map of JSON keys from the response.
+     * @throws Exception if the HTTP request fails.
+     */
+    public static Map<String, JsonElement> sendChatCompletion(JsonObject requestBody) throws Exception {
+        return sendRequest("/v1/chat/completions", true, requestBody);
+    }
 }
