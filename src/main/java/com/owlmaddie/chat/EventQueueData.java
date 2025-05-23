@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.chat.MessageData.MessageDataType;
 import com.owlmaddie.goals.EntityBehaviorManager;
 import com.owlmaddie.goals.GoalPriority;
@@ -17,6 +18,7 @@ import com.owlmaddie.utils.ServerEntityFinder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 
 public class EventQueueData {
     String entityId;
@@ -57,7 +59,8 @@ public class EventQueueData {
     public void add(MessageData toAdd) {
         queue.addLast(toAdd);
         if (needToGenCharacter()) {
-            // if we are calling add, then no need to send greeting.
+            // if we are calling add, then no need to send greeting because conversation has
+            // started already
             addOnlyCharacterToQueue(toAdd.userLanguage, toAdd.player);
         } else if (queue.size() > 3) {
             // discard if queue size is too much
@@ -76,6 +79,10 @@ public class EventQueueData {
         }
         MessageDataType firstType = queue.getFirst().type;
         return firstType == MessageDataType.GreetingAndCharacter || firstType == MessageDataType.Character;
+    }
+
+    public void addGreeting(String userLanguage, ServerPlayerEntity player){
+        addCharacterAndMaybeGreeting(userLanguage,player,MessageDataType.GreetingAndCharacter);
     }
 
     private void addCharacterAndMaybeGreeting(String userLanguage, ServerPlayerEntity player,
@@ -142,21 +149,97 @@ public class EventQueueData {
         TalkPlayerGoal talkGoal = new TalkPlayerGoal(lastMessageData.player, (MobEntity) entity, 3.5F);
         EntityBehaviorManager.addGoal((MobEntity) entity, talkGoal, GoalPriority.TALK_PLAYER);
 
+        // Need to send character msg/greeting
         if (queueContainsCharacterGen()) {
-            
+            MessageData greetingMsg = queue.poll();
+            chatData.generateCharacterMessage(greetingMsg, (name) -> {
+                // on characterName
+                setCharacterName(name);
+                LOGGER.info(
+                        String.format("EventQueueData/injectOnServerTick(entity %s) generated character with name (%s)",
+                                entityId, characterName));
+                // if generated character without greeting, then should poll if possible so that
+                // it talks
+                if (!queue.isEmpty()) {
+                    messagePoll(chatData);
+                } else {
+                    donePolling();
+                }
+            }, (errMsg) -> {
+                onError(errMsg);
+                LOGGER.info(String.format(
+                        "EventQueueData/injectOnServerTick(entity %s) ERROR GENERATING MESSAGE: errMsg: (%s)",
+                        entityId, errMsg));
+                donePolling();
+            }, (greetMsg) -> {
+                onGreetingGenerated(greetMsg);
+                donePolling();
+            });
+            return; // dont continue to generate other msg
+        } else {
+            messagePoll(chatData);
         }
     }
 
+    public void messagePoll(EntityChatData chatData) {
+        while (!queue.isEmpty()) {
+            // add all messages to chatData
+            MessageData cur = queue.poll();
+            chatData.addMessage(cur.userMessage, ChatDataManager.ChatSender.USER, cur.player, "system-chat");
+        }
+        LOGGER.info(
+                String.format("EventQueueData/injectOnServerTick(entity %s) done polling, generating msg", entityId));
+        chatData.generateEntityResponse(lastMessageData.userLanguage, lastMessageData.player, (responseMsg) -> {
+            LOGGER.info(String.format("EventQueueData/injectOnServerTick(entity %s) generated message (%s)",
+                    entityId, responseMsg));
+            onMessageGenerated(responseMsg);
+            donePolling();
+        }, (errMsg) -> {
+            onError(errMsg);
+            donePolling();
+        });
+    }
+
+    public void startPolling(EntityChatData chatData) {
+        EventQueueManager.llmProcessing = true;
+        chatData.setStatus(ChatStatus.PENDING);
+    }
+
+    public void donePolling() {
+        lastTimePolled = System.nanoTime();
+        EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
+        chatData.setStatus(ChatStatus.DISPLAY);
+        EventQueueManager.llmProcessing = false;
+    }
+
     // SIDE EFFECTS
+
     public void onMessageGenerated(String message) {
+        if (message.isBlank()) {
+            EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
+            LOGGER.info("Assistant generated empty message in order not to respond");
+            chatData.setStatus(ChatStatus.DISPLAY);
+            return;
+        }
         // TODO: BROADCAST ENTITY MESSAGE HERE:
+        lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString() + " the " +entity.getType().getName().getString() + "> " + message), false);
     }
 
     public void onGreetingGenerated(String message) {
+        if (message.isBlank()) {
+            message = "Hello!"; // Do not want to send "" for greeting message as this starts the conversation
+        }
         onMessageGenerated(message);
     }
 
     public void onError(String errorMessage) {
+        EventQueueManager.onError();
         ServerPackets.SendClickableError(lastMessageData.player, errorMessage, "https://elefant.gg/discord");
+    }
+
+    public void setCharacterName(String name) {
+        if (!name.equals("N/A")) {
+            this.characterName = name;
+        }
     }
 }

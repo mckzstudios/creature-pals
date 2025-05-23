@@ -40,6 +40,8 @@ public class EventQueueManager {
 
     // }
 
+    
+
     public static EventQueueData getOrCreateQueueData(String entityId, Entity entity) {
         return queueData.computeIfAbsent(entityId, k -> {
             LOGGER.info(String.format("EventQueueManager/creating new queue data for ent id (%s)", entityId));
@@ -51,6 +53,12 @@ public class EventQueueManager {
             boolean is_auto_message) {
         EventQueueData q = getOrCreateQueueData(entity.getUuidAsString(), entity);
         q.addUserMessage(userLanguage, player, userMessage, is_auto_message);
+    }
+
+
+    public static void addGreeting(Entity entity, String userLangauge, ServerPlayerEntity player){
+        EventQueueData q = getOrCreateQueueData(entity.getUuidAsString(), entity);
+        q.addGreeting(userLangauge,player);
     }
 
     public static void injectOnServerTick() {

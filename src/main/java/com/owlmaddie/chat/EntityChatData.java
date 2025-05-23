@@ -80,7 +80,6 @@ public class EntityChatData {
         this.auto_generated = 0;
         this.previousMessages = new ArrayList<>();
         this.born = System.currentTimeMillis();
-        ;
 
         // Old, unused migrated properties
         this.legacyPlayerId = null;
@@ -330,7 +329,7 @@ public class EntityChatData {
 
         // Get messages for player
 
-        ChatGPTRequest.fetchMessageFromChatGPT(config, systemPrompt, contextData, previousMessages, false,
+        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false,
                 "Reminder: Respond with a empty message only when \\\"\\\" you detect repetitive or filler content in conversations.")
                 .thenAccept(ent_msg -> {
                     try {
@@ -341,6 +340,7 @@ public class EntityChatData {
 
                             String cleanedMessage = result.getCleanedMessage();
                             if (cleanedMessage.isEmpty()) {
+                                // do not call addMessage
                                 onGenerate.accept("");
                                 return;
                             }
@@ -415,26 +415,19 @@ public class EntityChatData {
         // Add message to history
         previousMessages.add(new ChatMessage(truncatedMessage, sender, playerName));
 
-        // Log regular message addition
-        LOGGER.info("Message added: status={}, sender={}, message={}, player={}, entity={}",
-                status.toString(), sender.toString(), truncatedMessage, playerName, entityId);
-
         // Update current message and reset line number of displayed text
         this.currentMessage = truncatedMessage;
         this.currentLineNumber = 0;
         this.sender = sender;
 
-        // Determine status for message
         if (sender == ChatDataManager.ChatSender.ASSISTANT) {
             status = ChatDataManager.ChatStatus.DISPLAY;
-        } else {
-            status = ChatDataManager.ChatStatus.PENDING;
-        }
+        } 
 
-        if (sender == ChatDataManager.ChatSender.USER && systemPrompt.equals("system-chat") && auto_generated == 0) {
-            // Broadcast new player message (when not auto-generated)
-            ServerPackets.BroadcastPlayerMessage(this, player, false);
-        }
+        // if (sender == ChatDataManager.ChatSender.USER && systemPrompt.equals("system-chat") && auto_generated == 0) {
+        //     // Broadcast new player message (when not auto-generated)
+        //     ServerPackets.BroadcastPlayerMessage(this, player, false);
+        // }
 
         // Broadcast new entity message status (i.e. pending)
         ServerPackets.BroadcastEntityMessage(this);
