@@ -6,6 +6,7 @@ import net.minecraft.server.world.ServerWorld;
 
 import java.util.UUID;
 
+
 /**
  * The {@code ServerEntityFinder} class is used to find a specific LivingEntity by UUID, since
  * there is not a built-in method for this.
@@ -19,4 +20,6 @@ public class ServerEntityFinder {
         }
         return null; // Entity not found
     }
+
+    
 }

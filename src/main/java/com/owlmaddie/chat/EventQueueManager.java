@@ -27,7 +27,6 @@ public class EventQueueManager {
         return System.nanoTime() <= lastErrorTime + waitTimeAfterError;
     }
 
-
     // TODO : look for all stuff like this:
     // public static void updateUUID(String oldUUID, String newUUID) {
     // EventQueueData data = queueData.remove(oldUUID);
@@ -39,8 +38,6 @@ public class EventQueueManager {
     // queueData.put(newUUID, data);
 
     // }
-
-    
 
     public static EventQueueData getOrCreateQueueData(String entityId, Entity entity) {
         return queueData.computeIfAbsent(entityId, k -> {
@@ -55,10 +52,18 @@ public class EventQueueManager {
         q.addUserMessage(userLanguage, player, userMessage, is_auto_message);
     }
 
-
-    public static void addGreeting(Entity entity, String userLangauge, ServerPlayerEntity player){
+    public static void addGreeting(Entity entity, String userLangauge, ServerPlayerEntity player) {
         EventQueueData q = getOrCreateQueueData(entity.getUuidAsString(), entity);
-        q.addGreeting(userLangauge,player);
+        q.addGreeting(userLangauge, player);
+    }
+
+    public static void addUserMessageToAllClose(String userLanguage, ServerPlayerEntity player, String userMessage,
+            boolean is_auto_message) {
+        for (EventQueueData curQueue : queueData.values()) {
+
+            Entity entity = curQueue.entity;
+            addUserMessage(curQueue.entity, userLanguage, player, userMessage, is_auto_message);
+        }
     }
 
     public static void injectOnServerTick() {

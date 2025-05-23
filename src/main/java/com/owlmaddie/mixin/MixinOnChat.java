@@ -1,6 +1,7 @@
 package com.owlmaddie.mixin;
 
 import com.owlmaddie.chat.EntityChatData;
+import com.owlmaddie.chat.EventQueueManager;
 import com.owlmaddie.commands.ConfigurationHandler;
 import com.owlmaddie.network.ServerPackets;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
@@ -40,5 +41,7 @@ public abstract class MixinOnChat {
             // Optionally, cancel the event to prevent the default behavior
             // ci.cancel();
         }
+        String userLanguage = player.getClientOptions().language();
+        EventQueueManager.addUserMessageToAllClose(userLanguage, player, chatMessage, false);
     }
 }
