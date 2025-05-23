@@ -15,6 +15,7 @@ import com.owlmaddie.goals.TalkPlayerGoal;
 import com.owlmaddie.network.ServerPackets;
 import com.owlmaddie.utils.ServerEntityFinder;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -234,6 +235,9 @@ public class EventQueueData {
             return;
         }
         // TODO: BROADCAST ENTITY MESSAGE HERE:
+        if(entity.getCustomName() == null){
+            return;
+        }
         lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString()
                 + " the " + entity.getType().getName().getString() + "> " + message), false);
     }
