@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.owlmaddie.network.ServerPackets.*;
+import static com.owlmaddie.particle.Particles.*;
 
 /**
  * The {@code EntityChatData} class represents a conversation between an
@@ -48,7 +49,7 @@ import static com.owlmaddie.network.ServerPackets.*;
  */
 public class EntityChatData {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
-    public String entityId;
+    public UUID entityId;
     public String currentMessage;
     public int currentLineNumber;
     public ChatDataManager.ChatStatus status;
@@ -68,9 +69,9 @@ public class EntityChatData {
     public Integer legacyFriendship;
 
     // The map to store data for each player interacting with this entity
-    public Map<String, PlayerData> players;
+    public Map<UUID, PlayerData> players;
 
-    public EntityChatData(String entityId) {
+    public EntityChatData(UUID entityId) {
         this.entityId = entityId;
         this.players = new HashMap<>();
         this.currentMessage = "";
@@ -101,7 +102,7 @@ public class EntityChatData {
     // Migrate old data into the new structure
     private void migrateData() {
         // Ensure the blank player data entry exists
-        PlayerData blankPlayerData = this.players.computeIfAbsent("", k -> new PlayerData());
+        PlayerData blankPlayerData = this.players.computeIfAbsent(UUID.fromString(""), k -> new PlayerData());
 
         // Update the previousMessages arraylist and add timestamps if missing
         if (this.previousMessages != null) {
@@ -125,7 +126,7 @@ public class EntityChatData {
     }
 
     // Get the player data (or fallback to the blank player)
-    public PlayerData getPlayerData(String playerName) {
+    public PlayerData getPlayerData(UUID playerName) {
         if (this.players == null) {
             return new PlayerData();
         }
@@ -148,7 +149,7 @@ public class EntityChatData {
     }
 
     // Generate light version of chat data (no previous messages)
-    public EntityChatDataLight toLightVersion(String playerName) {
+    public EntityChatDataLight toLightVersion(UUID playerName) {
         return new EntityChatDataLight(this, playerName);
     }
 
@@ -194,7 +195,7 @@ public class EntityChatData {
 
         // Get active player effects
         String effectsString = player.getActiveStatusEffects().entrySet().stream()
-                .map(entry -> entry.getKey().getTranslationKey() + " x" + (entry.getValue().getAmplifier() + 1))
+                .map(entry -> entry.getKey().getKey().get() + " x" + (entry.getValue().getAmplifier() + 1))
                 .collect(Collectors.joining(", "));
         contextData.put("player_active_effects", effectsString);
 
@@ -229,8 +230,8 @@ public class EntityChatData {
         contextData.put("world_moon_phase", moonPhaseDescription);
 
         // Get Entity details
-        MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
-                UUID.fromString(entityId));
+
+        MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
         if (entity.getCustomName() == null) {
             contextData.put("entity_name", "");
         } else {
@@ -253,7 +254,7 @@ public class EntityChatData {
             contextData.put("entity_maturity", "Adult");
         }
 
-        PlayerData playerData = this.getPlayerData(player.getDisplayName().getString());
+        PlayerData playerData = this.getPlayerData(player.getUuid());
         if (playerData != null) {
             contextData.put("entity_friendship", String.valueOf(playerData.friendship));
         } else {
@@ -330,7 +331,6 @@ public class EntityChatData {
         Map<String, String> contextData = getPlayerContext(player, userLanguage, config);
 
         // Get messages for player
-
         ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false,
                 "Reminder: Respond with a empty message only when \\\"\\\" you detect a lot of repetitive content in conversations (multiple byes, etc.).")
                 .thenAccept(ent_msg -> {
@@ -338,7 +338,8 @@ public class EntityChatData {
                         if (ent_msg != null) {
                             ParsedMessage result = MessageParser.parseMessage(ent_msg.replace("\n", " "));
                             PlayerData playerData = this.getPlayerData(player.getDisplayName().getString());
-                            BehaviorApplier.apply(result.getBehaviors(), player, entityId, playerData);
+                            BehaviorApplier.apply(result.getBehaviors(), player, 
+                                                  Id, playerData);
 
                             String cleanedMessage = result.getCleanedMessage();
                             if (cleanedMessage.isEmpty()) {
@@ -358,6 +359,7 @@ public class EntityChatData {
                         } else {
                             // No valid LLM response
                             throw new RuntimeException(ChatGPTRequest.lastErrorMessage);
+
                         }
                     } catch (Exception e) {
                         // Log the exception for debugging
