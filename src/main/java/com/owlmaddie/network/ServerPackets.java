@@ -3,6 +3,8 @@ package com.owlmaddie.network;
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.ChatDataSaverScheduler;
 import com.owlmaddie.chat.EntityChatData;
+import com.owlmaddie.chat.EventQueueManager;
+import com.owlmaddie.chat.MessageData;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.commands.ConfigurationHandler;
 import com.owlmaddie.goals.EntityBehaviorManager;
@@ -101,7 +103,8 @@ public class ServerPackets {
                 if (entity != null) {
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
                     if (chatData.characterSheet.isEmpty()) {
-                        generate_character(userLanguage, chatData, player, entity);
+                        LOGGER.info("C2S_GREETING");
+                       EventQueueManager.addGreeting(entity, userLanguage, player); 
                     }
                 }
             });
@@ -167,7 +170,6 @@ public class ServerPackets {
 
         // Handle packet for Close Chat
         ServerPlayNetworking.registerGlobalReceiver(PACKET_C2S_CLOSE_CHAT, (server, player, handler, buf, responseSender) -> {
-
             server.execute(() -> {
                 // Sync player UI status to all clients
                 BroadcastPlayerStatus(player, false);
@@ -179,18 +181,18 @@ public class ServerPackets {
             UUID entityId = UUID.fromString(buf.readString());
             String message = buf.readString(32767);
             String userLanguage = buf.readString(32767);
+            Entity ent = ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            String RHS = ent != null && ent.getCustomName() != null && !ent.getCustomName().equals("N/A")? "> (to " +ent.getCustomName().getString() + ") " : "> ";
 
+// lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entityCustomName
+                // + " the " + entityType + "> " + message), false);
+            server.getPlayerManager().broadcast(Text.of("<" + player.getName().getString() + RHS + message), false);
             // Ensure that the task is synced with the server thread
             server.execute(() -> {
                 MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
                 if (entity != null) {
                     EntityChatData chatData = ChatDataManager.getServerInstance().getOrCreateChatData(entity.getUuidAsString());
-                    if (chatData.characterSheet.isEmpty()) {
-                        generate_character(userLanguage, chatData, player, entity);
-                    } else {
-                        // AAA server side generate llm response on entity
-                        generate_chat(userLanguage, chatData, player, entity, message, false);
-                    }
+                    EventQueueManager.addUserMessage(entity, userLanguage, player, message, false );
                 }
             });
         });
@@ -237,7 +239,6 @@ public class ServerPackets {
             if (world_name.equals("overworld")) {
                 serverInstance = server;
                 ChatDataManager.getServerInstance().loadChatData(server);
-
                 // Start the auto-save task to save every X minutes
                 scheduler = new ChatDataSaverScheduler();
                 scheduler.startAutoSaveTask(server, 15, TimeUnit.MINUTES);
@@ -293,45 +294,6 @@ public class ServerPackets {
         }
     }
 
-    public static void generate_character(String userLanguage, EntityChatData chatData, ServerPlayerEntity player, MobEntity entity) {
-        // Set talk to player goal (prevent entity from walking off)
-        TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
-        EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
-
-        // Grab random adjective
-        String randomAdjective = Randomizer.getRandomMessage(Randomizer.RandomType.ADJECTIVE);
-        String randomClass = Randomizer.getRandomMessage(Randomizer.RandomType.CLASS);
-        String randomAlignment = Randomizer.getRandomMessage(Randomizer.RandomType.ALIGNMENT);
-        String randomSpeakingStyle = Randomizer.getRandomMessage(Randomizer.RandomType.SPEAKING_STYLE);
-
-        // Generate random name parameters
-        String randomLetter = Randomizer.RandomLetter();
-        int randomSyllables = Randomizer.RandomNumber(5) + 1;
-
-        // Build the message
-        StringBuilder userMessageBuilder = new StringBuilder();
-        userMessageBuilder.append("Please generate a ").append(randomAdjective).append(" character. ");
-        userMessageBuilder.append("This character is a ").append(randomClass).append(" class, who is ").append(randomAlignment).append(". ");
-        if (entity.getCustomName() != null && !entity.getCustomName().getString().equals("N/A")) {
-            userMessageBuilder.append("Their name is '").append(entity.getCustomName().getString()).append("'. ");
-        } else {
-            userMessageBuilder.append("Their name starts with the letter '").append(randomLetter)
-                    .append("' and is ").append(randomSyllables).append(" syllables long. ");
-        }
-        userMessageBuilder.append("They speak in '").append(userLanguage).append("' with a ").append(randomSpeakingStyle).append(" style.");
-
-        // Generate new character
-        chatData.generateCharacter(userLanguage, player, userMessageBuilder.toString(), false);
-    }
-
-    public static void generate_chat(String userLanguage, EntityChatData chatData, ServerPlayerEntity player, MobEntity entity, String message, boolean is_auto_message) {
-        // Set talk to player goal (prevent entity from walking off)
-        TalkPlayerGoal talkGoal = new TalkPlayerGoal(player, entity, 3.5F);
-        EntityBehaviorManager.addGoal(entity, talkGoal, GoalPriority.TALK_PLAYER);
-
-        // Add new message
-        chatData.generateMessage(userLanguage, player, message, is_auto_message);
-    }
 
     // Writing a Map<String, PlayerData> to the buffer
     public static void writePlayerDataMap(PacketByteBuf buffer, Map<String, PlayerData> map) {

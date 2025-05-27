@@ -89,7 +89,7 @@ public class ClientPackets {
         buf.writeString(entity.getUuidAsString());
         buf.writeString(message);
         buf.writeString(userLanguageName);
-
+        
         // Send C2S packet
         ClientPlayNetworking.send(ServerPackets.PACKET_C2S_SEND_CHAT, buf);
     }
@@ -171,12 +171,12 @@ public class ClientPackets {
                 PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName, ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);
 
                 // if the msg was from minecraft's chat, and this is the client for that player, then send to nearest entity with bubble open.
-                if(fromMinecraftChat && senderPlayerName.equals(client.player.getName().getString())){
-                    Optional<Entity> entityToSendChatTo = ClientEntityFinder.getClosestEntityToPlayerWithChatBubbleOpen();
-                    entityToSendChatTo.ifPresent(entity -> {
-                        ClientPackets.sendChat(entity, message);
-                    });
-                }
+                // if(fromMinecraftChat && senderPlayerName.equals(client.player.getName().getString())){
+                //     Optional<Entity> entityToSendChatTo = ClientEntityFinder.getClosestEntityToPlayerWithChatBubbleOpen();
+                //     entityToSendChatTo.ifPresent(entity -> {
+                //         ClientPackets.sendChat(entity, message);
+                //     });
+                // }
             });
         });
 
