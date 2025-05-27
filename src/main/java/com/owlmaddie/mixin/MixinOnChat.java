@@ -41,7 +41,9 @@ public abstract class MixinOnChat {
             // Optionally, cancel the event to prevent the default behavior
             // ci.cancel();
         }
-        String userLanguage = player.getClientOptions().language();
+        // String userLanguage = player.getClientOptions().language();
+        String userLanguage = "english"; // TODO: Changeme
+        // String userLanguage = player.get
         EventQueueManager.addUserMessageToAllClose(userLanguage, player, chatMessage, false);
     }
 }
