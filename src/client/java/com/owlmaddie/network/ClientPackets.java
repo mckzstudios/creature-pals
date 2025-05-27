@@ -89,7 +89,7 @@ public class ClientPackets {
         buf.writeString(entity.getUuidAsString());
         buf.writeString(message);
         buf.writeString(userLanguageName);
-
+        
         // Send C2S packet
         ClientPlayNetworking.send(ServerPackets.PACKET_C2S_SEND_CHAT, buf);
     }

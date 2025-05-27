@@ -181,7 +181,12 @@ public class ServerPackets {
             UUID entityId = UUID.fromString(buf.readString());
             String message = buf.readString(32767);
             String userLanguage = buf.readString(32767);
+            Entity ent = ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
+            String RHS = ent != null && ent.getCustomName() != null && !ent.getCustomName().equals("N/A")? "> (to " +ent.getCustomName().getString() + ") " : "> ";
 
+// lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entityCustomName
+                // + " the " + entityType + "> " + message), false);
+            server.getPlayerManager().broadcast(Text.of("<" + player.getName().getString() + RHS + message), false);
             // Ensure that the task is synced with the server thread
             server.execute(() -> {
                 MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
