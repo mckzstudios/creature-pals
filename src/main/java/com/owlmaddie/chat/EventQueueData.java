@@ -30,6 +30,9 @@ public class EventQueueData {
     MessageData lastMessageData;
     String characterName;
 
+
+
+
     public EventQueueData(String entityId, Entity entity) {
         this.entityId = entityId;
         this.entity = entity;
@@ -129,9 +132,9 @@ public class EventQueueData {
 
     // MAKE SURE THAT EXTERNAL ENTITY IS DIFFERENT FROM CURRENT WHEN CALLING THIS:
     public void addExternalEntityMessage(String userLanguage, ServerPlayerEntity player, String entityMessage,
-            String entityCustomName, String entityName) {
+            String entityCustomName, String entityTypeName) {
         EventQueueManager.blacklistedEntityId = null;
-        String newMessage = String.format("[%s the %s] said %s", entityCustomName, entityName, entityMessage);
+        String newMessage = String.format("[%s the %s] said %s", entityCustomName, entityTypeName, entityMessage);
         MessageData toAdd = new MessageData(userLanguage, player, newMessage, false, MessageDataType.Normal);
         add(toAdd);
         lastMessageData = toAdd;
@@ -235,11 +238,20 @@ public class EventQueueData {
             return;
         }
         // TODO: BROADCAST ENTITY MESSAGE HERE:
-        if(entity.getCustomName() == null){
+        if (entity.getCustomName() == null) {
             return;
         }
-        lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entity.getCustomName().getString()
-                + " the " + entity.getType().getName().getString() + "> " + message), false);
+        String entityCustomName = entity.getCustomName().getString();
+
+        String entityType = entity.getType().getName().getString();
+        lastMessageData.player.server.getPlayerManager().broadcast(Text.of("<" + entityCustomName
+                + " the " + entityType + "> " + message), false);
+
+        // add msg to all nearby entities: (broken, maybe fix later)
+        // EventQueueManager.addEntityMessageToAllClose(entity,
+        // lastMessageData.userLanguage, lastMessageData.player, message,
+        // entityCustomName, entityType);
+
     }
 
     public void onGreetingGenerated(String message) {

@@ -2,6 +2,7 @@ package com.owlmaddie.chat;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.chat.MessageData.MessageDataType;
 import com.owlmaddie.commands.ConfigurationHandler;
 import com.owlmaddie.controls.SpeedControls;
@@ -94,6 +95,7 @@ public class EntityChatData {
         if (this.legacyPlayerId != null && !this.legacyPlayerId.isEmpty()) {
             this.migrateData();
         }
+        EventQueueManager.addEntityIdToCreate(entityId);
     }
 
     // Migrate old data into the new structure
@@ -423,11 +425,12 @@ public class EntityChatData {
 
         if (sender == ChatDataManager.ChatSender.ASSISTANT) {
             status = ChatDataManager.ChatStatus.DISPLAY;
-        } 
+        }
 
-        // if (sender == ChatDataManager.ChatSender.USER && systemPrompt.equals("system-chat") && auto_generated == 0) {
-        //     // Broadcast new player message (when not auto-generated)
-        //     ServerPackets.BroadcastPlayerMessage(this, player, false);
+        // if (sender == ChatDataManager.ChatSender.USER &&
+        // systemPrompt.equals("system-chat") && auto_generated == 0) {
+        // // Broadcast new player message (when not auto-generated)
+        // ServerPackets.BroadcastPlayerMessage(this, player, false);
         // }
 
         // Broadcast new entity message status (i.e. pending)

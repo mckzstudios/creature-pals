@@ -1,11 +1,19 @@
 package com.owlmaddie.chat;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.owlmaddie.utils.ServerEntityFinder;
+
 import net.minecraft.entity.Entity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class EventQueueManager {
@@ -13,11 +21,14 @@ public class EventQueueManager {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
     public static final long maxDistance = 12;
     public static boolean llmProcessing = false;
-
     public static String blacklistedEntityId = null;
 
     private static long lastErrorTime = 0L;
     private static long waitTimeAfterError = 10_000_000_000L; // wait 3 sec after err before doing any polling
+
+    public static long entityToEntityCutoffDistance = 12;
+    public static long playerToEntityCutoffDistance = 12;
+    private static Set<String> entityIdsToAdd = new HashSet<>();
 
     public static void onError() {
         lastErrorTime = System.nanoTime();
@@ -38,6 +49,10 @@ public class EventQueueManager {
     // queueData.put(newUUID, data);
 
     // }
+
+    public static void addEntityIdToCreate(String entityId){
+       entityIdsToAdd.add(entityId); 
+    }
 
     public static EventQueueData getOrCreateQueueData(String entityId, Entity entity) {
         return queueData.computeIfAbsent(entityId, k -> {
@@ -60,13 +75,38 @@ public class EventQueueManager {
     public static void addUserMessageToAllClose(String userLanguage, ServerPlayerEntity player, String userMessage,
             boolean is_auto_message) {
         for (EventQueueData curQueue : queueData.values()) {
-
             Entity entity = curQueue.entity;
+            if (entity.distanceTo(player) > playerToEntityCutoffDistance) {
+                continue;
+            }
             addUserMessage(curQueue.entity, userLanguage, player, userMessage, is_auto_message);
         }
     }
 
-    public static void injectOnServerTick() {
+    public static void addEntityMessageToAllClose(Entity fromEntity, String userLanguage, ServerPlayerEntity player,
+            String entityMessage,
+            String entityCustomName, String entityTypeName) {
+        for (EventQueueData curQueue : queueData.values()) {
+            if (curQueue.entityId.equals(fromEntity.getUuidAsString())) {
+                continue;
+            }
+            Entity entity = curQueue.entity;
+            if (entity.distanceTo(fromEntity) > entityToEntityCutoffDistance) {
+                continue;
+            }
+            curQueue.addExternalEntityMessage(userLanguage, player, entityMessage, entityCustomName, entityTypeName);
+        }
+    }
+
+    public static void injectOnServerTick(MinecraftServer server) {
+        for(String entityId : entityIdsToAdd){ // for chatdata on load we only have entity Id
+            for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList()){
+                Entity cur = ServerEntityFinder.getEntityByUUID(player.getServerWorld(), UUID.fromString(entityId));
+                if(cur != null){
+                    getOrCreateQueueData(entityId, cur);
+                }
+            }
+        }
         if (llmProcessing)
             return;
 

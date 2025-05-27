@@ -234,7 +234,6 @@ public class ServerPackets {
             if (world_name.equals("overworld")) {
                 serverInstance = server;
                 ChatDataManager.getServerInstance().loadChatData(server);
-
                 // Start the auto-save task to save every X minutes
                 scheduler = new ChatDataSaverScheduler();
                 scheduler.startAutoSaveTask(server, 15, TimeUnit.MINUTES);

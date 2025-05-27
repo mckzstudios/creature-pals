@@ -31,7 +31,7 @@ public class ModInit implements ModInitializer {
 
 		// ontick handling for server
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			EventQueueManager.injectOnServerTick();
+			EventQueueManager.injectOnServerTick(server);
 		});
 
 		LOGGER.info("CreatureChat MOD Initialized!");

@@ -161,6 +161,10 @@ public class ChatGPTRequest {
                     ChatMessage chatMessage = messageHistory.get(i);
                     String senderName = chatMessage.sender.toString().toLowerCase(Locale.ENGLISH);
                     String messageText = replacePlaceholders(chatMessage.message, contextData);
+                    if(messageText.equals("...")){ // replace ... with "" so that it makes more sense to LLM
+                        messageText = "";
+                    }
+                    messageText.replace("said ...", "said ");
                     int messageTokens = estimateTokenSize(senderName + ": " + messageText);
 
                     if (usedTokens + messageTokens > remainingContextTokens) {
