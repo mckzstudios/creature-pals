@@ -207,7 +207,7 @@ public class ClickHandler {
     public static void drawCorners(World world, Vec3d[] corners) {
         // Iterate over the corners to place glow particles
         for (Vec3d corner : corners) {
-            world.addParticle(
+            world.addParticleClient(
                     ParticleTypes.GLOW,  // Using glow particles
                     corner.x, corner.y, corner.z,  // Coordinates of the particle
                     0.0, 0.0, 0.0  // No motion
@@ -221,7 +221,7 @@ public class ClickHandler {
         int count = 100;  // Draw the ray for 100 steps
         for (int i = 0; i < count; i++) {
             point = point.add(direction.multiply(step));
-            world.addParticle(ParticleTypes.END_ROD, point.x, point.y, point.z, 0, 0, 0);
+            world.addParticleClient(ParticleTypes.END_ROD, point.x, point.y, point.z, 0, 0, 0);
         }
     }
 

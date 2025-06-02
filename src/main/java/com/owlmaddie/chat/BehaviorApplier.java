@@ -41,7 +41,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.village.VillageGossipType;
+import net.minecraft.village.VillagerGossipType;
 import net.minecraft.world.GameRules;
 
 public class BehaviorApplier {
@@ -193,24 +193,24 @@ public class BehaviorApplier {
                     VillagerEntityAccessor villager = (VillagerEntityAccessor) entity;
                     switch (new_friendship) {
                         case 3:
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MAJOR_POSITIVE, 20);
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MINOR_POSITIVE, 25);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MAJOR_POSITIVE, 20);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MINOR_POSITIVE, 25);
                             break;
                         case 2:
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MINOR_POSITIVE, 25);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MINOR_POSITIVE, 25);
                             break;
                         case 1:
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MINOR_POSITIVE, 10);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MINOR_POSITIVE, 10);
                             break;
                         case -1:
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MINOR_NEGATIVE, 10);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MINOR_NEGATIVE, 10);
                             break;
                         case -2:
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MINOR_NEGATIVE, 25);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MINOR_NEGATIVE, 25);
                             break;
                         case -3:
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MAJOR_NEGATIVE, 20);
-                            villager.getGossip().startGossip(player.getUuid(), VillageGossipType.MINOR_NEGATIVE, 25);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MAJOR_NEGATIVE, 20);
+                            villager.getGossip().startGossip(player.getUuid(), VillagerGossipType.MINOR_NEGATIVE, 25);
                             break;
                     }
                 }
@@ -219,10 +219,10 @@ public class BehaviorApplier {
                 if (entity instanceof TameableEntity && playerData.friendship != new_friendship) {
                     TameableEntity tamableEntity = (TameableEntity) entity;
                     if (new_friendship == 3 && !tamableEntity.isTamed()) {
-                        tamableEntity.setOwner(player);
+                        tamableEntity.setTamedBy(player);
                     } else if (new_friendship == -3 && tamableEntity.isTamed()) {
                         tamableEntity.setTamed(false,true);
-                        tamableEntity.setOwnerUuid(null);
+                        tamableEntity.setOwner(null);
                     }
                 }
 

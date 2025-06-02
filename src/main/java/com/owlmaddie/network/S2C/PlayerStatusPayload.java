@@ -13,7 +13,7 @@ public record PlayerStatusPayload(UUID senderId, boolean isChatOpen) implements 
     public static final CustomPayload.Id<PlayerStatusPayload> ID = new CustomPayload.Id<>(NetworkingConstants.PACKET_S2C_PLAYER_STATUS);
     public static final PacketCodec<RegistryByteBuf, PlayerStatusPayload> CODEC = PacketCodec.tuple(
             Uuids.PACKET_CODEC, PlayerStatusPayload::senderId,
-            PacketCodecs.BOOL, PlayerStatusPayload::isChatOpen,
+            PacketCodecs.BOOLEAN, PlayerStatusPayload::isChatOpen,
             PlayerStatusPayload::new
     );
 

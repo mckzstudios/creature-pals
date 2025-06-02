@@ -48,12 +48,12 @@ public class LeadParticle extends SpriteBillboardParticle {
     }
 
     @Override
-    public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+    public void render(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
         // Get the current position of the particle relative to the camera
         Vec3d cameraPos = camera.getPos();
-        float particleX = (float)(MathHelper.lerp((double)tickDelta, this.prevPosX, this.x) - cameraPos.getX());
-        float particleY = (float)(MathHelper.lerp((double)tickDelta, this.prevPosY, this.y) - cameraPos.getY());
-        float particleZ = (float)(MathHelper.lerp((double)tickDelta, this.prevPosZ, this.z) - cameraPos.getZ());
+        float particleX = (float)(MathHelper.lerp((double)tickDelta, this.lastX, this.x) - cameraPos.getX());
+        float particleY = (float)(MathHelper.lerp((double)tickDelta, this.lastY, this.y) - cameraPos.getY());
+        float particleZ = (float)(MathHelper.lerp((double)tickDelta, this.lastZ, this.z) - cameraPos.getZ());
 
         // Define the four vertices of the particle (keeping it flat on the XY plane)
         Vector3f[] vertices = new Vector3f[]{

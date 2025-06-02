@@ -16,7 +16,7 @@ public record PlayerMessagePayload(UUID senderId, String senderName, String mess
             Uuids.PACKET_CODEC, PlayerMessagePayload::senderId,
             PacketCodecs.STRING, PlayerMessagePayload::senderName,
             PacketCodecs.STRING, PlayerMessagePayload::message,
-            PacketCodecs.BOOL, PlayerMessagePayload::fromMinecraftChat,
+            PacketCodecs.BOOLEAN, PlayerMessagePayload::fromMinecraftChat,
             PlayerMessagePayload::new
     );
 

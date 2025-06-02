@@ -78,7 +78,7 @@ public class CreatureChatCommands {
     private static List<Identifier> getLivingEntityIds() {
         List<Identifier> livingEntityIds = Registries.ENTITY_TYPE.getIds().stream()
                 .filter(id -> {
-                    EntityType<?> entityType = Registries.ENTITY_TYPE.get(id);
+                    EntityType<?> entityType = Registries.ENTITY_TYPE.getEntry(id);
                     return entityType != null && (entityType.getSpawnGroup() != SpawnGroup.MISC  || isIncludedEntity(entityType));
                 })
                 .collect(Collectors.toList());

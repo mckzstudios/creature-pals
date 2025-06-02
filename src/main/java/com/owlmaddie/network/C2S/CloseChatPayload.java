@@ -10,7 +10,7 @@ import net.minecraft.util.Uuids;
 
 public record CloseChatPayload(boolean nothing) implements CustomPayload {
     public static final CustomPayload.Id<CloseChatPayload> ID = new CustomPayload.Id<>(NetworkingConstants.PACKET_C2S_CLOSE_CHAT);
-    public static final PacketCodec<RegistryByteBuf, CloseChatPayload> CODEC = PacketCodec.tuple(PacketCodecs.BOOL, CloseChatPayload::nothing, CloseChatPayload::new);
+    public static final PacketCodec<RegistryByteBuf, CloseChatPayload> CODEC = PacketCodec.tuple(PacketCodecs.BOOLEAN, CloseChatPayload::nothing, CloseChatPayload::new);
 
     @Override
     public CustomPayload.Id<? extends CustomPayload> getId() {

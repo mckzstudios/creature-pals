@@ -467,9 +467,9 @@ public class BubbleRenderer {
             // Interpolate entity position (smooth motion)
             double paddingAboveEntity = 0.4D;
             Vec3d interpolatedEntityPos = new Vec3d(
-                    MathHelper.lerp(partialTicks, entity.prevX, entity.getPos().x),
-                    MathHelper.lerp(partialTicks, entity.prevY, entity.getPos().y),
-                    MathHelper.lerp(partialTicks, entity.prevZ, entity.getPos().z));
+                    MathHelper.lerp(partialTicks, entity.lastX, entity.getPos().x),
+                    MathHelper.lerp(partialTicks, entity.lastY, entity.getPos().y),
+                    MathHelper.lerp(partialTicks, entity.lastZ, entity.getPos().z));
 
             // Determine the chat bubble position
             Vec3d bubblePosition;
@@ -480,9 +480,9 @@ public class BubbleRenderer {
 
                 // Interpolate the head position
                 Vec3d headPos = new Vec3d(
-                        MathHelper.lerp(partialTicks, head.prevX, head.getX()),
-                        MathHelper.lerp(partialTicks, head.prevY, head.getY()),
-                        MathHelper.lerp(partialTicks, head.prevZ, head.getZ()));
+                        MathHelper.lerp(partialTicks, head.lastX, head.getX()),
+                        MathHelper.lerp(partialTicks, head.lastY, head.getY()),
+                        MathHelper.lerp(partialTicks, head.lastZ, head.getZ()));
 
                 // Just use the head's interpolated position directly
                 bubblePosition = headPos.add(0, entityHeight + paddingAboveEntity, 0);
