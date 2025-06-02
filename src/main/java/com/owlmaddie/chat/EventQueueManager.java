@@ -24,14 +24,14 @@ public class EventQueueManager {
     public static final long maxDistance = 12;
     public static boolean llmProcessing = false;
     public static boolean addingEntityQueues = false;
-    public static String blacklistedEntityId = null;
+    public static UUID blacklistedEntityId = null;
 
     private static long lastErrorTime = 0L;
     private static long waitTimeAfterError = 10_000_000_000L; // wait 3 sec after err before doing any polling
 
     public static long entityToEntityCutoffDistance = 12;
     public static long playerToEntityCutoffDistance = 12;
-    private static Set<String> entityIdsToAdd = new HashSet<>();
+    private static Set<UUID> entityIdsToAdd = new HashSet<>();
 
     public static void onError() {
         lastErrorTime = System.nanoTime();
@@ -53,20 +53,21 @@ public class EventQueueManager {
 
     // }
 
-    public static void addEntityIdToCreate(String entityId) {
+    public static void addEntityIdToCreate(UUID entityId) {
         entityIdsToAdd.add(entityId);
     }
 
-    public static EventQueueData getOrCreateQueueData(String entityId, Entity entity) {
-        return queueData.computeIfAbsent(entityId, k -> {
+    public static EventQueueData getOrCreateQueueData(UUID entityId, Entity entity) {
+        return queueData.computeIfAbsent(entityId.toString(), k -> {
             LOGGER.info(String.format("EventQueueManager/creating new queue data for ent id (%s)", entityId));
             return new EventQueueData(entityId, entity);
         });
     }
 
     public static void addUserMessage(Entity entity, String userLanguage, ServerPlayerEntity player, String userMessage,
+
             boolean is_auto_message, boolean shouldImmediatlyPoll) {
-        EventQueueData q = getOrCreateQueueData(entity.getUuidAsString(), entity);
+        EventQueueData q = getOrCreateQueueData(entity.getUuid(), entity);
         q.addUserMessage(userLanguage, player, userMessage, is_auto_message);
         if (shouldImmediatlyPoll) {
             q.bubblePoll();
@@ -75,7 +76,7 @@ public class EventQueueManager {
 
     public static void addGreeting(Entity entity, String userLangauge, ServerPlayerEntity player) {
         LOGGER.info("EventQueueManager: callign addGreeting");
-        EventQueueData q = getOrCreateQueueData(entity.getUuidAsString(), entity);
+        EventQueueData q = getOrCreateQueueData(entity.getUuid(), entity);
         q.addGreeting(userLangauge, player);
         q.immediateGreeting();
     }
@@ -94,7 +95,8 @@ public class EventQueueManager {
         ServerEntityFinder.getCloseEntities(player.getServerWorld(), player, 6).stream().filter(
                 (e) -> !e.isPlayer()).forEach((e) -> {
                     // adding user message.
-                    getOrCreateQueueData(e.getUuidAsString(), e);
+
+                    getOrCreateQueueData(e.getUuid(), e);
                     addUserMessage(e, userLanguage, player, userMessage, is_auto_message, false);
                 });
         addingEntityQueues = false;
@@ -116,13 +118,13 @@ public class EventQueueManager {
     }
 
     public static void injectOnServerTick(MinecraftServer server) {
-        Iterator<String> iterator = entityIdsToAdd.iterator();
+        Iterator<UUID> iterator = entityIdsToAdd.iterator();
         while (iterator.hasNext()) {
-            String entityId = iterator.next();
+            UUID entityId = iterator.next();
             boolean added = false;
 
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                Entity cur = ServerEntityFinder.getEntityByUUID(player.getServerWorld(), UUID.fromString(entityId));
+                Entity cur = ServerEntityFinder.getEntityByUUID(player.getServerWorld(), entityId);
                 if (cur != null) {
                     getOrCreateQueueData(entityId, cur);
                     added = true;

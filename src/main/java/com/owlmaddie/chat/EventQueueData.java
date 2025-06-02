@@ -22,7 +22,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 public class EventQueueData {
-    String entityId;
+    UUID entityId;
     Entity entity;
     Deque<MessageData> queue;
     long lastTimePolled;
@@ -31,7 +31,7 @@ public class EventQueueData {
     String characterName;
     boolean immediatePolling = false;
 
-    public EventQueueData(String entityId, Entity entity) {
+    public EventQueueData(UUID entityId, Entity entity) {
         this.entityId = entityId;
         this.entity = entity;
         queue = new ArrayDeque<>();
@@ -151,7 +151,7 @@ public class EventQueueData {
     public boolean shouldDelete() {
         if (lastMessageData != null && lastMessageData.player != null) {
             return ServerEntityFinder.getEntityByUUID(lastMessageData.player.getServerWorld(),
-                    UUID.fromString(entityId)) == null || !entity.isAlive();
+                    entityId) == null || !entity.isAlive();
         }
         return false;
     }
