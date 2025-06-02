@@ -23,8 +23,6 @@ public class LookControls {
     public static void lookAtPosition(Vec3d targetPos, MobEntity entity) {
         if (entity instanceof SlimeEntity) {
             handleSlimeLook((SlimeEntity) entity, targetPos);
-        } else if (entity instanceof SquidEntity) {
-            handleSquidLook((SquidEntity) entity, targetPos);
         } else if (entity instanceof GhastEntity) {
             handleFlyingEntity(entity, targetPos, 10F);
         } else if (entity instanceof FlyingEntity || entity instanceof VexEntity) {
@@ -38,22 +36,6 @@ public class LookControls {
     private static void handleSlimeLook(SlimeEntity slime, Vec3d targetPos) {
         float yawChange = calculateYawChange(slime, targetPos);
         ((SlimeEntity.SlimeMoveControl) slime.getMoveControl()).look(slime.getYaw() + yawChange, false);
-    }
-
-    private static void handleSquidLook(SquidEntity squid, Vec3d targetPos) {
-        Vec3d toPlayer = calculateNormalizedDirection(squid, targetPos);
-        float initialSwimStrength = 0.15f;
-        squid.setSwimmingVector(
-                (float) toPlayer.x * initialSwimStrength,
-                (float) toPlayer.y * initialSwimStrength,
-                (float) toPlayer.z * initialSwimStrength
-        );
-
-        double distanceToPlayer = squid.getPos().distanceTo(targetPos);
-        if (distanceToPlayer < 3.5F) {
-            // Stop motion when close
-            squid.setVelocity(0,0,0);
-        }
     }
 
     // Ghast, Phantom, etc...
