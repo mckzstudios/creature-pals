@@ -14,8 +14,8 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
@@ -53,11 +53,11 @@ public class ClickHandler {
     }
 
     // Handle use-item right-click (non-empty hand)
-    private static TypedActionResult<ItemStack> handleUseItemAction(PlayerEntity player, World world, Hand hand) {
+    private static ActionResult handleUseItemAction(PlayerEntity player, World world, Hand hand) {
         if (shouldCancelAction(world)) {
-            return TypedActionResult.fail(player.getStackInHand(hand));
+            return ActionResult.FAIL;
         }
-        return TypedActionResult.pass(player.getStackInHand(hand));
+        return ActionResult.SUCCESS.withNewHandStack(player.getStackInHand(hand));
     }
 
     private static boolean shouldCancelAction(World world) {

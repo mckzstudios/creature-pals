@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -76,11 +77,8 @@ public class CreatureChatCommands {
     }
 
     private static List<Identifier> getLivingEntityIds() {
-        List<Identifier> livingEntityIds = Registries.ENTITY_TYPE.getIds().stream()
-                .filter(id -> {
-                    EntityType<?> entityType = Registries.ENTITY_TYPE.getEntry(id);
-                    return entityType != null && (entityType.getSpawnGroup() != SpawnGroup.MISC  || isIncludedEntity(entityType));
-                })
+        List<Identifier> livingEntityIds = Registries.ENTITY_TYPE.stream()
+                .filter(entityType -> entityType != null && (entityType.getSpawnGroup() != SpawnGroup.MISC  || isIncludedEntity(entityType))).map(Registries.ENTITY_TYPE::getId)
                 .collect(Collectors.toList());
         return livingEntityIds;
     }

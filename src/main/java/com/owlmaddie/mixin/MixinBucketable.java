@@ -6,6 +6,9 @@ import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtType;
+import net.minecraft.util.Uuids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,7 +35,7 @@ public interface MixinBucketable {
         LOGGER.info("Saving original UUID of bucketed entity: " + originalUUID);
 
         // Add the original UUID to the ItemStack NBT as "CCUUID"
-        stack.set(Components.ChatUUID, originalUUID.toString());
+        stack.set(Components.ChatUUID, originalUUID);
     }
 
     // New method to read CCUUID from NBT
@@ -41,8 +45,7 @@ public interface MixinBucketable {
         UUID newUUID = entity.getUuid();
         if (nbt.contains("CCUUID")) {
 
-            String originalUUIDString = nbt.getString("CCUUID");
-            UUID originalUUID = UUID.fromString(originalUUIDString);
+            UUID originalUUID = nbt.get("CCUUID", Uuids.CODEC).orElseThrow();
             LOGGER.info("Duplicating bucketed chat data for original UUID (" + originalUUID + ") to cloned entity: (" + newUUID + ")");
             ChatDataManager.getServerInstance().updateUUID(originalUUID, newUUID);
         }

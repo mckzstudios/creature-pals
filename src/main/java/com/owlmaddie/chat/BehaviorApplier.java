@@ -25,6 +25,7 @@ import com.owlmaddie.goals.LeadPlayerGoal;
 import com.owlmaddie.goals.ProtectPlayerGoal;
 import com.owlmaddie.goals.TalkPlayerGoal;
 import com.owlmaddie.message.Behavior;
+import com.owlmaddie.mixin.TameableAccessor;
 import com.owlmaddie.particle.ParticleEmitter;
 import com.owlmaddie.utils.ServerEntityFinder;
 import com.owlmaddie.utils.VillagerEntityAccessor;
@@ -165,7 +166,7 @@ public class BehaviorApplier {
                                 SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.PLAYERS, 0.5F, 1.0F);
 
                         // Check if the game rule for mob loot is enabled
-                        boolean doMobLoot = entity.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
+                        boolean doMobLoot = ((ServerWorld) entity.getWorld()).getGameRules().getBoolean(GameRules.DO_MOB_LOOT);
 
                         // If this is the first time the dragon is 'befriended', adjust the XP
                         int baseXP = 500;
@@ -222,7 +223,7 @@ public class BehaviorApplier {
                         tamableEntity.setTamedBy(player);
                     } else if (new_friendship == -3 && tamableEntity.isTamed()) {
                         tamableEntity.setTamed(false,true);
-                        tamableEntity.setOwner(null);
+                        tamableEntity.getDataTracker().set(TameableAccessor.OWNER_UUID, null);
                     }
                 }
 

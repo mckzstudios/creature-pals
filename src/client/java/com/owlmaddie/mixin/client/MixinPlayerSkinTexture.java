@@ -2,42 +2,46 @@ package com.owlmaddie.mixin.client;
 
 import com.owlmaddie.skin.IPlayerSkinTexture;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.PlayerSkinTexture;
+import net.minecraft.client.texture.PlayerSkinTextureDownloader;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.util.Identifier;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The {@code MixinPlayerSkinTexture} class injects code into the PlayerSkinTexture class, to make a copy
  * of the player's skin native image, so we can later use it for pixel checking (black/white key) for
  * loading custom player icons in the unused UV coordinates of the player skin image.
  */
-@Mixin(PlayerSkinTexture.class)
-public abstract class MixinPlayerSkinTexture extends ResourceTexture implements IPlayerSkinTexture {
-
+@Mixin(PlayerSkinTextureDownloader.class)
+public abstract class MixinPlayerSkinTexture implements IPlayerSkinTexture {
     @Unique
-    private NativeImage cachedSkinImage;
+    @Mutable
+    private static NativeImage cachedSkinImage;
 
-    public MixinPlayerSkinTexture(Identifier location) {
-        super(location);
-    }
 
-    @Inject(method = "onTextureLoaded", at = @At("HEAD"))
-    private void captureNativeImage(NativeImage image, CallbackInfo ci) {
+    @Inject(method = "registerTexture", at = @At("HEAD"))
+    private static void captureNativeImage(Identifier textureId, NativeImage image, CallbackInfoReturnable<CompletableFuture<Identifier>> cir) {
         // Instead of image.copy(), we do a manual clone
-        this.cachedSkinImage = cloneNativeImage(image);
+        cachedSkinImage = cloneNativeImage(image);
     }
 
     @Override
     public NativeImage getLoadedImage() {
-        return this.cachedSkinImage;
+        return cachedSkinImage;
     }
 
     // Example of the utility method in the same class (or in a separate helper):
+    @Unique
     private static NativeImage cloneNativeImage(NativeImage source) {
         NativeImage copy = new NativeImage(
                 source.getFormat(),

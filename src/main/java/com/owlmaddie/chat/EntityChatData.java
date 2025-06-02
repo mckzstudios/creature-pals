@@ -185,10 +185,10 @@ public class EntityChatData {
         contextData.put("player_is_on_ground", player.isOnGround() ? "yes" : "no");
         contextData.put("player_language", userLanguage);
 
-        ItemStack feetArmor = player.getInventory().armor.get(0);
-        ItemStack legsArmor = player.getInventory().armor.get(1);
-        ItemStack chestArmor = player.getInventory().armor.get(2);
-        ItemStack headArmor = player.getInventory().armor.get(3);
+        ItemStack feetArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.FEET.getEntitySlotId()).getEntitySlotId());
+        ItemStack legsArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.LEGS.getEntitySlotId()).getEntitySlotId());
+        ItemStack chestArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.CHEST.getEntitySlotId()).getEntitySlotId());;
+        ItemStack headArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.HEAD.getEntitySlotId()).getEntitySlotId());
         contextData.put("player_armor_head", headArmor.getItem().toString());
         contextData.put("player_armor_chest", chestArmor.getItem().toString());
         contextData.put("player_armor_legs", legsArmor.getItem().toString());

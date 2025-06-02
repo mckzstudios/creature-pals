@@ -4,6 +4,8 @@ import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.util.Uuids;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,7 +32,7 @@ public abstract class MixinEntityChatData {
         // If the entity actually has chat data (for example, if its character sheet is non-empty), add CCUUID.
         if (!chatData.characterSheet.isEmpty()) {
             // Note: cir.getReturnValue() returns the NBT compound the method is about to return.
-            cir.getReturnValue().putUuid("CCUUID", currentUUID);
+            cir.getReturnValue().put("CCUUID", Uuids.CODEC, currentUUID);
         }
     }
 
@@ -42,7 +44,7 @@ public abstract class MixinEntityChatData {
     private void readChatData(NbtCompound nbt, CallbackInfo ci) {
         UUID currentUUID = this.getUuid();
         if (nbt.contains("CCUUID")) {
-            UUID originalUUID = nbt.getUuid("CCUUID");
+            UUID originalUUID = nbt.get("CCUUID", Uuids.CODEC).orElseThrow();
             if (!originalUUID.equals(currentUUID)) {
                 ChatDataManager.getServerInstance().updateUUID(originalUUID, currentUUID);
             }

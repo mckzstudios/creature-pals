@@ -25,8 +25,8 @@ public class SkinUtils {
                 // Check we have the full 64x64
                 if (width == 64 && height == 64) {
                     // Example: black & white pixel at (31,48) and (32,48)
-                    int color31_48 = image.getColor(31, 49);
-                    int color32_48 = image.getColor(32, 49);
+                    int color31_48 = image.getColorArgb(31, 49);
+                    int color32_48 = image.getColorArgb(32, 49);
                     return (color31_48 == 0xFF000000 && color32_48 == 0xFFFFFFFF);
                 }
             }

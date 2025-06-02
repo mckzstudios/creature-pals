@@ -55,7 +55,7 @@ public class ClientInit implements ClientModInitializer {
 
         // Register an event callback to render text bubbles
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
-            BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getTickDelta(false));
+            BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getDynamicDeltaTicks());
         });
 
         // Register an event callback for when the client disconnects from a server or

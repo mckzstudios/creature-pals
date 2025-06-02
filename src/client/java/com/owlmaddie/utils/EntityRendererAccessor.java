@@ -10,7 +10,7 @@ import net.minecraft.entity.Entity;
  * This is needed to get the texture path associated with the entity (for rendering our icons).
  */
 public class EntityRendererAccessor {
-    public static EntityRenderer<?> getEntityRenderer(Entity entity) {
+    public static EntityRenderer<?, ?> getEntityRenderer(Entity entity) {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         EntityRenderDispatcher renderDispatcher = minecraftClient.getEntityRenderDispatcher();
         return renderDispatcher.getRenderer(entity);

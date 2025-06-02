@@ -36,6 +36,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -364,7 +365,7 @@ public class ServerPackets {
         MutableText text = Text.literal(message)
                 .formatted(Formatting.RED)
                 .styled(style -> style
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url))
+                        .withClickEvent(new ClickEvent.OpenUrl(URI.create(url)))
                         .withUnderline(true));
         player.sendMessage(text, false);
     }

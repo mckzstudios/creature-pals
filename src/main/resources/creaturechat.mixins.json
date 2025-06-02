@@ -3,16 +3,17 @@
 	"package": "com.owlmaddie.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"MixinMobEntity",
-		"MixinMobEntityAccessor",
-		"MixinLivingEntity",
 		"MixinBucketable",
 		"MixinEntityChatData",
-		"MixinWitherEntity",
+		"MixinLivingEntity",
+		"MixinMobEntity",
+		"MixinMobEntityAccessor",
+		"MixinOnChat",
 		"MixinVexEntity",
-		"MixinWanderingTrader",
 		"MixinVillagerEntity",
-		"MixinOnChat"
+		"MixinWanderingTrader",
+		"MixinWitherEntity",
+		"TameableAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

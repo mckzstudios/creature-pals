@@ -91,7 +91,7 @@ public class AttackPlayerGoal extends PlayerBaseGoal {
         }
 
         // For passive entities (or hostile in creative mode), apply minimal damage to simulate a 'leap' / 'melee' attack
-        this.targetEntity.clientDamage(this.attackerEntity.getDamageSources().generic(), 1.0F);
+        this.targetEntity.damage(((ServerWorld) this.attackerEntity.getWorld()), this.attackerEntity.getDamageSources().generic(), 1.0F);
 
         // Play damage sound
         this.attackerEntity.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1F, 1F);
