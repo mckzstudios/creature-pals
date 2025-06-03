@@ -13,9 +13,11 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -29,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 public class MixinLivingEntity {
 
+    @Unique
     private EntityChatData getChatData(LivingEntity entity) {
         ChatDataManager chatDataManager = ChatDataManager.getServerInstance();
         return chatDataManager.getOrCreateChatData(entity.getUuid());
@@ -48,7 +51,7 @@ public class MixinLivingEntity {
     }
 
     @Inject(method = "damage", at = @At(value = "RETURN"))
-    private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void onDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()) {
             // If damage method returned false, it means the damage was not applied (possibly due to invulnerability).
             return;

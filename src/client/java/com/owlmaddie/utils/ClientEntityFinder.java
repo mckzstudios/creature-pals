@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -45,10 +46,10 @@ public class ClientEntityFinder {
     /**
      * Gets entity closest to player that has chat bubble open.
      */
-    public static Optional<Entity> getClosestEntityToPlayerWithChatBubbleOpen() {
+    public static Optional<LivingEntity> getClosestEntityToPlayerWithChatBubbleOpen() {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
-        Optional<Entity> closest = BubbleRenderer.getRelevantEntities().stream()
+        Optional<LivingEntity> closest = BubbleRenderer.getRelevantEntities().stream()
                 .filter(entity -> {
                     if (!(entity instanceof MobEntity))
                         return false;

@@ -27,7 +27,7 @@ public class ModInit implements ModInitializer {
 		// Register server commands
 		CreatureChatCommands.register();
 
-		Particles.register();
+		//Particles.register();
 		// Register events
 		ServerPackets.register();
 

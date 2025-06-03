@@ -1,11 +1,16 @@
 package com.owlmaddie.utils;
 
+import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.ResourceTexture;
+import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -21,15 +26,13 @@ public class TextureLoader {
     public TextureLoader() {
     }
 
-    public Identifier GetUI(String name) {
+    public GpuTexture GetUI(String name) {
         String texturePath = "textures/ui/" + name + ".png";
         Identifier textureId = Identifier.of("creaturechat", texturePath);
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(textureId);
 
         if (resource.isPresent()) {
-            // Bind texture, and return Identity
-            MinecraftClient.getInstance().getTextureManager().bindTexture(textureId);
-            return textureId;
+            return loadTexture(textureId);
         } else {
             // Resource not found
             logMissingTextureOnce(texturePath);
@@ -37,20 +40,38 @@ public class TextureLoader {
         }
     }
 
-    public Identifier GetEntity(String texturePath) {
+    private GpuTexture loadTexture(Identifier textureId) {
+        // Bind texture, and return Identity
+        TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
+        try {
+            return textureManager.getTexture(textureId).getGlTexture();
+        } catch (IllegalStateException e) {
+            ResourceTexture texture = new ResourceTexture(textureId);
+            try {
+                texture.loadContents(MinecraftClient.getInstance().getResourceManager());
+            } catch (IOException ee) {
+                throw new RuntimeException(ee);
+            }
+            textureManager.registerTexture(textureId, texture);
+
+            return texture.getGlTexture();
+        }
+
+    }
+    public GpuTexture GetEntity(String texturePath) {
         Identifier textureId = Identifier.of("creaturechat", texturePath);
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(textureId);
 
+        TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
+
         if (resource.isPresent()) {
             // Texture found, bind it and return the Identifier
-            MinecraftClient.getInstance().getTextureManager().bindTexture(textureId);
-            return textureId;
+            return loadTexture(textureId);
         } else {
             // Texture not found, log a message and return the "not_found" texture Identifier
             Identifier notFoundTextureId = Identifier.of("creaturechat", "textures/entity/not_found.png");
-            MinecraftClient.getInstance().getTextureManager().bindTexture(notFoundTextureId);
             logMissingTextureOnce(texturePath);
-            return notFoundTextureId;
+            return loadTexture(notFoundTextureId);
         }
     }
 

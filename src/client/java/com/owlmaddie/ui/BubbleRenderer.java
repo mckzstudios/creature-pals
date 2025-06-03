@@ -1,6 +1,9 @@
 package com.owlmaddie.ui;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
@@ -13,8 +16,12 @@ import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.mob.MobEntity;
@@ -51,18 +58,18 @@ public class BubbleRenderer {
     public static List<String> whitelist = new ArrayList<>();
     public static List<String> blacklist = new ArrayList<>();
     private static int queryEntityDataCount = 0;
-    private static List<Entity> relevantEntities;
+    private static List<LivingEntity> relevantEntities;
 
     public static void drawTextBubbleBackground(String base_name, MatrixStack matrices, float x, float y, float width,
             float height, int friendship) {
         // Set shader & texture
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapProgram);
+        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
 
         // Enable depth test and blending
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
+        GlStateManager._enableBlend();
+        //GlStateManager._defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
 
         // Prepare the tessellator and buffer
         float z = 0.01F;
@@ -87,8 +94,8 @@ public class BubbleRenderer {
         drawTexturePart(matrices, x, y + 40 + height, z, width, 5);
 
         // Disable blending and depth test
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
     }
 
     private static void drawTexturePart(MatrixStack matrices, float x, float y, float z,
@@ -107,23 +114,21 @@ public class BubbleRenderer {
         buffer.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(light).overlay(overlay); // top right
         buffer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top
         // left
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        RenderLayer.getTranslucent().draw(buffer.end());
     }
 
     private static void drawIcon(String ui_icon_name, MatrixStack matrices, float x, float y, float width,
             float height) {
         // Draw button icon
-        Identifier button_texture = textures.GetUI(ui_icon_name);
-
+        GpuTexture button_texture = textures.GetUI(ui_icon_name);
         // Set shader & texture
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapProgram);
         RenderSystem.setShaderTexture(0, button_texture);
 
         // Enable depth test and blending
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
+        GlStateManager._enableBlend();
+        //GlStateManager.defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
 
         // Prepare the tessellator and buffer
         Tessellator tessellator = Tessellator.getInstance();
@@ -142,10 +147,11 @@ public class BubbleRenderer {
                 .overlay(overlay); // top right
         buffer.vertex(matrix4f, x, y, 0.0F).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top left
 
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+
+        RenderLayer.getTranslucent().draw(buffer.end());
         // Disable blending and depth test
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
     }
 
     private static void drawFriendshipStatus(MatrixStack matrices, float x, float y, float width, float height,
@@ -154,17 +160,17 @@ public class BubbleRenderer {
         String ui_icon_name = "friendship" + friendship;
 
         // Set shader
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapProgram);
+        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
 
         // Set texture
-        Identifier button_texture = textures.GetUI(ui_icon_name);
+        GpuTexture button_texture = textures.GetUI(ui_icon_name);
         RenderSystem.setShaderTexture(0, button_texture);
 
         // Enable depth test and blending
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
+        GlStateManager._enableBlend();
+        //GlStateManager._defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
 
         // Prepare the tessellator and buffer
         Tessellator tessellator = Tessellator.getInstance();
@@ -184,33 +190,34 @@ public class BubbleRenderer {
                 .overlay(overlay); // top right
         bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top left
 
+        RenderLayer.getTranslucent().draw(bufferBuilder.end());
+
         // Disable blending and depth test
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
     }
 
-    private static void drawEntityIcon(MatrixStack matrices, Entity entity, float x, float y, float width,
+    private static void drawEntityIcon(MatrixStack matrices, LivingEntity entity, float x, float y, float width,
             float height) {
         // Get entity renderer
-        EntityRenderer renderer = EntityRendererAccessor.getEntityRenderer(entity);
-        String entity_icon_path = renderer.getTexture(entity).getPath();
+        String entity_icon_path = getTextureIdentifier(entity).getPath();
+
 
         // Draw face icon
-        Identifier entity_id = textures.GetEntity(entity_icon_path);
+        GpuTexture entity_id = textures.GetEntity(entity_icon_path);
         if (entity_id == null) {
             return;
         }
 
         // Set shader & texture
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapProgram);
+        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
         RenderSystem.setShaderTexture(0, entity_id);
 
         // Enable depth test and blending
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
+        GlStateManager._enableBlend();
+       // GlStateManager._defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
 
         // Prepare the tessellator and buffer
         Tessellator tessellator = Tessellator.getInstance();
@@ -231,29 +238,49 @@ public class BubbleRenderer {
         bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top left
 
         // Disable blending and depth test
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
+        RenderLayer.getTranslucent().draw(bufferBuilder.end());
+
     }
 
-    private static void drawPlayerIcon(MatrixStack matrices, Entity entity, float x, float y, float width,
+    private static <T extends LivingEntity, S extends LivingEntityRenderState> Identifier getTextureIdentifier(LivingEntity entity) {
+
+        EntityRenderer<? super T, ?> renderer = EntityRendererAccessor.getEntityRenderer(entity);
+        // This is a test method to check if the renderer is working correctly.
+        // It can be used to debug rendering issues or to verify that the renderer
+        // is set up correctly.
+        if (renderer instanceof LivingEntityRenderer) {
+            EntityRenderState state = renderer.createRenderState();
+            if (state instanceof LivingEntityRenderState) {
+                return ((LivingEntityRenderer<? super T, ? super LivingEntityRenderState, ?>) renderer).getTexture(((LivingEntityRenderState) state));
+            }
+            else {
+                LOGGER.warn("Renderer state is not an instance of LivingEntityRenderState for entity: {}", entity.getName().getString());
+                return Identifier.of("creaturechat", "textures/entity/not_found.png");
+            }
+        } else {
+            LOGGER.warn("Renderer is not an instance of LivingEntityRenderer for entity: {}", entity.getName().getString());
+            return Identifier.of("creaturechat", "textures/entity/not_found.png");
+        }
+    }
+    private static void drawPlayerIcon(MatrixStack matrices, LivingEntity entity, float x, float y, float width,
             float height) {
         // Get player skin texture
-        EntityRenderer renderer = EntityRendererAccessor.getEntityRenderer(entity);
-        Identifier playerTexture = renderer.getTexture(entity);
+        Identifier playerTexture = getTextureIdentifier(entity);
 
         // Check for black and white pixels (using the Mixin-based check)
         boolean customSkinFound = PlayerCustomTexture.hasCustomIcon(playerTexture);
 
         // Set shader & texture
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapProgram);
-        RenderSystem.setShaderTexture(0, playerTexture);
+        //GlStateManager.setShader(GameRenderer::getPositionColorTexLightmapProgram);
+
+        RenderSystem.setShaderTexture(0, MinecraftClient.getInstance().getTextureManager().getTexture(playerTexture).getGlTexture());
 
         // Enable depth test and blending
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
+        GlStateManager._enableBlend();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
 
         // Prepare the tessellator and buffer
         Tessellator tessellator = Tessellator.getInstance();
@@ -341,11 +368,11 @@ public class BubbleRenderer {
                     .color(255, 255, 255, 255).texture(hatU1, hatV1).light(light).overlay(overlay);
         }
 
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        RenderLayer.getTranslucent().draw(bufferBuilder.end());
 
         // Disable blending and depth test
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
     }
 
     private static void drawMessageText(Matrix4f matrix, List<String> lines, int starting_line, int ending_line,
@@ -428,35 +455,34 @@ public class BubbleRenderer {
         // the list every 3rd call to this render function
         if (queryEntityDataCount % 3 == 0 || relevantEntities == null) {
             // Get all entities
-            List<Entity> nearbyEntities = world.getOtherEntities(null, area);
-
             // Filter to include only MobEntity & PlayerEntity but exclude any camera 1st
             // person entity and any entities with passengers
-            relevantEntities = nearbyEntities.stream()
-                    .filter(entity -> (entity instanceof MobEntity || entity instanceof PlayerEntity))
-                    .filter(entity -> !entity.hasPassengers())
-                    .filter(entity -> !(entity.equals(cameraEntity) && !camera.isThirdPerson()))
-                    .filter(entity -> !(entity.equals(cameraEntity) && entity.isSpectator()))
-                    .filter(entity -> {
-                        // Always include PlayerEntity
-                        if (entity instanceof PlayerEntity) {
-                            return true;
-                        }
-                        Identifier entityId = Registries.ENTITY_TYPE.getId(entity.getType());
-                        String entityIdString = entityId.toString();
-                        // Check blacklist first
-                        if (blacklist.contains(entityIdString)) {
-                            return false;
-                        }
-                        // If whitelist is not empty, only include entities in the whitelist
-                        return whitelist.isEmpty() || whitelist.contains(entityIdString);
-                    })
-                    .collect(Collectors.toList());
+            relevantEntities = world.<LivingEntity>getEntitiesByClass(LivingEntity.class, area, (entity) -> {
+                if ((entity instanceof MobEntity || entity instanceof PlayerEntity) &&
+                        !entity.hasPassengers() &&
+                        !(entity.equals(cameraEntity) && !camera.isThirdPerson()) &&
+                        !(entity.equals(cameraEntity) && entity.isSpectator())) {
+                    if (entity instanceof PlayerEntity) {
+                        return true;
+                    }
+                    Identifier entityId = Registries.ENTITY_TYPE.getId(entity.getType());
+                    String entityIdString = entityId.toString();
+                    // Check blacklist first
+                    if (blacklist.contains(entityIdString)) {
+                        return false;
+                    }
+                    // If whitelist is not empty, only include entities in the whitelist
+                    return whitelist.isEmpty() || whitelist.contains(entityIdString);
+                } else {
+                    return false;
+                }
+            });
+
 
             queryEntityDataCount = 0;
         }
 
-        for (Entity entity : relevantEntities) {
+        for (LivingEntity entity : relevantEntities) {
 
             // Push a new matrix onto the stack.
             matrices.push();
@@ -710,7 +736,7 @@ public class BubbleRenderer {
         BubbleLocationManager.performCleanup(activeEntityUUIDs);
     }
 
-    public static List<Entity> getRelevantEntities() {
+    public static List<LivingEntity> getRelevantEntities() {
         return relevantEntities;
     }
 }
