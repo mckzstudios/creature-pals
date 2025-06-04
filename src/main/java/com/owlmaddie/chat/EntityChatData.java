@@ -2,46 +2,26 @@ package com.owlmaddie.chat;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.chat.MessageData.MessageDataType;
 import com.owlmaddie.commands.ConfigurationHandler;
-import com.owlmaddie.controls.SpeedControls;
-import com.owlmaddie.goals.*;
-import com.owlmaddie.message.Behavior;
 import com.owlmaddie.message.MessageParser;
 import com.owlmaddie.message.ParsedMessage;
 import com.owlmaddie.network.ServerPackets;
-import com.owlmaddie.particle.ParticleEmitter;
 import com.owlmaddie.utils.Randomizer;
 import com.owlmaddie.utils.ServerEntityFinder;
-import com.owlmaddie.utils.VillagerEntityAccessor;
-import com.owlmaddie.utils.WitherEntityAccessor;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.ExperienceOrbEntity;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.owlmaddie.network.ServerPackets.*;
-import static com.owlmaddie.particle.Particles.*;
 
 /**
  * The {@code EntityChatData} class represents a conversation between an
@@ -185,10 +165,11 @@ public class EntityChatData {
         contextData.put("player_is_on_ground", player.isOnGround() ? "yes" : "no");
         contextData.put("player_language", userLanguage);
 
-        ItemStack feetArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.FEET.getEntitySlotId()).getEntitySlotId());
-        ItemStack legsArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.LEGS.getEntitySlotId()).getEntitySlotId());
-        ItemStack chestArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.CHEST.getEntitySlotId()).getEntitySlotId());;
-        ItemStack headArmor = player.getInventory().getStack(PlayerInventory.EQUIPMENT_SLOTS.get(EquipmentSlot.HEAD.getEntitySlotId()).getEntitySlotId());
+
+        ItemStack feetArmor = player.getInventory().getStack(EquipmentSlot.FEET.getIndex() + 9*4);
+        ItemStack legsArmor = player.getInventory().getStack(EquipmentSlot.LEGS.getIndex() + 9*4);
+        ItemStack chestArmor = player.getInventory().getStack(EquipmentSlot.CHEST.getIndex() + 9*4);;
+        ItemStack headArmor = player.getInventory().getStack(EquipmentSlot.HEAD.getIndex() + 9*4);
         contextData.put("player_armor_head", headArmor.getItem().toString());
         contextData.put("player_armor_chest", chestArmor.getItem().toString());
         contextData.put("player_armor_legs", legsArmor.getItem().toString());

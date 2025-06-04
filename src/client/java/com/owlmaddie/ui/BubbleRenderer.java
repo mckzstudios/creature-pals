@@ -114,7 +114,7 @@ public class BubbleRenderer {
         buffer.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(light).overlay(overlay); // top right
         buffer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top
         // left
-        RenderLayer.getTranslucent().draw(buffer.end());
+        RenderLayer.getSolid().draw(buffer.end());
     }
 
     private static void drawIcon(String ui_icon_name, MatrixStack matrices, float x, float y, float width,
@@ -148,7 +148,7 @@ public class BubbleRenderer {
         buffer.vertex(matrix4f, x, y, 0.0F).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top left
 
 
-        RenderLayer.getTranslucent().draw(buffer.end());
+        RenderLayer.getSolid().draw(buffer.end());
         // Disable blending and depth test
         GlStateManager._disableBlend();
         GlStateManager._disableDepthTest();
@@ -190,7 +190,7 @@ public class BubbleRenderer {
                 .overlay(overlay); // top right
         bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(overlay); // top left
 
-        RenderLayer.getTranslucent().draw(bufferBuilder.end());
+        RenderLayer.getSolid().draw(bufferBuilder.end());
 
         // Disable blending and depth test
         GlStateManager._disableBlend();
@@ -240,7 +240,7 @@ public class BubbleRenderer {
         // Disable blending and depth test
         GlStateManager._disableBlend();
         GlStateManager._disableDepthTest();
-        RenderLayer.getTranslucent().draw(bufferBuilder.end());
+        RenderLayer.getSolid().draw(bufferBuilder.end());
 
     }
 
@@ -368,7 +368,7 @@ public class BubbleRenderer {
                     .color(255, 255, 255, 255).texture(hatU1, hatV1).light(light).overlay(overlay);
         }
 
-        RenderLayer.getTranslucent().draw(bufferBuilder.end());
+        RenderLayer.getSolid().draw(bufferBuilder.end());
 
         // Disable blending and depth test
         GlStateManager._disableBlend();
