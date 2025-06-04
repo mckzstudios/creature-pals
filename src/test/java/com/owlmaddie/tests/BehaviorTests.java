@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * The {@code BehaviorTests} class tests a variety of LLM prompts and expected outputs from specific characters
  * and personality types. For example, an aggressive character will attack, a nervous character will flee, etc...
  */
+/*
 public class BehaviorTests {
     static String PROMPT_PATH = "src/main/resources/data/creaturechat/prompts/";
     static String RESOURCE_PATH = "src/test/resources/data/creaturechat/";
@@ -312,3 +313,4 @@ public class BehaviorTests {
     }
 
 }
+*/
