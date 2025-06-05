@@ -2,6 +2,9 @@ package com.owlmaddie.mixin;
 
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
+import com.owlmaddie.chat.EventQueueData;
+import com.owlmaddie.chat.EventQueueManager;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,6 +48,7 @@ public abstract class MixinEntityChatData {
             UUID originalUUID = nbt.getUuid("CCUUID");
             if (!originalUUID.equals(currentUUID)) {
                 ChatDataManager.getServerInstance().updateUUID(originalUUID, currentUUID);
+                EventQueueManager.updateUUID(originalUUID, currentUUID);
             }
         }
     }

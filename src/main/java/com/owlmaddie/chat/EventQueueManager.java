@@ -32,7 +32,6 @@ public class EventQueueManager {
     public static long entityToEntityCutoffDistance = 12;
     public static long playerToEntityCutoffDistance = 12;
     private static Set<UUID> entityIdsToAdd = new HashSet<>();
-
     public static void onError() {
         lastErrorTime = System.nanoTime();
     }
@@ -114,6 +113,15 @@ public class EventQueueManager {
                 continue;
             }
             curQueue.addExternalEntityMessage(userLanguage, player, entityMessage, entityCustomName, entityTypeName);
+        }
+    }
+
+    public static void updateUUID(UUID oldId, UUID newId){
+        EventQueueData data = queueData.remove(oldId.toString());
+        if(data != null){
+            data.entityId = newId;
+            queueData.put(newId.toString(), data);
+            LOGGER.info("Updated Event Queue data from UUID (" + oldId.toString() + ") to UUID (" + newId.toString() + ")");
         }
     }
 
