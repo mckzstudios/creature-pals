@@ -22,6 +22,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,10 +78,9 @@ public class CreatureChatCommands {
     }
 
     private static List<Identifier> getLivingEntityIds() {
-        List<Identifier> livingEntityIds = Registries.ENTITY_TYPE.stream()
+        return Registries.ENTITY_TYPE.stream()
                 .filter(entityType -> entityType != null && (entityType.getSpawnGroup() != SpawnGroup.MISC  || isIncludedEntity(entityType))).map(Registries.ENTITY_TYPE::getId)
                 .collect(Collectors.toList());
-        return livingEntityIds;
     }
 
     private static boolean isIncludedEntity(EntityType<?> entityType) {
@@ -89,11 +89,6 @@ public class CreatureChatCommands {
                 || entityType == EntityType.SNOW_GOLEM;
     }
 
-    private static List<String> getLivingEntityTypeNames() {
-        return getLivingEntityIds().stream()
-                .map(Identifier::toString)
-                .collect(Collectors.toList());
-    }
     private static LiteralArgumentBuilder<ServerCommandSource> registerChatBubbleCommand() {
         return CommandManager.literal("chatbubble")
                 .requires(source -> source.hasPermissionLevel(4))
@@ -129,14 +124,14 @@ public class CreatureChatCommands {
                 .requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.argument("entityType", IdentifierArgumentType.identifier())
                         .suggests((context, builder) -> CommandSource.suggestIdentifiers(getLivingEntityIds(), builder))
-                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, "whitelist", IdentifierArgumentType.getIdentifier(context, "entityType").toString(), useServerConfig)))
-                        .executes(context -> modifyList(context, "whitelist", IdentifierArgumentType.getIdentifier(context, "entityType").toString(), false)))
+                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, ListToActOn.WHITELIST, ListAction.ADD, Optional.of(IdentifierArgumentType.getIdentifier(context, "entityType")), useServerConfig)))
+                        .executes(context -> modifyList(context, ListToActOn.WHITELIST, ListAction.ADD, Optional.of(IdentifierArgumentType.getIdentifier(context, "entityType")), false)))
                 .then(CommandManager.literal("all")
-                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, "whitelist", "all", useServerConfig)))
-                        .executes(context -> modifyList(context, "whitelist", "all", false)))
+                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, ListToActOn.WHITELIST, ListAction.ALL, Optional.empty(), useServerConfig)))
+                        .executes(context -> modifyList(context, ListToActOn.WHITELIST, ListAction.ALL, Optional.empty(),false)))
                 .then(CommandManager.literal("clear")
-                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, "whitelist", "clear", useServerConfig)))
-                        .executes(context -> modifyList(context, "whitelist", "clear", false)));
+                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, ListToActOn.WHITELIST, ListAction.CLEAR,Optional.empty(), useServerConfig)))
+                        .executes(context -> modifyList(context, ListToActOn.WHITELIST, ListAction.CLEAR, Optional.empty(), false)));
     }
 
     private static LiteralArgumentBuilder<ServerCommandSource> registerBlacklistCommand() {
@@ -144,14 +139,14 @@ public class CreatureChatCommands {
                 .requires(source -> source.hasPermissionLevel(4))
                 .then(CommandManager.argument("entityType", IdentifierArgumentType.identifier())
                         .suggests((context, builder) -> CommandSource.suggestIdentifiers(getLivingEntityIds(), builder))
-                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, "blacklist", IdentifierArgumentType.getIdentifier(context, "entityType").toString(), useServerConfig)))
-                        .executes(context -> modifyList(context, "blacklist", IdentifierArgumentType.getIdentifier(context, "entityType").toString(), false)))
+                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, ListToActOn.BLACKLIST, ListAction.ADD, Optional.of(IdentifierArgumentType.getIdentifier(context, "entityType")), useServerConfig)))
+                        .executes(context -> modifyList(context, ListToActOn.BLACKLIST, ListAction.ADD, Optional.of(IdentifierArgumentType.getIdentifier(context, "entityType")), false)))
                 .then(CommandManager.literal("all")
-                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, "blacklist", "all", useServerConfig)))
-                        .executes(context -> modifyList(context, "blacklist", "all", false)))
+                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, ListToActOn.BLACKLIST, ListAction.ALL, Optional.empty(), useServerConfig)))
+                        .executes(context -> modifyList(context, ListToActOn.BLACKLIST, ListAction.ALL, Optional.empty(),false)))
                 .then(CommandManager.literal("clear")
-                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, "blacklist", "clear", useServerConfig)))
-                        .executes(context -> modifyList(context, "blacklist", "clear", false)));
+                        .then(addConfigArgs((context, useServerConfig) -> modifyList(context, ListToActOn.BLACKLIST, ListAction.CLEAR,Optional.empty(), useServerConfig)))
+                        .executes(context -> modifyList(context, ListToActOn.BLACKLIST, ListAction.CLEAR, Optional.empty(), false)));
     }
 
     private static LiteralArgumentBuilder<ServerCommandSource> registerHelpCommand() {
@@ -268,50 +263,55 @@ public class CreatureChatCommands {
         }
     }
 
-    private static int modifyList(CommandContext<ServerCommandSource> context, String listName, String action, boolean useServerConfig) {
+    private enum ListAction {
+        ALL, CLEAR, ADD, REMOVE
+    }
+
+    private enum ListToActOn {
+        WHITELIST, BLACKLIST
+    }
+    private static int modifyList(CommandContext<ServerCommandSource> context, ListToActOn listToActOn, ListAction action, Optional<Identifier> optId, boolean useServerConfig) {
         ServerCommandSource source = context.getSource();
         ConfigurationHandler configHandler = new ConfigurationHandler(source.getServer());
         ConfigurationHandler.Config config = configHandler.loadConfig();
-        List<String> entityTypes = getLivingEntityTypeNames();
+        List<Identifier> entityTypes = getLivingEntityIds();
 
         try {
-            if ("all".equals(action)) {
-                if ("whitelist".equals(listName)) {
+            if (action == ListAction.ALL) {
+                if (listToActOn == ListToActOn.WHITELIST) {
                     config.setWhitelist(entityTypes);
                     config.setBlacklist(new ArrayList<>()); // Clear blacklist
-                } else if ("blacklist".equals(listName)) {
+                } else if (listToActOn == ListToActOn.BLACKLIST) {
                     config.setBlacklist(entityTypes);
                     config.setWhitelist(new ArrayList<>()); // Clear whitelist
                 }
-            } else if ("clear".equals(action)) {
-                if ("whitelist".equals(listName)) {
+            } else if (action == ListAction.CLEAR) {
+                if (listToActOn == ListToActOn.WHITELIST) {
                     config.setWhitelist(new ArrayList<>());
-                } else if ("blacklist".equals(listName)) {
+                } else if (listToActOn == ListToActOn.BLACKLIST) {
                     config.setBlacklist(new ArrayList<>());
                 }
-            } else {
-                if (!entityTypes.contains(action)) {
-                    throw new IllegalArgumentException("Invalid entity type: " + action);
-                }
-                if ("whitelist".equals(listName)) {
-                    List<String> whitelist = new ArrayList<>(config.getWhitelist());
-                    if (!whitelist.contains(action)) {
-                        whitelist.add(action);
+            } else if (action == ListAction.ADD && optId.isPresent()) {
+                Identifier id = optId.get();
+                if (listToActOn == ListToActOn.WHITELIST ) {
+                    List<Identifier> whitelist = new ArrayList<>(config.getWhitelist());
+                    if (!whitelist.contains(id)) {
+                        whitelist.add(id);
                         config.setWhitelist(whitelist);
                     }
                     // Remove from blacklist if present
-                    List<String> blacklist = new ArrayList<>(config.getBlacklist());
-                    blacklist.remove(action);
+                    List<Identifier> blacklist = new ArrayList<>(config.getBlacklist());
+                    blacklist.remove(id);
                     config.setBlacklist(blacklist);
-                } else if ("blacklist".equals(listName)) {
-                    List<String> blacklist = new ArrayList<>(config.getBlacklist());
-                    if (!blacklist.contains(action)) {
-                        blacklist.add(action);
+                } else if (listToActOn == ListToActOn.BLACKLIST) {
+                    List<Identifier> blacklist = new ArrayList<>(config.getBlacklist());
+                    if (!blacklist.contains(id)) {
+                        blacklist.add(id);
                         config.setBlacklist(blacklist);
                     }
                     // Remove from whitelist if present
-                    List<String> whitelist = new ArrayList<>(config.getWhitelist());
-                    whitelist.remove(action);
+                    List<Identifier> whitelist = new ArrayList<>(config.getWhitelist());
+                    whitelist.remove(id);
                     config.setWhitelist(whitelist);
                 }
             }
@@ -323,14 +323,14 @@ public class CreatureChatCommands {
         }
 
         if (configHandler.saveConfig(config, useServerConfig)) {
-            Text feedbackMessage = Text.literal("Successfully updated " + listName + " with " + action).formatted(Formatting.GREEN);
+            Text feedbackMessage = Text.literal("Successfully updated " + listToActOn.toString() + " with " + action).formatted(Formatting.GREEN);
             source.sendFeedback(() -> feedbackMessage, false);
 
             // Send whitelist / blacklist to all players
             ServerPackets.send_whitelist_blacklist(null);
             return 1;
         } else {
-            Text feedbackMessage = Text.literal("Failed to update " + listName).formatted(Formatting.RED);
+            Text feedbackMessage = Text.literal("Failed to update " + listToActOn.toString()).formatted(Formatting.RED);
             source.sendFeedback(() -> feedbackMessage, false);
             return 0;
         }

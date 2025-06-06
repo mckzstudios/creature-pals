@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.owlmaddie.network.ServerPackets;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +78,8 @@ public class ConfigurationHandler {
         private double percentOfContext = 0.75;
         private int timeout = 40; // 40 second timeout
         private boolean chatBubbles = true;
-        private List<String> whitelist = new ArrayList<>();
-        private List<String> blacklist = new ArrayList<>();
+        private List<Identifier> whitelist = new ArrayList<>();
+        private List<Identifier> blacklist = new ArrayList<>();
         private String story = "";
 
         // Getters and setters for existing fields
@@ -145,19 +146,19 @@ public class ConfigurationHandler {
             this.percentOfContext = percentOfContext;
         }
 
-        public List<String> getWhitelist() {
+        public List<Identifier> getWhitelist() {
             return whitelist;
         }
 
-        public void setWhitelist(List<String> whitelist) {
+        public void setWhitelist(List<Identifier> whitelist) {
             this.whitelist = whitelist;
         }
 
-        public List<String> getBlacklist() {
+        public List<Identifier> getBlacklist() {
             return blacklist;
         }
 
-        public void setBlacklist(List<String> blacklist) {
+        public void setBlacklist(List<Identifier> blacklist) {
             this.blacklist = blacklist;
         }
 

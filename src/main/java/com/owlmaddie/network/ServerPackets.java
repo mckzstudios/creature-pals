@@ -267,8 +267,8 @@ public class ServerPackets {
         ConfigurationHandler.Config config = new ConfigurationHandler(ServerPackets.serverInstance).loadConfig();
 
         // Write the whitelist data to the buffer
-        List<String> whitelist = config.getWhitelist();
-        List<String> blacklist = config.getBlacklist();
+        List<Identifier> whitelist = config.getWhitelist();
+        List<Identifier> blacklist = config.getBlacklist();
 
         WhitelistPayload packet = new WhitelistPayload(whitelist, blacklist);
 

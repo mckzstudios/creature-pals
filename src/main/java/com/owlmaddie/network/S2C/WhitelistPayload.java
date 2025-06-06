@@ -6,15 +6,16 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
 
 import java.util.List;
 
-public record WhitelistPayload(List<String> whitlelist, List<String> blacklist) implements CustomPayload {
+public record WhitelistPayload(List<Identifier> whitlelist, List<Identifier> blacklist) implements CustomPayload {
     public static final CustomPayload.Id<WhitelistPayload> ID = new CustomPayload.Id<>(NetworkingConstants.PACKET_S2C_WHITELIST);
     public static final PacketCodec<RegistryByteBuf, WhitelistPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.STRING.collect(PacketCodecs.toList()), WhitelistPayload::whitlelist,
-            PacketCodecs.STRING.collect(PacketCodecs.toList()), WhitelistPayload::blacklist,
+            Identifier.PACKET_CODEC.collect(PacketCodecs.toList()), WhitelistPayload::whitlelist,
+            Identifier.PACKET_CODEC.collect(PacketCodecs.toList()), WhitelistPayload::blacklist,
             WhitelistPayload::new
     );
 

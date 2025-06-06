@@ -19,6 +19,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,13 +211,13 @@ public class ClientPackets {
         // Client-side packet handler, receive entire whitelist / blacklist, and update BubbleRenderer
         ClientPlayNetworking.registerGlobalReceiver(WhitelistPayload.ID, (payload, context) -> {
             // Read the whitelist data from the buffer
-            List<String> whitelist = payload.whitlelist();
-            List<String> blacklist = payload.blacklist();
+            List<Identifier> whitelist = payload.whitlelist();
+            List<Identifier> blacklist = payload.blacklist();
 
 
             context.client().execute(() -> {
-                BubbleRenderer.whitelist = whitelist;
-                BubbleRenderer.blacklist = blacklist;
+                BubbleRenderer.WHITELIST = whitelist;
+                BubbleRenderer.BLACKLIST = blacklist;
             });
         });
 
