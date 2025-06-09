@@ -1,5 +1,6 @@
 package com.owlmaddie.mixin.client;
 
+import com.owlmaddie.utils.EntityRendererUUID;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
@@ -12,10 +13,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityRenderer.class)
-public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> {
+public abstract class EntityRendererMixin{
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
-    private void cancelRenderLabel(S state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+    private <S extends EntityRenderState>  void cancelRenderLabel(S state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+
         ci.cancel(); // Hide Entity Custom Names
+    }
+
+
+    @Inject(method = "updateRenderState", at = @At("HEAD"))
+    private <T extends Entity, S extends EntityRenderState> void addUUID(T entity, S state, float tickProgress, CallbackInfo ci) {
+        // This is a workaround to add the UUID to the EntityRenderState
+        // so that it can be used in the BubbleRenderer.
+        if (state != null && entity != null) {
+            ((EntityRendererUUID) state).setEntityUUID(entity.getUuid());
+        }
     }
 }

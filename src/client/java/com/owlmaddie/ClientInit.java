@@ -9,7 +9,6 @@ import com.owlmaddie.particle.CreatureParticleFactory;
 import com.owlmaddie.particle.Particles;
 import com.owlmaddie.player2.HeartbeatManager;
 import com.owlmaddie.ui.BubblePipeline;
-import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.ClickHandler;
 import com.owlmaddie.ui.PlayerMessageManager;
 import net.fabricmc.api.ClientModInitializer;
@@ -59,7 +58,7 @@ public class ClientInit implements ClientModInitializer {
         // Register an event callback to render text bubbles
 
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
-            BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getDynamicDeltaTicks());
+            //BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getDynamicDeltaTicks());
         });
 
         // Register an event callback for when the client disconnects from a server or

@@ -3,6 +3,7 @@
   "package": "com.owlmaddie.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "MobEntityRendererStateMixin",
     "EntityRendererMixin",
     "LivingEntityRendererMixin",
     "MixinPlayerCustomTexture",

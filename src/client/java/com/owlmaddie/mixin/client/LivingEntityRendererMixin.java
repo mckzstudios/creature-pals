@@ -4,6 +4,7 @@ import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.ui.*;
+import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.EntityHeights;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -53,30 +54,17 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             value = "INVOKE_ASSIGN",
             target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;shouldRenderFeatures(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;)Z"))
     private void onRender(S livingEntityRenderState, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-
-        if (livingEntityRenderState.onFire) {
-            System.out.println("FIRE");
-        }
         EntityType<?> entityType = livingEntityRenderState.entityType;
-        if (!(entityType == EntityType.PLAYER || entityType.isSummonable())) {
-            return;
-        }
-
-        Identifier entityId = Registries.ENTITY_TYPE.getId(entityType);
-
-        if (BubbleRenderer.BLACKLIST.contains(entityId) || (!BubbleRenderer.WHITELIST.isEmpty() && !BubbleRenderer.WHITELIST.contains(entityId))) {
+        if (!ClientEntityFinder.isChattableEntity(entityType)) {
             return;
         }
 
         BubbleEntityRenderer<S, M> entityRenderer = getBubbleEntityRendererFeature();
 
         if (!featureRendererEnabled) {
-
             this.addFeature(entityRenderer);
             featureRendererEnabled = true;
         }
-
-
     }
 
     @Unique
@@ -89,7 +77,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 //Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
                 System.out.println("Hello");
-                renderEntity(matrices,vertexConsumers,state);
+
+                renderEntity(matrices,vertexConsumers,state,limbAngle, limbDistance);
             }
         };
     }

@@ -7,7 +7,7 @@ import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.network.C2S.*;
 import com.owlmaddie.network.S2C.*;
-import com.owlmaddie.ui.BubbleRenderer;
+import com.owlmaddie.ui.BubbleEntityRenderer;
 import com.owlmaddie.ui.PlayerMessageManager;
 import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.Decompression;
@@ -208,7 +208,7 @@ public class ClientPackets {
             });
         });
 
-        // Client-side packet handler, receive entire whitelist / blacklist, and update BubbleRenderer
+        // Client-side packet handler, receive entire whitelist / blacklist, and update BubbleEntityRenderer
         ClientPlayNetworking.registerGlobalReceiver(WhitelistPayload.ID, (payload, context) -> {
             // Read the whitelist data from the buffer
             List<Identifier> whitelist = payload.whitlelist();
@@ -216,8 +216,8 @@ public class ClientPackets {
 
 
             context.client().execute(() -> {
-                BubbleRenderer.WHITELIST = whitelist;
-                BubbleRenderer.BLACKLIST = blacklist;
+                BubbleEntityRenderer.WHITELIST = whitelist;
+                BubbleEntityRenderer.BLACKLIST = blacklist;
             });
         });
 
