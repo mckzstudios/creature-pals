@@ -8,6 +8,7 @@ import com.owlmaddie.particle.ClientParticle;
 import com.owlmaddie.particle.CreatureParticleFactory;
 import com.owlmaddie.particle.Particles;
 import com.owlmaddie.player2.HeartbeatManager;
+import com.owlmaddie.ui.BubblePipeline;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.ClickHandler;
 import com.owlmaddie.ui.PlayerMessageManager;
@@ -15,6 +16,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.client.particle.Particle;
@@ -41,6 +43,7 @@ public class ClientInit implements ClientModInitializer {
         Particles.register();
 
         ClientParticle.register();
+        BubblePipeline.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             tickCounter++;
@@ -54,6 +57,7 @@ public class ClientInit implements ClientModInitializer {
         ClientPackets.register();
 
         // Register an event callback to render text bubbles
+
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
             BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getDynamicDeltaTicks());
         });
