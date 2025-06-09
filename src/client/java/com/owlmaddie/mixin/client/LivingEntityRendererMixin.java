@@ -1,17 +1,8 @@
 package com.owlmaddie.mixin.client;
 
-import com.owlmaddie.chat.ChatDataManager;
-import com.owlmaddie.chat.EntityChatData;
-import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.ui.*;
 import com.owlmaddie.utils.ClientEntityFinder;
-import com.owlmaddie.utils.EntityHeights;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
@@ -19,31 +10,22 @@ import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonPart;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
 
 
     @Unique @Mutable
-    protected boolean featureRendererEnabled = false;
+    private static HashSet<EntityType<?>> ENTITY_TYPES_WITH_MIXIN_ENABLED = new HashSet<>();
     @Shadow @Final protected List<FeatureRenderer<S, M>> features;
 
     @Shadow protected abstract boolean addFeature(FeatureRenderer<S, M> feature);
@@ -51,19 +33,20 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     @Shadow public abstract M getModel();
 
     @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(
-            value = "INVOKE_ASSIGN",
+            value = "INVOKE",
             target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;shouldRenderFeatures(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;)Z"))
     private void onRender(S livingEntityRenderState, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         EntityType<?> entityType = livingEntityRenderState.entityType;
-        if (!ClientEntityFinder.isChattableEntity(entityType)) {
+        if (!ClientEntityFinder.isChattableEntity(livingEntityRenderState)) {
             return;
         }
 
         BubbleEntityRenderer<S, M> entityRenderer = getBubbleEntityRendererFeature();
 
-        if (!featureRendererEnabled) {
+        if (!ENTITY_TYPES_WITH_MIXIN_ENABLED.contains(entityType)) {
             this.addFeature(entityRenderer);
-            featureRendererEnabled = true;
+            ENTITY_TYPES_WITH_MIXIN_ENABLED.add(entityType);
+            System.out.println("Added BubbleEntityRenderer for " + entityType.getName().getString());
         }
     }
 
@@ -76,9 +59,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
                 //VertexConsumer consumer = vertexConsumers.getBuffer(BubblePipeline.BUBBLE_LAYER);
                 //Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
-                System.out.println("Hello");
 
-                renderEntity(matrices,vertexConsumers,state,limbAngle, limbDistance);
+
+                if (ClientEntityFinder.isChattableEntity(state)) {
+                    matrices.push();
+                    renderEntity(matrices,vertexConsumers,state,limbAngle, limbDistance,this.getContextModel());
+                    matrices.pop();
+
+                }
             }
         };
     }

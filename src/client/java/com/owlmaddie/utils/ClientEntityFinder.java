@@ -3,6 +3,9 @@ package com.owlmaddie.utils;
 import com.owlmaddie.ui.BubbleEntityRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -18,6 +21,8 @@ import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.ui.PlayerMessageManager;
 import net.minecraft.registry.Registries;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 /**
@@ -27,7 +32,25 @@ import net.minecraft.util.Identifier;
  * PlayerEntity lookup.
  */
 public class ClientEntityFinder {
-    public static boolean isChattableEntity(EntityType<?> entityType) {
+
+    public static boolean isChattableEntity(Entity entity) {
+        return isChattableEntity(entity.getType(), entity.getName().getString());
+    }
+    public static boolean isChattableEntity(EntityRenderState renderState) {
+        if (renderState instanceof PlayerEntityRenderState playerEntityRenderState) {
+            if (playerEntityRenderState.playerName == null) {
+                return false;
+            }
+            return isChattableEntity(playerEntityRenderState.entityType, playerEntityRenderState.playerName.getString());
+        }
+        if (renderState.displayName != null) {
+            return isChattableEntity(renderState.entityType, renderState.displayName.getString());
+        } else {
+            return isChattableEntity(renderState.entityType, "");
+        }
+    }
+
+    public static boolean isChattableEntity(EntityType<?> entityType, String name) {
         if (!(entityType == EntityType.PLAYER || entityType.isSummonable())) {
             return false;
         }
@@ -36,6 +59,13 @@ public class ClientEntityFinder {
 
         if (BubbleEntityRenderer.BLACKLIST.contains(entityId) || (!BubbleEntityRenderer.WHITELIST.isEmpty() && !BubbleEntityRenderer.WHITELIST.contains(entityId))) {
             return false;
+        }
+
+        if (entityType == EntityType.PLAYER) {
+            // Check if the entity is a player or has a chat bubble open
+            if (MinecraftClient.getInstance().player.getName().getString().equals(name)) {
+                return false;
+            }
         }
         return true;
     }
@@ -66,7 +96,7 @@ public class ClientEntityFinder {
             if (!(entity instanceof LivingEntity)) {
                 return;
             }
-            if (isChattableEntity(entity.getType())) {
+            if (isChattableEntity(((LivingEntity) entity))) {
                 entities.add((LivingEntity) entity);
             }
         });

@@ -2,11 +2,14 @@ package com.owlmaddie.utils;
 
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderPhase;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.ResourceTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TriState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +29,7 @@ public class TextureLoader {
     public TextureLoader() {
     }
 
-    public GpuTexture GetUI(String name) {
+    public RenderPhase.Texture GetUI(String name) {
         String texturePath = "textures/ui/" + name + ".png";
         Identifier textureId = Identifier.of("creaturechat", texturePath);
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(textureId);
@@ -40,11 +43,11 @@ public class TextureLoader {
         }
     }
 
-    private GpuTexture loadTexture(Identifier textureId) {
+    public RenderPhase.Texture loadTexture(Identifier textureId) {
         // Bind texture, and return Identity
         TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
         try {
-            return textureManager.getTexture(textureId).getGlTexture();
+            return new RenderPhase.Texture(textureId, TriState.FALSE, false);
         } catch (IllegalStateException e) {
             ResourceTexture texture = new ResourceTexture(textureId);
             try {
@@ -54,11 +57,11 @@ public class TextureLoader {
             }
             textureManager.registerTexture(textureId, texture);
 
-            return texture.getGlTexture();
+            return new RenderPhase.Texture(textureId, TriState.FALSE, false);
         }
 
     }
-    public GpuTexture GetEntity(String texturePath) {
+    public RenderPhase.Texture GetEntity(String texturePath) {
         Identifier textureId = Identifier.of("creaturechat", texturePath);
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(textureId);
 
@@ -66,7 +69,7 @@ public class TextureLoader {
 
         if (resource.isPresent()) {
             // Texture found, bind it and return the Identifier
-            return loadTexture(textureId);
+            return new RenderPhase.Texture(textureId, TriState.FALSE, false);
         } else {
             // Texture not found, log a message and return the "not_found" texture Identifier
             Identifier notFoundTextureId = Identifier.of("creaturechat", "textures/entity/not_found.png");
