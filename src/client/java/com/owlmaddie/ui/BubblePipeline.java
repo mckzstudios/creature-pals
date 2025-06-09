@@ -20,12 +20,11 @@ import java.util.Optional;
 
 public class BubblePipeline {
     public static RenderPipeline BUBBLE_PIPELINE =
-        RenderPipeline.builder(RenderPipelines.GUI_SNIPPET)
+        RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
                 .withLocation(Identifier.of("creaturechat", "textures/ui"))
                 .withBlend(BlendFunction.TRANSLUCENT)
                 .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
                 .withCull(false)
-                .withPolygonMode(PolygonMode.FILL)
                 .withVertexFormat(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT, VertexFormat.DrawMode.QUADS)
                 .build();
 

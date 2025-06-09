@@ -84,6 +84,8 @@ public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M 
         RenderPhase.Texture button_texture = TEXTURES.GetUI(ui_icon_name);
         // Set shader & texture
 
+        RenderSystem.setShaderTexture(0, MinecraftClient.getInstance().getTextureManager().getTexture(Identifier.of("creaturechat", "textures/ui/" + ui_icon_name)).getGlTexture());
+
         // Enable depth test and blending
         GlStateManager._enableBlend();
         //GlStateManager.defaultBlendFunc();
@@ -114,7 +116,7 @@ public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M 
     }
 
 
-    protected void renderEntity(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, S entityRenderState, float yaw, float pitch, M model ) {
+    protected void renderEntity(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, S entityRenderState, float entityYaw, M model ) {
         float lineSpacing = 1F;
         float textHeaderHeight = 40F;
         float textFooterHeight = 5F;
@@ -124,7 +126,7 @@ public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M 
         TextRenderer fontRenderer = client.textRenderer;
 
         EntityType<?> entityType = entityRenderState.entityType;
-        System.out.println(this.getContextModel().getRootPart());
+        Vec3d interpolatedCameraPos = client.getCameraEntity().getClientCameraPosVec(0.0F);
 
 
         // Get entity height (adjust for specific classes)
@@ -139,9 +141,9 @@ public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M 
         if (entityType == EntityType.ENDER_DRAGON) {
             // Interpolate the head position
             bubblePosition = interpolatedEntityPos.add(0,entityRenderState.standingEyeHeight,0).add(0,paddingAboveEntity,0);
-        } else  {
+        } else {
             // Calculate the forward offset based on the entity's yaw
-            float entityYawRadians = (float) Math.toRadians(yaw);
+            float entityYawRadians = (float) Math.toRadians(entityYaw);
             Vec3d forwardOffset = new Vec3d(-Math.sin(entityYawRadians), 0.0, Math.cos(entityYawRadians));
 
             // Calculate the forward offset based on the entity's yaw, scaled to 80% towards
@@ -156,35 +158,41 @@ public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M 
 
         // Translate to the chat bubble's position
 
-        matrices.translate(bubblePosition);
+        matrices.translate(bubblePosition.subtract(interpolatedCameraPos));
 
+        UUID entityUUID = ((EntityRendererUUID) entityRenderState).getEntityUUID();
+        // Use the body yaw for LivingEntityRenderState
 
-        // Calculate the yaw
-            // Use the body yaw for LivingEntityRenderState
+        // Calculate the difference vector (from entity + padding above to camera)
+        Vec3d difference = interpolatedCameraPos.subtract(new Vec3d(interpolatedEntityPos.x,
+                interpolatedEntityPos.y + entityHeight + paddingAboveEntity, interpolatedEntityPos.z));
 
-            // Convert yaw to Quaternion
-        float halfYaw = yaw * 0.5f;
+        // Calculate the yaw angle
+        double yaw = -(Math.atan2(difference.z, difference.x) + Math.PI / 2D);
+
+        // Convert yaw to Quaternion
+        float halfYaw = (float) yaw * 0.5f;
         double sinHalfYaw = MathHelper.sin(halfYaw);
         double cosHalfYaw = MathHelper.cos(halfYaw);
         Quaternionf yawRotation = new Quaternionf(0, sinHalfYaw, 0, cosHalfYaw);
 
         // Apply the yaw rotation to the matrix stack
         matrices.multiply(yawRotation);
-        UUID entityUUID = ((EntityRendererUUID) entityRenderState).getEntityUUID();
 
         // Obtain the horizontal distance to the entity
+        double horizontalDistance = Math.sqrt(difference.x * difference.x + difference.z * difference.z);
         // Calculate the pitch angle based on the horizontal distance and the y
         // difference
+        double pitch = Math.atan2(difference.y, horizontalDistance);
 
         // Convert pitch to Quaternion
-        float halfPitch = pitch * 0.5f;
+        float halfPitch = (float) pitch * 0.5f;
         double sinHalfPitch = MathHelper.sin(halfPitch);
         double cosHalfPitch = MathHelper.cos(halfPitch);
         Quaternionf pitchRotation = new Quaternionf(sinHalfPitch, 0, 0, cosHalfPitch);
 
         // Apply the pitch rotation to the matrix stack
         matrices.multiply(pitchRotation);
-
 
         // Get position matrix
         Matrix4f matrix = matrices.peek().getPositionMatrix();
