@@ -409,7 +409,8 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
         float height = EntityHeights.getAdjustedEntityHeight(entityType) + paddingAboveEntity;
 
-        Vec3d difference = client.cameraEntity.getEyePos().relativize(new Vec3d(entityRenderState.x, entityRenderState.y+height, entityRenderState.z));
+        Vec3d entityPosition = new Vec3d(entityRenderState.x, entityRenderState.y + height, entityRenderState.z);
+        Vec3d difference = client.cameraEntity.getEyePos().relativize(entityPosition);
 
         // Get entity height (adjust for specific classes)
 
@@ -532,7 +533,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
             scaledTextHeight = Math.max(scaledTextHeight, minTextHeight);
 
             // Update Bubble Data for Click Handling using UUID (account for scaling)
-            BubbleLocationManager.updateBubbleData(entityUUID, bubblePosition,
+            BubbleLocationManager.updateBubbleData(entityUUID, entityPosition,
                     128F / (1 / 0.02F), (scaledTextHeight + 25F) / (1 / 0.02F), yaw, entityRenderState.pitch);
 
             // Scale down before rendering textures (otherwise font is huge)
