@@ -1,9 +1,8 @@
 package com.owlmaddie.utils;
 
-import com.owlmaddie.ui.BubbleEntityRenderer;
+import com.owlmaddie.ui.BubbleRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.world.ClientWorld;
@@ -17,12 +16,8 @@ import java.util.*;
 
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
-import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.chat.ChatDataManager.ChatStatus;
-import com.owlmaddie.ui.PlayerMessageManager;
 import net.minecraft.registry.Registries;
-import net.minecraft.resource.ResourceReloader;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 /**
@@ -57,7 +52,7 @@ public class ClientEntityFinder {
 
         Identifier entityId = Registries.ENTITY_TYPE.getId(entityType);
 
-        if (BubbleEntityRenderer.BLACKLIST.contains(entityId) || (!BubbleEntityRenderer.WHITELIST.isEmpty() && !BubbleEntityRenderer.WHITELIST.contains(entityId))) {
+        if (BubbleRenderer.BLACKLIST.contains(entityId) || (!BubbleRenderer.WHITELIST.isEmpty() && !BubbleRenderer.WHITELIST.contains(entityId))) {
             return false;
         }
 

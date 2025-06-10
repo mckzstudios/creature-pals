@@ -7,7 +7,7 @@ import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.network.C2S.*;
 import com.owlmaddie.network.S2C.*;
-import com.owlmaddie.ui.BubbleEntityRenderer;
+import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.PlayerMessageManager;
 import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.Decompression;
@@ -216,8 +216,8 @@ public class ClientPackets {
 
 
             context.client().execute(() -> {
-                BubbleEntityRenderer.WHITELIST = whitelist;
-                BubbleEntityRenderer.BLACKLIST = blacklist;
+                BubbleRenderer.WHITELIST = whitelist;
+                BubbleRenderer.BLACKLIST = blacklist;
             });
         });
 

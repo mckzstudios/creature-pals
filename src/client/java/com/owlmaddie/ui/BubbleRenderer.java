@@ -1,44 +1,28 @@
 package com.owlmaddie.ui;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
 import com.owlmaddie.skin.PlayerCustomTexture;
 import com.owlmaddie.utils.EntityHeights;
-import com.owlmaddie.utils.EntityRendererAccessor;
 import com.owlmaddie.utils.EntityRendererUUID;
 import com.owlmaddie.utils.TextureLoader;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TriState;
 import net.minecraft.util.math.MathHelper;
@@ -56,7 +40,7 @@ import java.util.UUID;
 import static com.owlmaddie.ui.BubblePipeline.getBubbleLayer;
 
 
-public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends FeatureRenderer<S, M> {
+public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends FeatureRenderer<S, M> {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
     protected static TextureLoader TEXTURES = new TextureLoader();
     public static int DISPLAY_PADDING = 2;
@@ -68,7 +52,7 @@ public abstract class BubbleEntityRenderer<S extends LivingEntityRenderState, M 
     public static List<Identifier> BLACKLIST = new ArrayList<>();
     private static int QUERY_ENTITY_DATA_COUNT = 0;
     private static List<LivingEntity> RELEVANT_ENTITIES;
-    public BubbleEntityRenderer(M model) {
+    public BubbleRenderer(M model) {
         super(new BubbleRendererContext<S,M>() {
             @Override
             public M getModel() {

@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
@@ -41,7 +40,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             return;
         }
 
-        BubbleEntityRenderer<S, M> entityRenderer = getBubbleEntityRendererFeature();
+        BubbleRenderer<S, M> entityRenderer = getBubbleEntityRendererFeature();
 
         if (!ENTITY_TYPES_WITH_MIXIN_ENABLED.contains(entityType)) {
             this.addFeature(entityRenderer);
@@ -51,9 +50,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
     }
 
     @Unique
-    private @NotNull BubbleEntityRenderer<S, M> getBubbleEntityRendererFeature() {
+    private @NotNull BubbleRenderer<S, M> getBubbleEntityRendererFeature() {
         M model = this.getModel();
-        return new BubbleEntityRenderer<S, M>(model) {
+        return new BubbleRenderer<S, M>(model) {
             @Override
             public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, S state, float limbAngle, float limbDistance) {
                 //VertexConsumer consumer = vertexConsumers.getBuffer(BubblePipeline.BUBBLE_LAYER);
