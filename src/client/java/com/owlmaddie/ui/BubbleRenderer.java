@@ -61,6 +61,67 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         });
     }
 
+    public static void drawTextBubbleBackground(String base_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width,
+                                                float height, int friendship) {
+        // Set shader & texture
+        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
+
+        // Enable depth test and blending
+        GlStateManager._enableBlend();
+        //GlStateManager._defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
+
+        float z = 0.01F;
+
+        // Draw UI text background (based on friendship)
+        // Draw TOP
+        if (friendship == -3 && !base_name.endsWith("-player")) {
+            VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name + "-enemy")));
+            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
+        } else if (friendship == 3 && !base_name.endsWith("-player")) {
+            VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name + "-friend")));
+            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
+
+        } else {
+            VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name)));
+            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
+
+        }
+
+
+        // Draw MIDDLE
+
+        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI("text-middle")));
+        drawTexturePart(matrices,vertexConsumer,model, x, y + 40, z, width, height);
+
+        // Draw BOTTOM
+        vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI("text-bottom")));
+        drawTexturePart(matrices,vertexConsumer,model, x, y + 40 + height, z, width, 5);
+
+        // Disable blending and depth test
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
+    }
+
+    private static void drawTexturePart(MatrixStack matrices, VertexConsumer buffer, EntityModel<?> model, float x, float y, float z,
+                                        float width, float height) {
+
+        // Define the vertices with color, texture, light, and overlay
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+
+        // Begin drawing quads with the correct vertex format
+
+        buffer.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT).overlay(OVERLAY); // bottom left
+        buffer.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
+                .overlay(OVERLAY); // bottom right
+        buffer.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT).overlay(OVERLAY); // top right
+        buffer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top
+        // left
+        model.render(matrices, buffer, LIGHT, OVERLAY);
+
+    }
+
     public static void drawIcon(String ui_icon_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height) {
         // Draw button icon
 
@@ -99,6 +160,247 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         GlStateManager._disableDepthTest();
     }
 
+
+    private static void drawFriendshipStatus(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height,
+                                             int friendship) {
+        // dynamically calculate friendship ui image name
+        String ui_icon_name = "friendship" + friendship;
+
+        // Set shader
+        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
+
+        // Set texture
+
+        // Enable depth test and blending
+        GlStateManager._enableBlend();
+        //GlStateManager._defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
+
+        VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(ui_icon_name)));
+
+        // Get the current matrix position
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+
+        // Begin drawing quads with the correct vertex format
+
+        float z = -0.01F;
+        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
+                .overlay(OVERLAY); // bottom left
+        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
+                .overlay(OVERLAY); // bottom right
+        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
+                .overlay(OVERLAY); // top right
+        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
+        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
+
+        // Disable blending and depth test
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
+    }
+
+    private static void drawEntityIcon(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, LivingEntityRenderState entity, MinecraftClient client, float x, float y, float width,
+                                       float height) {
+        // Get entity renderer
+        String entity_icon_path = getTextureIdentifier(client,entity).getPath();
+
+
+        // Draw face icon
+        RenderPhase.Texture entity_id = TEXTURES.GetEntity(entity_icon_path);
+        if (entity_id == null) {
+            return;
+        }
+
+        // Set shader & texture
+        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
+
+        // Enable depth test and blending
+        GlStateManager._enableBlend();
+        // GlStateManager._defaultBlendFunc();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
+
+        VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(getBubbleLayer(entity_id));
+
+        // Get the current matrix position
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+
+        // Begin drawing quads with the correct vertex format
+
+        float z = -0.01F;
+        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
+                .overlay(OVERLAY); // bottom left
+        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
+                .overlay(OVERLAY); // bottom right
+        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
+                .overlay(OVERLAY); // top right
+        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
+
+        System.out.println("Drawing entity icon: " + entity_icon_path);
+
+        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
+
+        // Disable blending and depth test
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
+
+    }
+
+    private static void drawPlayerIcon(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, LivingEntityRenderState entityRenderState, MinecraftClient client, float x, float y, float width,
+                                       float height) {
+        // Get player skin texture
+        Identifier playerTexture = getTextureIdentifier(client, entityRenderState);
+
+        // Check for black and white pixels (using the Mixin-based check)
+        boolean customSkinFound = PlayerCustomTexture.hasCustomIcon(playerTexture);
+
+        // Set shader & texture
+        //GlStateManager.setShader(GameRenderer::getPositionColorTexLightmapProgram);
+
+        RenderSystem.setShaderTexture(0, MinecraftClient.getInstance().getTextureManager().getTexture(playerTexture).getGlTexture());
+
+        // Enable depth test and blending
+        GlStateManager._enableBlend();
+        GlStateManager._enableDepthTest();
+        GlStateManager._depthMask(true);
+
+        VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(getBubbleLayer(new RenderPhase.Texture(playerTexture, TriState.FALSE, false)));
+
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        float z = -0.01F;
+
+        if (customSkinFound) {
+            // Hidden icon UV coordinates
+            float[][] newCoordinates = {
+                    { 0.0F, 0.0F, 8.0F, 8.0F, 0F, 0F }, // Row 1 left
+                    { 24.0F, 0.0F, 32.0F, 8.0F, 8F, 0F }, // Row 1 middle
+                    { 32.0F, 0.0F, 40.0F, 8.0F, 16F, 0F }, // Row 1 right
+                    { 56.0F, 0.0F, 64.0F, 8.0F, 0F, 8F }, // Row 2 left
+                    { 56.0F, 20.0F, 64.0F, 28.0F, 8F, 8F }, // Row 2 middle
+                    { 36.0F, 16.0F, 44.0F, 20.0F, 16F, 8F }, // Row 2 right top
+                    { 56.0F, 16.0F, 64.0F, 20.0F, 16F, 12F }, // Row 2 right bottom
+                    { 56.0F, 28.0F, 64.0F, 36.0F, 0F, 16F }, // Row 3 left
+                    { 56.0F, 36.0F, 64.0F, 44.0F, 8F, 16F }, // Row 3 middle
+                    { 56.0F, 44.0F, 64.0F, 48, 16F, 16F }, // Row 3 top right
+                    { 12.0F, 48.0F, 20.0F, 52, 16F, 20F }, // Row 3 bottom right
+            };
+            float scaleFactor = 0.77F;
+
+            for (float[] coords : newCoordinates) {
+                float newU1 = coords[0] / 64.0F;
+                float newV1 = coords[1] / 64.0F;
+                float newU2 = coords[2] / 64.0F;
+                float newV2 = coords[3] / 64.0F;
+
+                float offsetX = coords[4] * scaleFactor;
+                float offsetY = coords[5] * scaleFactor;
+                float scaledX = x + offsetX;
+                float scaledY = y + offsetY;
+                float scaledWidth = (coords[2] - coords[0]) * scaleFactor;
+                float scaledHeight = (coords[3] - coords[1]) * scaleFactor;
+
+                bufferBuilder.vertex(matrix4f, scaledX, scaledY + scaledHeight, z)
+                        .color(255, 255, 255, 255).texture(newU1, newV2).light(LIGHT).overlay(OVERLAY);
+                bufferBuilder.vertex(matrix4f, scaledX + scaledWidth, scaledY + scaledHeight, z)
+                        .color(255, 255, 255, 255).texture(newU2, newV2).light(LIGHT).overlay(OVERLAY);
+                bufferBuilder.vertex(matrix4f, scaledX + scaledWidth, scaledY, z)
+                        .color(255, 255, 255, 255).texture(newU2, newV1).light(LIGHT).overlay(OVERLAY);
+                bufferBuilder.vertex(matrix4f, scaledX, scaledY, z)
+                        .color(255, 255, 255, 255).texture(newU1, newV1).light(LIGHT).overlay(OVERLAY);
+            }
+        } else {
+            // make skin appear smaller and centered
+            x += 2;
+            y += 2;
+            width -= 4;
+            height -= 4;
+
+            // Normal face coordinates
+            float u1 = 8.0F / 64.0F;
+            float v1 = 8.0F / 64.0F;
+            float u2 = 16.0F / 64.0F;
+            float v2 = 16.0F / 64.0F;
+
+            bufferBuilder.vertex(matrix4f, x, y + height, z)
+                    .color(255, 255, 255, 255).texture(u1, v2).light(LIGHT).overlay(OVERLAY);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, z)
+                    .color(255, 255, 255, 255).texture(u2, v2).light(LIGHT).overlay(OVERLAY);
+            bufferBuilder.vertex(matrix4f, x + width, y, z)
+                    .color(255, 255, 255, 255).texture(u2, v1).light(LIGHT).overlay(OVERLAY);
+            bufferBuilder.vertex(matrix4f, x, y, z)
+                    .color(255, 255, 255, 255).texture(u1, v1).light(LIGHT).overlay(OVERLAY);
+
+            // Hat layer
+            float hatU1 = 40.0F / 64.0F;
+            float hatV1 = 8.0F / 64.0F;
+            float hatU2 = 48.0F / 64.0F;
+            float hatV2 = 16.0F / 64.0F;
+
+            z -= 0.01F;
+
+            bufferBuilder.vertex(matrix4f, x, y + height, z)
+                    .color(255, 255, 255, 255).texture(hatU1, hatV2).light(LIGHT).overlay(OVERLAY);
+            bufferBuilder.vertex(matrix4f, x + width, y + height, z)
+                    .color(255, 255, 255, 255).texture(hatU2, hatV2).light(LIGHT).overlay(OVERLAY);
+            bufferBuilder.vertex(matrix4f, x + width, y, z)
+                    .color(255, 255, 255, 255).texture(hatU2, hatV1).light(LIGHT).overlay(OVERLAY);
+            bufferBuilder.vertex(matrix4f, x, y, z)
+                    .color(255, 255, 255, 255).texture(hatU1, hatV1).light(LIGHT).overlay(OVERLAY);
+        }
+
+        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
+        // Disable blending and depth test
+        GlStateManager._disableBlend();
+        GlStateManager._disableDepthTest();
+    }
+
+    private static void drawMessageText(Matrix4f matrix, List<String> lines, int starting_line, int ending_line,
+                                        VertexConsumerProvider immediate, float lineSpacing, int fullBright, float yOffset) {
+        TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
+        int currentLineIndex = 0; // We'll use this to track which line we're on
+
+        for (String lineText : lines) {
+            // Only draw lines that are within the specified range
+            if (currentLineIndex >= starting_line && currentLineIndex < ending_line) {
+                fontRenderer.draw(lineText, -fontRenderer.getWidth(lineText) / 2f, yOffset, 0xffffff,
+                        false, matrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, fullBright);
+                yOffset += fontRenderer.fontHeight + lineSpacing;
+            }
+            currentLineIndex++;
+
+            if (currentLineIndex > ending_line) {
+                break;
+            }
+        }
+    }
+
+    private static void drawEntityName(LivingEntityRenderState entityRenderState, Matrix4f matrix, VertexConsumerProvider immediate,
+                                       int fullBright, float yOffset, boolean truncate) {
+        TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
+
+        // Get Name of entity
+        String nameText = "";
+        EntityType<?> entityType = entityRenderState.entityType;
+        if (entityType.getBaseClass().isInstance(MobEntity.class)) {
+            // Custom Name Tag (MobEntity)
+            if (entityRenderState.customName != null) {
+                nameText = entityRenderState.customName.getString();
+            }
+        } else if (entityRenderState instanceof PlayerEntityRenderState) {
+            // Player Name
+            if (((PlayerEntityRenderState) entityRenderState).playerName != null) {
+                nameText = ((PlayerEntityRenderState) entityRenderState).playerName.getString();
+            }
+        }
+
+        // Truncate long names
+        if (nameText.length() > 14 && truncate) {
+            nameText = nameText.substring(0, 14) + "...";
+        }
+
+        fontRenderer.draw(nameText, -fontRenderer.getWidth(nameText) / 2f, yOffset, 0xffffff,
+                false, matrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, fullBright);
+    }
 
     protected void renderEntity(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, S entityRenderState, float entityYaw, M model ) {
         float lineSpacing = 1F;
@@ -359,247 +661,6 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
     }
 
-    private static void drawEntityName(LivingEntityRenderState entityRenderState, Matrix4f matrix, VertexConsumerProvider immediate,
-                                       int fullBright, float yOffset, boolean truncate) {
-        TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
-
-        // Get Name of entity
-        String nameText = "";
-        EntityType<?> entityType = entityRenderState.entityType;
-        if (entityType.getBaseClass().isInstance(MobEntity.class)) {
-            // Custom Name Tag (MobEntity)
-            if (entityRenderState.customName != null) {
-                nameText = entityRenderState.customName.getString();
-            }
-        } else if (entityRenderState instanceof PlayerEntityRenderState) {
-            // Player Name
-            if (((PlayerEntityRenderState) entityRenderState).playerName != null) {
-                nameText = ((PlayerEntityRenderState) entityRenderState).playerName.getString();
-            }
-        }
-
-        // Truncate long names
-        if (nameText.length() > 14 && truncate) {
-            nameText = nameText.substring(0, 14) + "...";
-        }
-
-        fontRenderer.draw(nameText, -fontRenderer.getWidth(nameText) / 2f, yOffset, 0xffffff,
-                false, matrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, fullBright);
-    }
-
-
-    private static void drawPlayerIcon(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, LivingEntityRenderState entityRenderState, MinecraftClient client, float x, float y, float width,
-                                       float height) {
-        // Get player skin texture
-        Identifier playerTexture = getTextureIdentifier(client, entityRenderState);
-
-        // Check for black and white pixels (using the Mixin-based check)
-        boolean customSkinFound = PlayerCustomTexture.hasCustomIcon(playerTexture);
-
-        // Set shader & texture
-        //GlStateManager.setShader(GameRenderer::getPositionColorTexLightmapProgram);
-
-        RenderSystem.setShaderTexture(0, MinecraftClient.getInstance().getTextureManager().getTexture(playerTexture).getGlTexture());
-
-        // Enable depth test and blending
-        GlStateManager._enableBlend();
-        GlStateManager._enableDepthTest();
-        GlStateManager._depthMask(true);
-
-        VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(getBubbleLayer(new RenderPhase.Texture(playerTexture, TriState.FALSE, false)));
-
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-        float z = -0.01F;
-
-        if (customSkinFound) {
-            // Hidden icon UV coordinates
-            float[][] newCoordinates = {
-                    { 0.0F, 0.0F, 8.0F, 8.0F, 0F, 0F }, // Row 1 left
-                    { 24.0F, 0.0F, 32.0F, 8.0F, 8F, 0F }, // Row 1 middle
-                    { 32.0F, 0.0F, 40.0F, 8.0F, 16F, 0F }, // Row 1 right
-                    { 56.0F, 0.0F, 64.0F, 8.0F, 0F, 8F }, // Row 2 left
-                    { 56.0F, 20.0F, 64.0F, 28.0F, 8F, 8F }, // Row 2 middle
-                    { 36.0F, 16.0F, 44.0F, 20.0F, 16F, 8F }, // Row 2 right top
-                    { 56.0F, 16.0F, 64.0F, 20.0F, 16F, 12F }, // Row 2 right bottom
-                    { 56.0F, 28.0F, 64.0F, 36.0F, 0F, 16F }, // Row 3 left
-                    { 56.0F, 36.0F, 64.0F, 44.0F, 8F, 16F }, // Row 3 middle
-                    { 56.0F, 44.0F, 64.0F, 48, 16F, 16F }, // Row 3 top right
-                    { 12.0F, 48.0F, 20.0F, 52, 16F, 20F }, // Row 3 bottom right
-            };
-            float scaleFactor = 0.77F;
-
-            for (float[] coords : newCoordinates) {
-                float newU1 = coords[0] / 64.0F;
-                float newV1 = coords[1] / 64.0F;
-                float newU2 = coords[2] / 64.0F;
-                float newV2 = coords[3] / 64.0F;
-
-                float offsetX = coords[4] * scaleFactor;
-                float offsetY = coords[5] * scaleFactor;
-                float scaledX = x + offsetX;
-                float scaledY = y + offsetY;
-                float scaledWidth = (coords[2] - coords[0]) * scaleFactor;
-                float scaledHeight = (coords[3] - coords[1]) * scaleFactor;
-
-                bufferBuilder.vertex(matrix4f, scaledX, scaledY + scaledHeight, z)
-                        .color(255, 255, 255, 255).texture(newU1, newV2).light(LIGHT).overlay(OVERLAY);
-                bufferBuilder.vertex(matrix4f, scaledX + scaledWidth, scaledY + scaledHeight, z)
-                        .color(255, 255, 255, 255).texture(newU2, newV2).light(LIGHT).overlay(OVERLAY);
-                bufferBuilder.vertex(matrix4f, scaledX + scaledWidth, scaledY, z)
-                        .color(255, 255, 255, 255).texture(newU2, newV1).light(LIGHT).overlay(OVERLAY);
-                bufferBuilder.vertex(matrix4f, scaledX, scaledY, z)
-                        .color(255, 255, 255, 255).texture(newU1, newV1).light(LIGHT).overlay(OVERLAY);
-            }
-        } else {
-            // make skin appear smaller and centered
-            x += 2;
-            y += 2;
-            width -= 4;
-            height -= 4;
-
-            // Normal face coordinates
-            float u1 = 8.0F / 64.0F;
-            float v1 = 8.0F / 64.0F;
-            float u2 = 16.0F / 64.0F;
-            float v2 = 16.0F / 64.0F;
-
-            bufferBuilder.vertex(matrix4f, x, y + height, z)
-                    .color(255, 255, 255, 255).texture(u1, v2).light(LIGHT).overlay(OVERLAY);
-            bufferBuilder.vertex(matrix4f, x + width, y + height, z)
-                    .color(255, 255, 255, 255).texture(u2, v2).light(LIGHT).overlay(OVERLAY);
-            bufferBuilder.vertex(matrix4f, x + width, y, z)
-                    .color(255, 255, 255, 255).texture(u2, v1).light(LIGHT).overlay(OVERLAY);
-            bufferBuilder.vertex(matrix4f, x, y, z)
-                    .color(255, 255, 255, 255).texture(u1, v1).light(LIGHT).overlay(OVERLAY);
-
-            // Hat layer
-            float hatU1 = 40.0F / 64.0F;
-            float hatV1 = 8.0F / 64.0F;
-            float hatU2 = 48.0F / 64.0F;
-            float hatV2 = 16.0F / 64.0F;
-
-            z -= 0.01F;
-
-            bufferBuilder.vertex(matrix4f, x, y + height, z)
-                    .color(255, 255, 255, 255).texture(hatU1, hatV2).light(LIGHT).overlay(OVERLAY);
-            bufferBuilder.vertex(matrix4f, x + width, y + height, z)
-                    .color(255, 255, 255, 255).texture(hatU2, hatV2).light(LIGHT).overlay(OVERLAY);
-            bufferBuilder.vertex(matrix4f, x + width, y, z)
-                    .color(255, 255, 255, 255).texture(hatU2, hatV1).light(LIGHT).overlay(OVERLAY);
-            bufferBuilder.vertex(matrix4f, x, y, z)
-                    .color(255, 255, 255, 255).texture(hatU1, hatV1).light(LIGHT).overlay(OVERLAY);
-        }
-
-        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
-        // Disable blending and depth test
-        GlStateManager._disableBlend();
-        GlStateManager._disableDepthTest();
-    }
-    private static void drawEntityIcon(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, LivingEntityRenderState entity, MinecraftClient client, float x, float y, float width,
-                                       float height) {
-        // Get entity renderer
-        String entity_icon_path = getTextureIdentifier(client,entity).getPath();
-
-
-        // Draw face icon
-        RenderPhase.Texture entity_id = TEXTURES.GetEntity(entity_icon_path);
-        if (entity_id == null) {
-            return;
-        }
-
-        // Set shader & texture
-        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
-
-        // Enable depth test and blending
-        GlStateManager._enableBlend();
-        // GlStateManager._defaultBlendFunc();
-        GlStateManager._enableDepthTest();
-        GlStateManager._depthMask(true);
-
-        VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(getBubbleLayer(entity_id));
-
-        // Get the current matrix position
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-
-        // Begin drawing quads with the correct vertex format
-
-        float z = -0.01F;
-        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom left
-        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom right
-        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
-                .overlay(OVERLAY); // top right
-        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
-
-        System.out.println("Drawing entity icon: " + entity_icon_path);
-
-        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
-
-        // Disable blending and depth test
-        GlStateManager._disableBlend();
-        GlStateManager._disableDepthTest();
-
-    }
-
-    private static void drawFriendshipStatus(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height,
-                                             int friendship) {
-        // dynamically calculate friendship ui image name
-        String ui_icon_name = "friendship" + friendship;
-
-        // Set shader
-        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
-
-        // Set texture
-
-        // Enable depth test and blending
-        GlStateManager._enableBlend();
-        //GlStateManager._defaultBlendFunc();
-        GlStateManager._enableDepthTest();
-        GlStateManager._depthMask(true);
-
-        VertexConsumer bufferBuilder = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(ui_icon_name)));
-
-        // Get the current matrix position
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-
-        // Begin drawing quads with the correct vertex format
-
-        float z = -0.01F;
-        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom left
-        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom right
-        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
-                .overlay(OVERLAY); // top right
-        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
-        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
-
-        // Disable blending and depth test
-        GlStateManager._disableBlend();
-        GlStateManager._disableDepthTest();
-    }
-
-
-    private static void drawMessageText(Matrix4f matrix, List<String> lines, int starting_line, int ending_line,
-                                        VertexConsumerProvider immediate, float lineSpacing, int fullBright, float yOffset) {
-        TextRenderer fontRenderer = MinecraftClient.getInstance().textRenderer;
-        int currentLineIndex = 0; // We'll use this to track which line we're on
-
-        for (String lineText : lines) {
-            // Only draw lines that are within the specified range
-            if (currentLineIndex >= starting_line && currentLineIndex < ending_line) {
-                fontRenderer.draw(lineText, -fontRenderer.getWidth(lineText) / 2f, yOffset, 0xffffff,
-                        false, matrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, fullBright);
-                yOffset += fontRenderer.fontHeight + lineSpacing;
-            }
-            currentLineIndex++;
-
-            if (currentLineIndex > ending_line) {
-                break;
-            }
-        }
-    }
     private static <T extends LivingEntity, S extends LivingEntityRenderState> Identifier getTextureIdentifier(MinecraftClient client,S state) {
 
         EntityRenderer<? , ? super S> renderer = client.getEntityRenderDispatcher().getRenderer(state);
@@ -613,66 +674,5 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
             LOGGER.warn("Renderer is not an instance of LivingEntityRenderer for entity: {}", state.customName.getString());
             return Identifier.of("creaturechat", "textures/entity/not_found.png");
         }
-    }
-
-    public static void drawTextBubbleBackground(String base_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width,
-                                                float height, int friendship) {
-        // Set shader & texture
-        //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
-
-        // Enable depth test and blending
-        GlStateManager._enableBlend();
-        //GlStateManager._defaultBlendFunc();
-        GlStateManager._enableDepthTest();
-        GlStateManager._depthMask(true);
-
-        float z = 0.01F;
-
-        // Draw UI text background (based on friendship)
-        // Draw TOP
-        if (friendship == -3 && !base_name.endsWith("-player")) {
-            VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name + "-enemy")));
-            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
-        } else if (friendship == 3 && !base_name.endsWith("-player")) {
-            VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name + "-friend")));
-            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
-
-        } else {
-            VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name)));
-            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
-
-        }
-
-
-        // Draw MIDDLE
-
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI("text-middle")));
-        drawTexturePart(matrices,vertexConsumer,model, x, y + 40, z, width, height);
-
-        // Draw BOTTOM
-        vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI("text-bottom")));
-        drawTexturePart(matrices,vertexConsumer,model, x, y + 40 + height, z, width, 5);
-
-        // Disable blending and depth test
-        GlStateManager._disableBlend();
-        GlStateManager._disableDepthTest();
-    }
-
-    private static void drawTexturePart(MatrixStack matrices, VertexConsumer buffer, EntityModel<?> model, float x, float y, float z,
-                                        float width, float height) {
-
-        // Define the vertices with color, texture, light, and overlay
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-
-        // Begin drawing quads with the correct vertex format
-
-        buffer.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT).overlay(OVERLAY); // bottom left
-        buffer.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom right
-        buffer.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT).overlay(OVERLAY); // top right
-        buffer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top
-        // left
-        model.render(matrices, buffer, LIGHT, OVERLAY);
-
     }
 }
