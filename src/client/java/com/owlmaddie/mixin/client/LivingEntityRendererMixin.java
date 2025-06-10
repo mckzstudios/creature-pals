@@ -62,7 +62,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
                 if (ClientEntityFinder.isChattableEntity(state)) {
                     matrices.push();
-                    renderEntity(matrices,vertexConsumers,state,limbAngle,this.getContextModel());
+                    renderEntity(matrices,vertexConsumers,state,limbAngle,this.getContextModel(), light);
                     matrices.pop();
 
                 }

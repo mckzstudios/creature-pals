@@ -46,7 +46,6 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
     public static int DISPLAY_PADDING = 2;
     public static int ANIMATION_FRAME = 0;
     public static long LAST_TICK = 0;
-    public static int LIGHT = 15728880;
     public static int OVERLAY = OverlayTexture.DEFAULT_UV;
     public static List<Identifier> WHITELIST = new ArrayList<>();
     public static List<Identifier> BLACKLIST = new ArrayList<>();
@@ -62,7 +61,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
     }
 
     public static void drawTextBubbleBackground(String base_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width,
-                                                float height, int friendship) {
+                                                float height, int friendship, int light) {
         // Set shader & texture
         //GlStateManager._setShader(GameRenderer::getPositionColorTexLightmapProgram);
 
@@ -78,14 +77,14 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         // Draw TOP
         if (friendship == -3 && !base_name.endsWith("-player")) {
             VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name + "-enemy")));
-            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
+            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40, light);
         } else if (friendship == 3 && !base_name.endsWith("-player")) {
             VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name + "-friend")));
-            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
+            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40, light);
 
         } else {
             VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI(base_name)));
-            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40);
+            drawTexturePart(matrices, vertexConsumer, model,x - 50, y, z, 228, 40,light);
 
         }
 
@@ -93,11 +92,11 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         // Draw MIDDLE
 
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI("text-middle")));
-        drawTexturePart(matrices,vertexConsumer,model, x, y + 40, z, width, height);
+        drawTexturePart(matrices,vertexConsumer,model, x, y + 40, z, width, height,light);
 
         // Draw BOTTOM
         vertexConsumer = vertexConsumerProvider.getBuffer(getBubbleLayer(TEXTURES.GetUI("text-bottom")));
-        drawTexturePart(matrices,vertexConsumer,model, x, y + 40 + height, z, width, 5);
+        drawTexturePart(matrices,vertexConsumer,model, x, y + 40 + height, z, width, 5,light);
 
         // Disable blending and depth test
         GlStateManager._disableBlend();
@@ -105,24 +104,23 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
     }
 
     private static void drawTexturePart(MatrixStack matrices, VertexConsumer buffer, EntityModel<?> model, float x, float y, float z,
-                                        float width, float height) {
+                                        float width, float height, int light) {
 
         // Define the vertices with color, texture, light, and overlay
         Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
         // Begin drawing quads with the correct vertex format
 
-        buffer.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT).overlay(OVERLAY); // bottom left
-        buffer.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom right
-        buffer.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT).overlay(OVERLAY); // top right
-        buffer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top
+        buffer.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1); // bottom left
+        buffer.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1); // bottom right
+        buffer.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0); // top right
+        buffer.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0); // top
         // left
-        model.render(matrices, buffer, LIGHT, OVERLAY);
+        model.render(matrices, buffer, light, OVERLAY);
 
     }
 
-    public static void drawIcon(String ui_icon_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height) {
+    public static void drawIcon(String ui_icon_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height, int light) {
         // Draw button icon
 
         matrices.push();
@@ -143,15 +141,15 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
         // Begin drawing quads with the correct vertex format
 
-        buffer.vertex(matrix4f, x, y + height, 0.0F).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
+        buffer.vertex(matrix4f, x, y + height, 0.0F).color(255, 255, 255, 255).texture(0, 1).light(light)
                 .overlay(OVERLAY); // bottom left
-        buffer.vertex(matrix4f, x + width, y + height, 0.0F).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
+        buffer.vertex(matrix4f, x + width, y + height, 0.0F).color(255, 255, 255, 255).texture(1, 1).light(light)
                 .overlay(OVERLAY); // bottom right
-        buffer.vertex(matrix4f, x + width, y, 0.0F).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
+        buffer.vertex(matrix4f, x + width, y, 0.0F).color(255, 255, 255, 255).texture(1, 0).light(light)
                 .overlay(OVERLAY); // top right
-        buffer.vertex(matrix4f, x, y, 0.0F).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
+        buffer.vertex(matrix4f, x, y, 0.0F).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(OVERLAY); // top left
 
-        model.render(matrices, buffer, LIGHT, OVERLAY);
+        model.render(matrices, buffer, light, OVERLAY);
 
         matrices.pop();
 
@@ -162,7 +160,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
 
     private static void drawFriendshipStatus(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height,
-                                             int friendship) {
+                                             int friendship, int light) {
         // dynamically calculate friendship ui image name
         String ui_icon_name = "friendship" + friendship;
 
@@ -185,22 +183,19 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         // Begin drawing quads with the correct vertex format
 
         float z = -0.01F;
-        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom left
-        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
-                .overlay(OVERLAY); // bottom right
-        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
-                .overlay(OVERLAY); // top right
-        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
-        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
+        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1); // bottom left
+        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1); // bottom right
+        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0); // top right
+        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0); // top left
 
         // Disable blending and depth test
         GlStateManager._disableBlend();
         GlStateManager._disableDepthTest();
+        model.render(matrices, bufferBuilder, light, OVERLAY);
     }
 
     private static void drawEntityIcon(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, LivingEntityRenderState entity, MinecraftClient client, float x, float y, float width,
-                                       float height) {
+                                       float height, int light) {
         // Get entity renderer
         String entity_icon_path = getTextureIdentifier(client,entity).getPath();
 
@@ -228,26 +223,26 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         // Begin drawing quads with the correct vertex format
 
         float z = -0.01F;
-        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(LIGHT)
+        bufferBuilder.vertex(matrix4f, x, y + height, z).color(255, 255, 255, 255).texture(0, 1).light(light)
                 .overlay(OVERLAY); // bottom left
-        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(LIGHT)
+        bufferBuilder.vertex(matrix4f, x + width, y + height, z).color(255, 255, 255, 255).texture(1, 1).light(light)
                 .overlay(OVERLAY); // bottom right
-        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(LIGHT)
+        bufferBuilder.vertex(matrix4f, x + width, y, z).color(255, 255, 255, 255).texture(1, 0).light(light)
                 .overlay(OVERLAY); // top right
-        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(LIGHT).overlay(OVERLAY); // top left
+        bufferBuilder.vertex(matrix4f, x, y, z).color(255, 255, 255, 255).texture(0, 0).light(light).overlay(OVERLAY); // top left
 
         System.out.println("Drawing entity icon: " + entity_icon_path);
 
-        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
 
         // Disable blending and depth test
         GlStateManager._disableBlend();
         GlStateManager._disableDepthTest();
+        model.render(matrices, bufferBuilder, light, OVERLAY);
 
     }
 
     private static void drawPlayerIcon(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, LivingEntityRenderState entityRenderState, MinecraftClient client, float x, float y, float width,
-                                       float height) {
+                                       float height, int light) {
         // Get player skin texture
         Identifier playerTexture = getTextureIdentifier(client, entityRenderState);
 
@@ -300,13 +295,13 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
                 float scaledHeight = (coords[3] - coords[1]) * scaleFactor;
 
                 bufferBuilder.vertex(matrix4f, scaledX, scaledY + scaledHeight, z)
-                        .color(255, 255, 255, 255).texture(newU1, newV2).light(LIGHT).overlay(OVERLAY);
+                        .color(255, 255, 255, 255).texture(newU1, newV2).light(light).overlay(OVERLAY);
                 bufferBuilder.vertex(matrix4f, scaledX + scaledWidth, scaledY + scaledHeight, z)
-                        .color(255, 255, 255, 255).texture(newU2, newV2).light(LIGHT).overlay(OVERLAY);
+                        .color(255, 255, 255, 255).texture(newU2, newV2).light(light).overlay(OVERLAY);
                 bufferBuilder.vertex(matrix4f, scaledX + scaledWidth, scaledY, z)
-                        .color(255, 255, 255, 255).texture(newU2, newV1).light(LIGHT).overlay(OVERLAY);
+                        .color(255, 255, 255, 255).texture(newU2, newV1).light(light).overlay(OVERLAY);
                 bufferBuilder.vertex(matrix4f, scaledX, scaledY, z)
-                        .color(255, 255, 255, 255).texture(newU1, newV1).light(LIGHT).overlay(OVERLAY);
+                        .color(255, 255, 255, 255).texture(newU1, newV1).light(light).overlay(OVERLAY);
             }
         } else {
             // make skin appear smaller and centered
@@ -322,13 +317,13 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
             float v2 = 16.0F / 64.0F;
 
             bufferBuilder.vertex(matrix4f, x, y + height, z)
-                    .color(255, 255, 255, 255).texture(u1, v2).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(u1, v2).light(light).overlay(OVERLAY);
             bufferBuilder.vertex(matrix4f, x + width, y + height, z)
-                    .color(255, 255, 255, 255).texture(u2, v2).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(u2, v2).light(light).overlay(OVERLAY);
             bufferBuilder.vertex(matrix4f, x + width, y, z)
-                    .color(255, 255, 255, 255).texture(u2, v1).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(u2, v1).light(light).overlay(OVERLAY);
             bufferBuilder.vertex(matrix4f, x, y, z)
-                    .color(255, 255, 255, 255).texture(u1, v1).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(u1, v1).light(light).overlay(OVERLAY);
 
             // Hat layer
             float hatU1 = 40.0F / 64.0F;
@@ -339,19 +334,19 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
             z -= 0.01F;
 
             bufferBuilder.vertex(matrix4f, x, y + height, z)
-                    .color(255, 255, 255, 255).texture(hatU1, hatV2).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(hatU1, hatV2).light(light).overlay(OVERLAY);
             bufferBuilder.vertex(matrix4f, x + width, y + height, z)
-                    .color(255, 255, 255, 255).texture(hatU2, hatV2).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(hatU2, hatV2).light(light).overlay(OVERLAY);
             bufferBuilder.vertex(matrix4f, x + width, y, z)
-                    .color(255, 255, 255, 255).texture(hatU2, hatV1).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(hatU2, hatV1).light(light).overlay(OVERLAY);
             bufferBuilder.vertex(matrix4f, x, y, z)
-                    .color(255, 255, 255, 255).texture(hatU1, hatV1).light(LIGHT).overlay(OVERLAY);
+                    .color(255, 255, 255, 255).texture(hatU1, hatV1).light(light).overlay(OVERLAY);
         }
 
-        model.render(matrices, bufferBuilder, LIGHT, OVERLAY);
         // Disable blending and depth test
         GlStateManager._disableBlend();
         GlStateManager._disableDepthTest();
+        model.render(matrices, bufferBuilder, light, OVERLAY);
     }
 
     private static void drawMessageText(Matrix4f matrix, List<String> lines, int starting_line, int ending_line,
@@ -402,7 +397,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
                 false, matrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, fullBright);
     }
 
-    protected void renderEntity(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, S entityRenderState, float entityYaw, M model ) {
+    protected void renderEntity(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, S entityRenderState, float entityYaw, M model, int light ) {
         float lineSpacing = 1F;
         float textHeaderHeight = 40F;
         float textFooterHeight = 5F;
@@ -412,7 +407,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         TextRenderer fontRenderer = client.textRenderer;
 
         EntityType<?> entityType = entityRenderState.entityType;
-        Vec3d interpolatedCameraPos = client.getCameraEntity().getClientCameraPosVec(0.0F);
+        Vec3d interpolatedCameraPos = client.cameraEntity.getEyePos();
 
 
         // Get entity height (adjust for specific classes)
@@ -429,7 +424,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
             bubblePosition = interpolatedEntityPos.add(0,entityRenderState.standingEyeHeight,0).add(0,paddingAboveEntity,0);
         } else {
             // Calculate the forward offset based on the entity's yaw
-            float entityYawRadians = (float) Math.toRadians(entityYaw);
+            float entityYawRadians = (float) Math.toRadians(entityRenderState.bodyYaw);
             Vec3d forwardOffset = new Vec3d(-Math.sin(entityYawRadians), 0.0, Math.cos(entityYawRadians));
 
             // Calculate the forward offset based on the entity's yaw, scaled to 80% towards
@@ -450,8 +445,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         // Use the body yaw for LivingEntityRenderState
 
         // Calculate the difference vector (from entity + padding above to camera)
-        Vec3d difference = interpolatedCameraPos.subtract(new Vec3d(interpolatedEntityPos.x,
-                interpolatedEntityPos.y + entityHeight + paddingAboveEntity, interpolatedEntityPos.z));
+        Vec3d difference = interpolatedCameraPos.subtract(interpolatedEntityPos.add(0,entityHeight+paddingAboveEntity,0));
 
         // Calculate the yaw angle
         double yaw = -(Math.atan2(difference.z, difference.x) + Math.PI / 2D);
@@ -466,7 +460,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         matrices.multiply(yawRotation);
 
         // Obtain the horizontal distance to the entity
-        double horizontalDistance = Math.sqrt(difference.x * difference.x + difference.z * difference.z);
+        double horizontalDistance = entityRenderState.squaredDistanceToCamera;
         // Calculate the pitch angle based on the horizontal distance and the y
         // difference
         double pitch = Math.atan2(difference.y, horizontalDistance);
@@ -511,14 +505,11 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         if (entityRenderState instanceof PlayerEntityRenderState) {
             chatData = PlayerMessageManager.getMessage(otherPlayerUUID.get());
             playerData = new PlayerData(); // no friendship needed for player messages
-        } else if (entityRenderState instanceof LivingEntityRenderState) {
+        } else {
             chatData = ChatDataManager.getClientInstance().getOrCreateChatData(entityUUID);
-            if (chatData != null) {
+            if (chatData != null && player != null) {
                 playerData = chatData.getPlayerData(player.getUuid());
             }
-        } else {
-            System.out.println("hello");
-            return;
         }
 
         float minTextHeight = (ChatDataManager.DISPLAY_NUM_LINES * (fontRenderer.fontHeight + lineSpacing))
@@ -554,14 +545,14 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
             if (chatData.status == ChatDataManager.ChatStatus.NONE) {
                 // AAA if chatData.status == ChatDataManage.ChatStatus.None
                 // Draw 'start chat' button
-                drawIcon("button-chat", matrices, vertexConsumerProvider, model, -16, textHeaderHeight, 32, 17);
+                drawIcon("button-chat", matrices, vertexConsumerProvider, model, -16, textHeaderHeight, 32, 17, light);
 
                 // Draw Entity (Custom Name)
                 drawEntityName(((LivingEntityRenderState) entityRenderState), matrix, vertexConsumerProvider, fullBright, 24F + DISPLAY_PADDING, true);
 
             } else if (chatData.status == ChatDataManager.ChatStatus.PENDING) {
                 // Draw 'pending' button
-                drawIcon("button-dot-" + ANIMATION_FRAME, matrices, vertexConsumerProvider, model,-16, textHeaderHeight, 32, 17);
+                drawIcon("button-dot-" + ANIMATION_FRAME, matrices, vertexConsumerProvider, model,-16, textHeaderHeight, 32, 17, light);
 
             } else if (chatData.sender == ChatDataManager.ChatSender.ASSISTANT
                     && chatData.status != ChatDataManager.ChatStatus.HIDDEN) {
@@ -570,22 +561,22 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
                 // Draw text background (no smaller than 50F tall)
                 drawTextBubbleBackground("text-top", matrices, vertexConsumerProvider, model,-64, 0, 128, scaledTextHeight,
-                        playerData.friendship);
+                        playerData.friendship,light);
 
                 // Draw face icon of entity
-                drawEntityIcon(matrices, vertexConsumerProvider, model, entityRenderState,client, -82, 7, 32, 32);
+                drawEntityIcon(matrices, vertexConsumerProvider, model, entityRenderState,client, -82, 7, 32, 32, light);
 
                 // Draw Friendship status
-                drawFriendshipStatus(matrices, vertexConsumerProvider, model,51, 18, 31, 21, playerData.friendship);
+                drawFriendshipStatus(matrices, vertexConsumerProvider, model,51, 18, 31, 21, playerData.friendship, light);
 
                 // Draw 'arrows' & 'keyboard' buttons
                 if (chatData.currentLineNumber > 0) {
-                    drawIcon("arrow-left", matrices, vertexConsumerProvider, model,-63, scaledTextHeight + 29, 16, 16);
+                    drawIcon("arrow-left", matrices, vertexConsumerProvider, model,-63, scaledTextHeight + 29, 16, 16, light);
                 }
                 if (!chatData.isEndOfMessage()) {
-                    drawIcon("arrow-right", matrices, vertexConsumerProvider, model,47, scaledTextHeight + 29, 16, 16);
+                    drawIcon("arrow-right", matrices, vertexConsumerProvider, model,47, scaledTextHeight + 29, 16, 16, light);
                 } else {
-                    drawIcon("keyboard", matrices, vertexConsumerProvider, model,47, scaledTextHeight + 28, 16, 16);
+                    drawIcon("keyboard", matrices, vertexConsumerProvider, model,47, scaledTextHeight + 28, 16, 16, light);
                 }
 
                 // Render each line of the text
@@ -600,13 +591,13 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
                 // Draw 'resume chat' button
                 if (playerData.friendship == 3) {
                     // Friend chat bubble
-                    drawIcon("button-chat-friend", matrices, vertexConsumerProvider,model,-16, textHeaderHeight, 32, 17);
+                    drawIcon("button-chat-friend", matrices, vertexConsumerProvider,model,-16, textHeaderHeight, 32, 17, light);
                 } else if (playerData.friendship == -3) {
                     // Enemy chat bubble
-                    drawIcon("button-chat-enemy", matrices, vertexConsumerProvider,model,-16, textHeaderHeight, 32, 17);
+                    drawIcon("button-chat-enemy", matrices, vertexConsumerProvider,model,-16, textHeaderHeight, 32, 17, light);
                 } else {
                     // Normal chat bubble
-                    drawIcon("button-chat", matrices, vertexConsumerProvider,model,-16, textHeaderHeight, 32, 17);
+                    drawIcon("button-chat", matrices, vertexConsumerProvider,model,-16, textHeaderHeight, 32, 17, light);
                 }
 
             } else if (chatData.sender == ChatDataManager.ChatSender.USER
@@ -616,10 +607,10 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
                 // Draw text background
                 drawTextBubbleBackground("text-top-player", matrices, vertexConsumerProvider,model,-64, 0, 128, scaledTextHeight,
-                        playerData.friendship);
+                        playerData.friendship, light);
 
                 // Draw face icon of player
-                drawPlayerIcon(matrices, vertexConsumerProvider, model, entityRenderState, client, -75, 14, 18, 18);
+                drawPlayerIcon(matrices, vertexConsumerProvider, model, entityRenderState, client, -75, 14, 18, 18, light);
 
                 // Render each line of the player's text
                 drawMessageText(matrix, lines, starting_line, ending_line, vertexConsumerProvider, lineSpacing, fullBright,
@@ -648,7 +639,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
                 if (showPendingIcon) {
                     // Draw 'pending' button (when Chat UI is open)
-                    drawIcon("button-dot-" + ANIMATION_FRAME, matrices,vertexConsumerProvider, model,-16, textHeaderHeight, 32, 17);
+                    drawIcon("button-dot-" + ANIMATION_FRAME, matrices,vertexConsumerProvider, model,-16, textHeaderHeight, 32, 17, light);
                 }
             }
         }
@@ -658,6 +649,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         if (ANIMATION_FRAME > 8) {
             ANIMATION_FRAME = 0;
         }
+
 
     }
 
