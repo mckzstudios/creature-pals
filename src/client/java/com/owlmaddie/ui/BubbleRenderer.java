@@ -405,17 +405,17 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         TextRenderer fontRenderer = client.textRenderer;
 
         EntityType<?> entityType = entityRenderState.entityType;
-        Vec3d interpolatedCameraPos = new Vec3d(entityRenderState.x, entityRenderState.y, entityRenderState.z).relativize(client.cameraEntity.getEyePos());
-        System.out.println(interpolatedCameraPos);
+        float paddingAboveEntity = 0.4f;
+
+        float height = EntityHeights.getAdjustedEntityHeight(entityType) + paddingAboveEntity;
+
+        Vec3d difference = client.cameraEntity.getEyePos().relativize(new Vec3d(entityRenderState.x, entityRenderState.y+height, entityRenderState.z));
 
         // Get entity height (adjust for specific classes)
-        float entityHeight = EntityHeights.getAdjustedEntityHeight(entityType);
 
         // Interpolate entity position (smooth motion)
-        float paddingAboveEntity = 0.4f;
         // Determine the chat bubble position
         Vec3d bubblePosition;
-        float height = entityRenderState.standingEyeHeight + paddingAboveEntity;
 
         if (entityType == EntityType.ENDER_DRAGON) {
             // Interpolate the head position
@@ -444,11 +444,9 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         UUID entityUUID = ((EntityRendererUUID) entityRenderState).getEntityUUID();
         // Use the body yaw for LivingEntityRenderState
 
-        // Calculate the difference vector (from entity + padding above to camera)
-        Vec3d difference =interpolatedCameraPos.subtract( bubblePosition);
 
         // Calculate the yaw angle
-        double yaw = (Math.atan2(difference.z, difference.x) + Math.PI / 2D);
+        double yaw = (Math.atan2(-difference.z, -difference.x) + Math.PI / 2D);
 
         // Convert yaw to Quaternion
         float halfYaw = (float) yaw * 0.5f;
@@ -463,16 +461,17 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         double horizontalDistance = Math.sqrt(difference.x * difference.x + difference.z * difference.z);
         // Calculate the pitch angle based on the horizontal distance and the y
         // difference
-        double pitch = Math.atan2(horizontalDistance,difference.y );
+        double pitch = Math.atan2(-difference.y,-horizontalDistance );
 
         // Convert pitch to Quaternion
         float halfPitch = (float) pitch * 0.5f;
         double sinHalfPitch = MathHelper.sin(halfPitch);
         double cosHalfPitch = MathHelper.cos(halfPitch);
-        Quaternionf pitchRotation = new Quaternionf(sinHalfPitch, 0, 0, cosHalfPitch);
+        Quaternionf pitchRotation = new Quaternionf(sinHalfPitch, 0, 0, -cosHalfPitch);
 
         // Apply the pitch rotation to the matrix stack
         matrices.multiply(pitchRotation);
+
 
 
         // Get position matrix
