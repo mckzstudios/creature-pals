@@ -9,6 +9,7 @@ import com.mojang.blaze3d.textures.GpuTexture;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.gl.Defines;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gl.UniformType;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexFormats;
@@ -20,12 +21,11 @@ import java.util.Optional;
 
 public class BubblePipeline {
     public static RenderPipeline BUBBLE_PIPELINE =
-        RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+        RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
                 .withLocation(Identifier.of("creaturechat", "pipelines/bubble"))
                 .withBlend(BlendFunction.TRANSLUCENT)
                 .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
                 .withCull(false)
-
                 .withVertexFormat(VertexFormats.POSITION_COLOR_TEXTURE_LIGHT, VertexFormat.DrawMode.QUADS)
                 .build();
 
