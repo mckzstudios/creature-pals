@@ -28,8 +28,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.TriState;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4d;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,7 +123,6 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
     public static void drawIcon(String ui_icon_name, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, EntityModel<?> model, float x, float y, float width, float height, int light) {
         // Draw button icon
 
-        matrices.push();
         RenderPhase.Texture button_texture = TEXTURES.GetUI(ui_icon_name);
         // Set shader & texture
 
@@ -149,7 +150,6 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
         model.render(matrices, buffer, light, OVERLAY);
 
-        matrices.pop();
 
         // Disable blending and depth test
         GlStateManager._disableBlend();
@@ -376,6 +376,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
         EntityType<?> entityType = entityRenderState.entityType;
         if (entityType.getBaseClass().isInstance(MobEntity.class)) {
             // Custom Name Tag (MobEntity)
+
             if (entityRenderState.customName != null) {
                 nameText = entityRenderState.customName.getString();
             }
@@ -409,9 +410,8 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
         float height = EntityHeights.getAdjustedEntityHeight(entityType) + paddingAboveEntity;
 
-        Vec3d entityPosition = new Vec3d(entityRenderState.x, entityRenderState.y + height, entityRenderState.z);
-        Vec3d difference = client.cameraEntity.getEyePos().relativize(entityPosition);
-
+        Vec3d entityPosition = new Vec3d(entityRenderState.x, entityRenderState.y+height, entityRenderState.z);
+        Vec3d difference = entityPosition.relativize(client.cameraEntity.getEyePos());
         // Get entity height (adjust for specific classes)
 
         // Interpolate entity position (smooth motion)
@@ -432,7 +432,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
             // Calculate the position of the chat bubble: above the head and 80% towards the
             // front
-            bubblePosition = new Vec3d(0,height,0).add(scaledForwardOffset);
+            bubblePosition = new Vec3d(0,height,0);//.add(scaledForwardOffset);
         }
 
         // Translate to the chat bubble's position
@@ -442,36 +442,27 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
         matrices.translate(bubblePosition);
 
+        Camera camera = client.gameRenderer.getCamera();
+        Quaternionf rot = camera.getRotation();
+        Vector3f vert = camera.getVerticalPlane();
+        Vector3f cameraPos = camera.getPos().subtract(entityPosition).toVector3f();
+
+        //Quaternionf quat = new Quaternionf().setFromUnnormalized(new Matrix4f().billboardSpherical(bubblePosition.toVector3f(),cameraPos));
+
+        System.out.println(bubblePosition);
+        System.out.println(camera.getPos().subtract(entityPosition));
+
+        //matrices.multiply(rot.conjugate().invert().conjugate());
+
+        matrices.multiply(rot.conjugate().invert().conjugate());
+        matrices.multiply(new Quaternionf().rotateX((float) Math.PI ));
+
+
         UUID entityUUID = ((EntityRendererUUID) entityRenderState).getEntityUUID();
         // Use the body yaw for LivingEntityRenderState
 
 
-        // Calculate the yaw angle
-        double yaw = (Math.atan2(-difference.z, -difference.x) + Math.PI / 2D);
 
-        // Convert yaw to Quaternion
-        float halfYaw = (float) yaw * 0.5f;
-        double sinHalfYaw = MathHelper.sin(halfYaw);
-        double cosHalfYaw = MathHelper.cos(halfYaw);
-        Quaternionf yawRotation = new Quaternionf(0, sinHalfYaw, 0, cosHalfYaw);
-
-        // Apply the yaw rotation to the matrix stack
-        matrices.multiply(yawRotation);
-
-        // Obtain the horizontal distance to the entity
-        double horizontalDistance = Math.sqrt(difference.x * difference.x + difference.z * difference.z);
-        // Calculate the pitch angle based on the horizontal distance and the y
-        // difference
-        double pitch = Math.atan2(-difference.y,-horizontalDistance );
-
-        // Convert pitch to Quaternion
-        float halfPitch = (float) pitch * 0.5f;
-        double sinHalfPitch = MathHelper.sin(halfPitch);
-        double cosHalfPitch = MathHelper.cos(halfPitch);
-        Quaternionf pitchRotation = new Quaternionf(sinHalfPitch, 0, 0, -cosHalfPitch);
-
-        // Apply the pitch rotation to the matrix stack
-        matrices.multiply(pitchRotation);
 
 
 
@@ -534,13 +525,13 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
             // Update Bubble Data for Click Handling using UUID (account for scaling)
             BubbleLocationManager.updateBubbleData(entityUUID, entityPosition,
-                    128F / (1 / 0.02F), (scaledTextHeight + 25F) / (1 / 0.02F), yaw, entityRenderState.pitch);
+                    128F / (1 / 0.02F), (scaledTextHeight + 25F) / (1 / 0.02F), 0, entityRenderState.pitch);
 
             // Scale down before rendering textures (otherwise font is huge)
-            matrices.scale(-0.02F, -0.02F, 0.02F);
+            matrices.scale(0.02F, 0.02F, 0.02F);
 
             // Translate above the entity
-            matrices.translate(0F, -scaledTextHeight - textHeaderHeight - textFooterHeight, 0F);
+            //matrices.translate(0F, -scaledTextHeight - textHeaderHeight - textFooterHeight, 0F);
 
             // Check if conversation has started
             if (chatData.status == ChatDataManager.ChatStatus.NONE) {
