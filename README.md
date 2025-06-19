@@ -12,12 +12,16 @@ Create meaningful conversations and enduring friendships? Watch the mobs and AI 
 ## What is CreatureChat Evolved?
 **CreatureChat Evolved** is a Minecraft mod that lets you chat with any creature in the game using AI. With built-in [Player2](https://player2.game/) integration, creatures can speak, remember past interactions, and react dynamically to your actions — no extra setup required. 
 
-## Features
+## New Features Compared to CreatureChat
 - **No LLM/API Setup:** All you need is the [Player2 App](https://player2.game/), no need to set up your own API account.
+- **Multi-Player:** New chat system that allow players including AI player to chat with mobs through Minecraft's own messaging system.
+- **Version Updates:** Re-write particle effects to supports 1.21.1 Fabric and Neoforge
+- **Coming:** TTS/STT capabilities
+
+## Maintained features from CreatureChat
 - **Behaviors:** Creatures can make decisions on their own and **Follow, Flee, Attack, Protect**, and more!
 - **Reactions:** Creatures automatically react to being damaged or receiving items from players.
 - **Friendship:** Track your relationships from friends to foes.
-- **Multi-Player:** Share the experience; conversations sync across server & players.
 - **Memory:** Creatures remember your past interactions, making each chat more personal.
 
 
