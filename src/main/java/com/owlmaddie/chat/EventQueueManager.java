@@ -1,10 +1,7 @@
 package com.owlmaddie.chat;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,17 +38,6 @@ public class EventQueueManager {
         return System.nanoTime() <= lastErrorTime + waitTimeAfterError;
     }
 
-    // TODO : look for all stuff like this:
-    // public static void updateUUID(String oldUUID, String newUUID) {
-    // EventQueueData data = queueData.remove(oldUUID);
-    // if (data == null) {
-    // LOGGER.info("Unable to update chat data, UUID not found: " + oldUUID);
-    // return;
-    // }
-    // data.updateUUID(newUUID);
-    // queueData.put(newUUID, data);
-
-    // }
 
     public static void addEntityIdToCreate(UUID entityId) {
         entityIdsToAdd.add(entityId);
@@ -65,7 +51,6 @@ public class EventQueueManager {
     }
 
     public static void addUserMessage(Entity entity, String userLanguage, ServerPlayerEntity player, String userMessage,
-
             boolean is_auto_message, boolean shouldImmediatlyPoll) {
         EventQueueData q = getOrCreateQueueData(entity.getUuid(), entity);
         q.addUserMessage(userLanguage, player, userMessage, is_auto_message);

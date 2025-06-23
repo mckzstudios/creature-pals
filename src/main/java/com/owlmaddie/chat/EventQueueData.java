@@ -297,7 +297,6 @@ public class EventQueueData {
             chatData.setStatus(ChatStatus.DISPLAY);
             return;
         }
-        // TODO: BROADCAST ENTITY MESSAGE HERE:
         if (entity.getCustomName() == null) {
             return;
         }
@@ -311,7 +310,6 @@ public class EventQueueData {
         // EventQueueManager.addEntityMessageToAllClose(entity,
         // lastMessageData.userLanguage, lastMessageData.player, message,
         // entityCustomName, entityType);
-
     }
 
     public void onGreetingGenerated(String message) {
