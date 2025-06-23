@@ -118,7 +118,7 @@ public class Player2APIService {
 
     public static List<String> getVoices() {
     try {
-        Map<String, JsonElement> responseMap = sendRequest("/v1/tts/speak", false, null);
+        Map<String, JsonElement> responseMap = sendRequest("/v1/tts/voices", false, null);
         JsonElement voicesJsonElement = responseMap.get("voices");
         JsonArray voicesJsonArray = voicesJsonElement.getAsJsonArray();
 
