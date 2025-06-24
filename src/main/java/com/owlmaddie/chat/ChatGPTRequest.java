@@ -209,6 +209,7 @@ public class ChatGPTRequest {
 
                 // Check for error message in response
                 if (connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
+                    LOGGER.error(String.format("BAD RESPONSE CODE %d", connection.getResponseCode()));
                     try (BufferedReader errorReader = new BufferedReader(
                             new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
                         String errorLine;
@@ -219,6 +220,7 @@ public class ChatGPTRequest {
 
                         // Parse and log the error response using Gson
                         String cleanError = parseAndLogErrorResponse(errorResponse.toString());
+                        System.out.println(String.format("CHATGPT ERROR : %s", errorResponse.toString()));
                         lastErrorMessage = cleanError;
                     } catch (Exception e) {
                         LOGGER.error("Failed to read error response", e);
@@ -226,7 +228,7 @@ public class ChatGPTRequest {
                     }
                     return null;
                 } else {
-                    lastErrorMessage = null;
+                    // lastErrorMessage = null;
                 }
 
                 try (BufferedReader br = new BufferedReader(

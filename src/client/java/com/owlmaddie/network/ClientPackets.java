@@ -138,7 +138,6 @@ public class ClientPackets {
                 }
                 if(status == ChatStatus.DISPLAY){
                     TTS.speak(message, entityId);
-
                 }
             });
         });

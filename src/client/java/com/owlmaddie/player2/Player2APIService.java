@@ -116,19 +116,17 @@ public class Player2APIService {
         }
     }
 
-    public static List<String> getVoices() {
+    public static List<JsonObject> getVoices() {
     try {
         Map<String, JsonElement> responseMap = sendRequest("/v1/tts/voices", false, null);
         JsonElement voicesJsonElement = responseMap.get("voices");
         JsonArray voicesJsonArray = voicesJsonElement.getAsJsonArray();
 
-        List<String> voiceIds = new ArrayList<>();
+        List<JsonObject> voiceIds = new ArrayList<>();
         for (JsonElement voiceElement : voicesJsonArray) {
             JsonObject voiceObject = voiceElement.getAsJsonObject();
-            String id = voiceObject.get("id").getAsString();
-            voiceIds.add(id);
+            voiceIds.add(voiceObject);
         }
-
         return voiceIds;
     } catch (Exception e) {
         System.err.println("Failed to get voices: " + e.getMessage());

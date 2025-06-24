@@ -8,10 +8,15 @@ import com.owlmaddie.particle.ClientParticle;
 import com.owlmaddie.particle.CreatureParticleFactory;
 import com.owlmaddie.particle.Particles;
 import com.owlmaddie.player2.HeartbeatManager;
+import com.owlmaddie.player2.TTS;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.ClickHandler;
 import com.owlmaddie.ui.PlayerMessageManager;
+import com.owlmaddie.ui.TTSToggleButton;
+
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
@@ -47,6 +52,11 @@ public class ClientInit implements ClientModInitializer {
             PlayerMessageManager.tickUpdate();
             // AAA add client ontick handlers here
             HeartbeatManager.injectIntoOnTick();
+            // STT.handleTick();
+            if(TTSToggleButton.tick()){
+                TTS.enabled = !TTS.enabled;
+            }
+
         });
 
         // Register events
@@ -57,13 +67,14 @@ public class ClientInit implements ClientModInitializer {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
             BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getTickDelta(false));
         });
-
+        
+        
         // Register an event callback for when the client disconnects from a server or
         // changes worlds
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             // Clear or reset the ChatDataManager
             ChatDataManager.getClientInstance().clearData();
         });
-
+        
     }
 }

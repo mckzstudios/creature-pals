@@ -12,21 +12,45 @@ import org.spongepowered.include.com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class TTS {
+    static class PerEntityTTS {
+        public String voiceId;
+        public String lastMessage;
+        public PerEntityTTS(String voiceId, String lastMessage) {
+            this.voiceId = voiceId;
+            this.lastMessage = lastMessage;
+        }
+    }
     public static final ExecutorService ttsThread = Executors.newSingleThreadExecutor();
-    public static ConcurrentHashMap<UUID, String> voiceIds = new ConcurrentHashMap<>();
-    public static List<String> voices = null;
+    public static ConcurrentHashMap<UUID, PerEntityTTS> entityTTSData = new ConcurrentHashMap<>();
+    public static List<String> englishVoices = null;
+    public static boolean enabled = true;
     private static final Random random = new Random();
 
     public static void speak(String message, UUID entityId) {
+        if(!enabled){
+            return;
+        }
         ttsThread.submit(() -> {
-            voiceIds.computeIfAbsent(entityId, id -> {
-                if (voices == null) {
-                    voices = Player2APIService.getVoices();
+            entityTTSData.computeIfAbsent(entityId, id -> {
+                if (englishVoices == null) {
+                    List<JsonObject> voices = Player2APIService.getVoices();
+                    englishVoices = voices.stream().filter(jsonV -> {
+                        String language = jsonV.get("language").getAsString();
+                        return language.equals("american_english") || language.equals("british_english");
+                    }).map(jsonV -> {
+                        return jsonV.get("id").getAsString();
+                    }).toList();
                 }
-                int index = random.nextInt(voices.size());
-                return voices.get(index);
+                int index = random.nextInt(englishVoices.size());
+                PerEntityTTS data =  new PerEntityTTS(englishVoices.get(index), "");
+                return data;
             });
-            Player2APIService.textToSpeech(message, voiceIds.get(entityId));
+            PerEntityTTS data = entityTTSData.get(entityId);
+            if(data.lastMessage.equals(message)){
+                return;
+            }
+            data.lastMessage = message;
+            Player2APIService.textToSpeech(message, data.voiceId);
         });
     }
 
