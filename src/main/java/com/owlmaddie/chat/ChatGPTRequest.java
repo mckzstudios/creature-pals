@@ -210,6 +210,11 @@ public class ChatGPTRequest {
                 // Check for error message in response
                 if (connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
                     LOGGER.error(String.format("BAD RESPONSE CODE %d", connection.getResponseCode()));
+                    LOGGER.error(String.format(connection.getResponseMessage()));
+                    if(connection.getErrorStream() == null){
+                        lastErrorMessage = "Internal server error, Try restarting player2";
+                        return null;
+                    }
                     try (BufferedReader errorReader = new BufferedReader(
                             new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
                         String errorLine;
