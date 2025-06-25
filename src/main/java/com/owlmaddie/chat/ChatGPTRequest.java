@@ -243,7 +243,10 @@ public class ChatGPTRequest {
                     ChatGPTResponse chatGPTResponse = gsonOutput.fromJson(response.toString(), ChatGPTResponse.class);
                     if (chatGPTResponse != null && chatGPTResponse.choices != null
                             && !chatGPTResponse.choices.isEmpty()) {
-                        String content = chatGPTResponse.choices.get(0).message.content;
+                                String content = chatGPTResponse.choices.get(0).message.content;
+                            if(content == null){
+                                return "";
+                            }
                         return content;
                     } else {
                         lastErrorMessage = "Failed to parse response from LLM";

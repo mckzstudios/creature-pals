@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
+import com.owlmaddie.chat.ChatDataManager.ChatSender;
 import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.network.C2S.*;
 import com.owlmaddie.network.S2C.*;
@@ -136,7 +137,7 @@ public class ClientPackets {
                 if (entity != null) {
                     playNearbyUISound(client, entity, 0.2f);
                 }
-                if(status == ChatStatus.DISPLAY){
+                if(status == ChatStatus.DISPLAY && chatData.sender == ChatSender.ASSISTANT){
                     TTS.speak(message, entityId);
                 }
             });
