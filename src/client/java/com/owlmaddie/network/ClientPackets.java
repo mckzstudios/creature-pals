@@ -5,8 +5,11 @@ import com.google.gson.reflect.TypeToken;
 import com.owlmaddie.chat.ChatDataManager;
 import com.owlmaddie.chat.EntityChatData;
 import com.owlmaddie.chat.PlayerData;
+import com.owlmaddie.chat.ChatDataManager.ChatSender;
+import com.owlmaddie.chat.ChatDataManager.ChatStatus;
 import com.owlmaddie.network.C2S.*;
 import com.owlmaddie.network.S2C.*;
+import com.owlmaddie.player2.TTS;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.PlayerMessageManager;
 import com.owlmaddie.utils.ClientEntityFinder;
@@ -127,12 +130,15 @@ public class ClientPackets {
                 chatData.currentLineNumber = line;
                 chatData.status = ChatDataManager.ChatStatus.valueOf(payload.status());
                 chatData.sender = ChatDataManager.ChatSender.valueOf(payload.sender());
-                chatData.players = players;
+                chatData.players = players == null? chatData.players : players;
 
                 // Play sound with volume based on distance (from player or entity)
                 MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
                 if (entity != null) {
                     playNearbyUISound(client, entity, 0.2f);
+                }
+                if(status == ChatStatus.DISPLAY && chatData.sender == ChatSender.ASSISTANT){
+                    TTS.speak(message, entityId);
                 }
             });
         });
