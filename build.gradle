@@ -145,7 +145,7 @@ task buildAllVersions {
 			def modVersion = file("gradle.properties").readLines().find { it.startsWith("mod_version=") }?.split("=")[1]?.trim()
 
 			// BUILD WRAPPED FORGE JAR FILE
-			if (v.mc == "1.20.1") {
+			if (v.mc == "1.21.1") {
 				println "Building Forge version for 1.20.1"
 
 
@@ -216,7 +216,7 @@ task buildAllVersions {
 					from "build/libs"
 					include "creaturechat-*.jar"
 					into "build/outputs"
-					rename { "creaturechatevolved-${modVersion}-1.20.1-forge.jar" }
+					rename { "creaturechatevolved-${modVersion}-${v.mc}-forge.jar" }
 					duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 				}
 
