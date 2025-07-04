@@ -410,7 +410,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
         float height = EntityHeights.getAdjustedEntityHeight(entityType) + paddingAboveEntity;
 
-        Vec3d entityPosition = new Vec3d(entityRenderState.x, entityRenderState.y+height, entityRenderState.z);
+        Vec3d entityPosition = new Vec3d(entityRenderState.x, entityRenderState.y, entityRenderState.z);
         Vec3d difference = entityPosition.relativize(client.cameraEntity.getEyePos());
         // Get entity height (adjust for specific classes)
 
@@ -440,23 +440,15 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
 
 
-        matrices.translate(bubblePosition);
+        //matrices.translate(bubblePosition);
 
         Camera camera = client.gameRenderer.getCamera();
-        Quaternionf rot = camera.getRotation();
-        Vector3f vert = camera.getVerticalPlane();
-        Vector3f cameraPos = camera.getPos().subtract(entityPosition).toVector3f();
+        Vector3f cameraPos = camera.getPos().subtract(entityPosition).subtract(bubblePosition).toVector3f();
 
-        //Quaternionf quat = new Quaternionf().setFromUnnormalized(new Matrix4f().billboardSpherical(bubblePosition.toVector3f(),cameraPos));
+        Quaternionf quat = new Quaternionf().setFromUnnormalized(new Matrix4f().billboardCylindrical(new Vector3f(0,0,0),cameraPos, camera.getVerticalPlane()));
 
-        System.out.println(bubblePosition);
-        System.out.println(camera.getPos().subtract(entityPosition));
 
-        //matrices.multiply(rot.conjugate().invert().conjugate());
-
-        matrices.multiply(rot.conjugate().invert().conjugate());
-        matrices.multiply(new Quaternionf().rotateX((float) Math.PI ));
-
+        matrices.multiply(quat.invert());
 
         UUID entityUUID = ((EntityRendererUUID) entityRenderState).getEntityUUID();
         // Use the body yaw for LivingEntityRenderState
@@ -525,7 +517,7 @@ public abstract class BubbleRenderer<S extends LivingEntityRenderState, M extend
 
             // Update Bubble Data for Click Handling using UUID (account for scaling)
             BubbleLocationManager.updateBubbleData(entityUUID, entityPosition,
-                    128F / (1 / 0.02F), (scaledTextHeight + 25F) / (1 / 0.02F), 0, entityRenderState.pitch);
+                    128F / (1 / 0.02F), (scaledTextHeight + 25F) / (1 / 0.02F), entityRenderState.bodyYaw, entityRenderState.pitch);
 
             // Scale down before rendering textures (otherwise font is huge)
             matrices.scale(0.02F, 0.02F, 0.02F);
