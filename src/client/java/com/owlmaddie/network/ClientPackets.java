@@ -147,16 +147,20 @@ public class ClientPackets {
                         chatData.sender = sender;
                         chatData.players = players == null ? chatData.players : players;
 
-                        // Play sound with volume based on distance (from player or entity)
-                        MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
-                        if (entity != null) {
-                            playNearbyUISound(client, entity, 0.2f);
-                        }
-                        if (status == ChatStatus.DISPLAY && chatData.sender == ChatSender.ASSISTANT) {
-                            TTS.speak(message, entityId);
-                        }
-                    });
-                });
+                // Play sound with volume based on distance (from player or entity)
+                MobEntity entity = ClientEntityFinder.getEntityByUUID(client.world, entityId);
+                if (entity != null) {
+                    playNearbyUISound(client, entity, 0.2f);
+                }
+                if(status == ChatStatus.DISPLAY && chatData.sender == ChatSender.ASSISTANT){
+                    if(message.contains("Error:")){
+                        // for now skip error
+                        return;
+                    }
+                    TTS.speak(message, entityId);
+                }
+            });
+        });
 
         // Client-side packet handler, message sync
         ClientPlayNetworking.registerGlobalReceiver(ServerPackets.PACKET_S2C_PLAYER_MESSAGE,
