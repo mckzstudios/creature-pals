@@ -67,8 +67,8 @@ public class MixinMobEntity {
 
         // Get chat data for entity
         ChatDataManager chatDataManager = ChatDataManager.getServerInstance();
-        EntityChatData entityData = chatDataManager.getOrCreateChatData(thisEntity.getUuidAsString());
-        PlayerData playerData = entityData.getPlayerData(player.getDisplayName().getString());
+        EntityChatData entityData = chatDataManager.getOrCreateChatData(thisEntity.getUuid());
+        PlayerData playerData = entityData.getPlayerData(player.getUuid());
 
         // Check if the player successfully interacts with an item
         if (player instanceof ServerPlayerEntity) {
@@ -92,7 +92,7 @@ public class MixinMobEntity {
                         && entityData.auto_generated < chatDataManager.MAX_AUTOGENERATE_RESPONSES) {
                     // ServerPackets.generate_chat("N/A", entityData, serverPlayer, thisEntity, giveItemMessage, true);
                     EventQueueManager.addUserMessage(thisEntity, "N/A", serverPlayer,
-                            giveItemMessage, true, false);
+                            giveItemMessage, true);
                 }
 
             } else if (itemStack.isEmpty() && playerData.friendship == 3) {

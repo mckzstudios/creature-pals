@@ -2,8 +2,8 @@ package com.owlmaddie.chat;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.owlmaddie.chat.ChatDataManager.ChatSender;
 import com.owlmaddie.chat.ChatDataManager.ChatStatus;
-import com.owlmaddie.chat.MessageData.MessageDataType;
 import com.owlmaddie.commands.ConfigurationHandler;
 import com.owlmaddie.controls.SpeedControls;
 import com.owlmaddie.goals.*;
@@ -48,7 +48,7 @@ import static com.owlmaddie.network.ServerPackets.*;
  */
 public class EntityChatData {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
-    public String entityId;
+    public UUID entityId;
     public String currentMessage;
     public int currentLineNumber;
     public ChatDataManager.ChatStatus status;
@@ -58,6 +58,8 @@ public class EntityChatData {
     public List<ChatMessage> previousMessages;
     public Long born;
     public Long death;
+    public ServerPlayerEntity lastPlayer;
+    public ChatMessage errorMessage = null;
 
     @SerializedName("playerId")
     @Expose(serialize = false)
@@ -68,9 +70,9 @@ public class EntityChatData {
     public Integer legacyFriendship;
 
     // The map to store data for each player interacting with this entity
-    public Map<String, PlayerData> players;
+    public Map<UUID, PlayerData> players;
 
-    public EntityChatData(String entityId) {
+    public EntityChatData(UUID entityId) {
         this.entityId = entityId;
         this.players = new HashMap<>();
         this.currentMessage = "";
@@ -81,6 +83,7 @@ public class EntityChatData {
         this.auto_generated = 0;
         this.previousMessages = new ArrayList<>();
         this.born = System.currentTimeMillis();
+        this.lastPlayer = null;
 
         // Old, unused migrated properties
         this.legacyPlayerId = null;
@@ -101,7 +104,7 @@ public class EntityChatData {
     // Migrate old data into the new structure
     private void migrateData() {
         // Ensure the blank player data entry exists
-        PlayerData blankPlayerData = this.players.computeIfAbsent("", k -> new PlayerData());
+        PlayerData blankPlayerData = this.players.computeIfAbsent(UUID.fromString(""), k -> new PlayerData());
 
         // Update the previousMessages arraylist and add timestamps if missing
         if (this.previousMessages != null) {
@@ -125,7 +128,7 @@ public class EntityChatData {
     }
 
     // Get the player data (or fallback to the blank player)
-    public PlayerData getPlayerData(String playerName) {
+    public PlayerData getPlayerData(UUID playerId) {
         if (this.players == null) {
             return new PlayerData();
         }
@@ -135,21 +138,21 @@ public class EntityChatData {
             // If a blank migrated legacy entity is found, always return this
             return this.players.get("");
 
-        } else if (this.players.containsKey(playerName)) {
+        } else if (this.players.containsKey(playerId)) {
             // Return a specific player's data
-            return this.players.get(playerName);
+            return this.players.get(playerId);
 
         } else {
             // Return a blank player data
             PlayerData newPlayerData = new PlayerData();
-            this.players.put(playerName, newPlayerData);
+            this.players.put(playerId, newPlayerData);
             return newPlayerData;
         }
     }
 
     // Generate light version of chat data (no previous messages)
-    public EntityChatDataLight toLightVersion(String playerName) {
-        return new EntityChatDataLight(this, playerName);
+    public EntityChatDataLight toLightVersion(UUID playerId) {
+        return new EntityChatDataLight(this, playerId);
     }
 
     public String getCharacterProp(String propertyName) {
@@ -230,7 +233,7 @@ public class EntityChatData {
 
         // Get Entity details
         MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
-                UUID.fromString(entityId));
+                entityId);
         if (entity.getCustomName() == null) {
             contextData.put("entity_name", "");
         } else {
@@ -253,7 +256,7 @@ public class EntityChatData {
             contextData.put("entity_maturity", "Adult");
         }
 
-        PlayerData playerData = this.getPlayerData(player.getDisplayName().getString());
+        PlayerData playerData = this.getPlayerData(player.getUuid());
         if (playerData != null) {
             contextData.put("entity_friendship", String.valueOf(playerData.friendship));
         } else {
@@ -263,122 +266,34 @@ public class EntityChatData {
         return contextData;
     }
 
-    public void generateCharacterMessage(MessageData data, Consumer<String> onSuccess, Consumer<String> onError,
-            Consumer<String> onGreeting) {
-        String systemPrompt = "system-character";
-        if (data.is_auto_message) {
-            this.auto_generated++;
-        } else {
-            this.auto_generated = 0;
-        }
-
-        this.addMessage(data.userMessage, ChatDataManager.ChatSender.USER, data.player, systemPrompt);
-        ConfigurationHandler.Config config = new ConfigurationHandler(ServerPackets.serverInstance).loadConfig();
-        String promptText = ChatPrompt.loadPromptFromResource(ServerPackets.serverInstance.getResourceManager(),
-                systemPrompt);
-        Map<String, String> contextData = getPlayerContext(data.player, data.userLanguage, config);
-
-        ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false, "")
-                .thenAccept(output_message -> {
-                    // get rid of the "generate greeting with ..." user message
-                    previousMessages.clear();
-                    try {
-                        if (output_message != null) {
-                            previousMessages.clear();
-                            this.characterSheet = output_message;
-                            String characterName = Optional.ofNullable(getCharacterProp("name"))
-                                    .filter(s -> !s.isEmpty())
-                                    .orElse("N/A");
-                            if (characterName.equals("N/A")) {
-                                throw new RuntimeException("Generated N/A as a character name");
-                            }
-                            if (data.type == MessageDataType.GreetingAndCharacter) {
-                                String shortGreeting = Optional.ofNullable(getCharacterProp("short greeting"))
-                                        .filter(s -> !s.isEmpty())
-                                        .orElse(Randomizer.getRandomMessage(Randomizer.RandomType.NO_RESPONSE))
-                                        .replace("\n", " ");
-                                this.addMessage(shortGreeting, ChatDataManager.ChatSender.ASSISTANT, data.player,
-                                        systemPrompt);
-                                onGreeting.accept(shortGreeting);
-                            }
-                            onSuccess.accept(characterName);
-                        } else {
-                            throw new RuntimeException(ChatGPTRequest.lastErrorMessage);
-                        }
-                    } catch (Exception e) {
-                        LOGGER.error("Error processing LLM response, clearing msg. Error:", e);
-                        String errorMessage = "Error: ";
-                        if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-                            errorMessage += truncateString(e.getMessage(), 55) + "\n";
-                        }
-                        errorMessage += "Help is available at elefant.gg/discord";
-                        onError.accept(errorMessage);
-                    }
-
-                });
+    public boolean lastMsgIsUserMsg() {
+        return previousMessages.size() > 0
+                && (previousMessages.get(previousMessages.size() - 1).sender.equals(ChatSender.USER));
     }
 
-    public void generateEntityResponse(String userLanguage, ServerPlayerEntity player, Consumer<String> onGenerate,
+    public void generateEntityResponse(String userLanguage, ServerPlayerEntity player,
+            Consumer<String> onUncleanResponse,
             Consumer<String> onError) {
         String systemPrompt = "system-chat";
         // Get config (api key, url, settings)
         ConfigurationHandler.Config config = new ConfigurationHandler(ServerPackets.serverInstance).loadConfig();
         String promptText = ChatPrompt.loadPromptFromResource(ServerPackets.serverInstance.getResourceManager(),
                 systemPrompt);
-
         // Add PLAYER context information
         Map<String, String> contextData = getPlayerContext(player, userLanguage, config);
 
-        // Get messages for player
-
         ChatGPTRequest.fetchMessageFromChatGPT(config, promptText, contextData, previousMessages, false,
-                "Reminder: Respond with a empty message only when \\\"\\\" you detect a lot of repetitive content in conversations (multiple byes, etc.).")
+                // "Reminder: Respond with a empty message only when \\\"\\\" you detect a lot
+                // of repetitive content in conversations (multiple byes, etc.)."
+                "")
                 .thenAccept(ent_msg -> {
                     try {
-                        if (ent_msg != null) {
-                            ParsedMessage result = MessageParser.parseMessage(ent_msg.replace("\n", " "));
-                            PlayerData playerData = this.getPlayerData(player.getDisplayName().getString());
-                            BehaviorApplier.apply(result.getBehaviors(), player, entityId, playerData);
-
-                            String cleanedMessage = result.getCleanedMessage();
-                            if (cleanedMessage.isEmpty()) {
-                                // do not call addMessage
-                                this.addMessage("...", ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
-                                onGenerate.accept("");
-                                return;
-                            }
-                            // Add ASSISTANT message to history
-                            this.addMessage(cleanedMessage, ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
-                            // Update the last entry in previousMessages to use the original message
-                            this.previousMessages.set(this.previousMessages.size() - 1,
-                                    new ChatMessage(result.getOriginalMessage(), ChatDataManager.ChatSender.ASSISTANT,
-                                            player.getDisplayName().getString()));
-
-                            onGenerate.accept(cleanedMessage);
-                        } else {
-                            // No valid LLM response
+                        if (ent_msg == null) {
                             throw new RuntimeException(ChatGPTRequest.lastErrorMessage);
                         }
+                        onUncleanResponse.accept(ent_msg);
                     } catch (Exception e) {
-                        // Log the exception for debugging
-                        LOGGER.error("Error processing LLM response", e);
-
-                        // Error / No Chat Message (Failure)
-                        String randomErrorMessage = Randomizer.getRandomMessage(Randomizer.RandomType.ERROR);
-                        this.addMessage(randomErrorMessage, ChatDataManager.ChatSender.ASSISTANT, player, systemPrompt);
-
-                        // Remove the error message from history to prevent it from affecting future
-                        // ChatGPT requests
-                        if (!previousMessages.isEmpty()) {
-                            previousMessages.remove(previousMessages.size() - 1);
-                        }
-                        // Send clickable error message
-                        String errorMessage = "Error: ";
-                        if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-                            errorMessage += truncateString(e.getMessage(), 55) + "\n";
-                        }
-                        errorMessage += "Help is available at elefant.gg/discord";
-                        onError.accept(errorMessage);
+                        onError.accept(e.getMessage() != null ? e.getMessage() : "");
                     }
                 });
     }
@@ -387,9 +302,24 @@ public class EntityChatData {
         return input.length() > maxLength ? input.substring(0, maxLength - 3) + "..." : input;
     }
 
+    public void setError(String errorMSg) {
+        errorMessage = new ChatMessage(errorMSg, ChatDataManager.ChatSender.ASSISTANT,
+                lastPlayer != null ? lastPlayer.getName().getString() : "");
+    }
+
+    public ChatMessage getTopMessage() {
+        if (errorMessage != null) {
+            return errorMessage;
+        }
+        ChatMessage top = previousMessages.get(previousMessages.size() - 1);
+        String newMessage = MessageParser.parseMessage(top.message.replace("\n", " ")).getCleanedMessage();
+        return new ChatMessage(newMessage, top.sender, top.name);
+    }
+
     // Add a message to the history and update the current message
-    public void addMessage(String message, ChatDataManager.ChatSender sender, ServerPlayerEntity player,
-            String systemPrompt) {
+    public void addMessage(String message, ChatDataManager.ChatSender sender, ServerPlayerEntity player) {
+        this.errorMessage = null;
+        this.lastPlayer = player;
         // Truncate message (prevent crazy long messages... just in case)
         String truncatedMessage = message.substring(0,
                 Math.min(message.length(), ChatDataManager.MAX_CHAR_IN_USER_MESSAGE));
@@ -435,7 +365,7 @@ public class EntityChatData {
         // }
 
         // Broadcast new entity message status (i.e. pending)
-        ServerPackets.BroadcastEntityMessage(this);
+        // ServerPackets.BroadcastEntityMessage(this);
     }
 
     // Get wrapped lines
@@ -450,19 +380,21 @@ public class EntityChatData {
         return currentLineNumber + ChatDataManager.DISPLAY_NUM_LINES >= totalLines;
     }
 
-    public void setLineNumber(Integer lineNumber) {
-        int totalLines = this.getWrappedLines().size();
-        // Ensure the lineNumber is within the valid range
-        currentLineNumber = Math.min(Math.max(lineNumber, 0), totalLines);
-
-        // Broadcast to all players
-        ServerPackets.BroadcastEntityMessage(this);
+    public ServerPlayerEntity getPlayer() {
+        if (lastPlayer == null) {
+            throw new RuntimeException("Tried to get player but no player found");
+        }
+        return lastPlayer;
     }
 
-    public void setStatus(ChatDataManager.ChatStatus new_status) {
-        status = new_status;
+    // // Broadcast to all players
+    // ServerPackets.BroadcastEntityMessage(this);
+    // }
 
-        // Broadcast to all players
-        ServerPackets.BroadcastEntityMessage(this);
-    }
+    // public void setStatus(ChatDataManager.ChatStatus new_status) {
+    // status = new_status;
+
+    // // Broadcast to all players
+    // ServerPackets.BroadcastEntityMessage(this);
+    // }
 }
