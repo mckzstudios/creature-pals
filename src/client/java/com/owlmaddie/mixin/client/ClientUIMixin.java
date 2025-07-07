@@ -14,10 +14,12 @@ import net.minecraft.client.render.RenderTickCounter;
 
 @Mixin(InGameHud.class)
 public final class ClientUIMixin {
-
-    @Inject(method = "render", at = @At("TAIL"))
-    private void clientRender(DrawContext context, float tickDelta, CallbackInfo ci) {
-        TTSToggleButton.render(context);
+    @Inject(
+            method = "render",
+            at = @At("TAIL")
+    )
+    private void clientRender(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        // TTSToggleButton.render(context);
     }
 
 }
