@@ -19,6 +19,7 @@ import com.owlmaddie.utils.TriConsumer;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 
 public class EventQueueManager {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
@@ -34,14 +35,20 @@ public class EventQueueManager {
         public void process(UUID entityId, BiConsumer<String, ServerPlayerEntity> onUncleanResponse,
                 BiConsumer<String, ServerPlayerEntity> onError,
                 TriConsumer<String, Boolean, ServerPlayerEntity> onCharacterSheetAndShouldGreet) {
+
+            LOGGER.info("LLMCompleter/processing entityId={}", entityId);
             isProcessing = true;
             queueData.get(entityId).process((resp, player) -> {
+                LOGGER.info("LLMCompleter/doneProcessing/Success entityId={} resp={}", entityId, resp);
                 onUncleanResponse.accept(resp, player);
                 isProcessing = false;
             }, (errMsg, player) -> {
+                LOGGER.info("LLMCompleter/doneProcessing/Error entityId={} errMsg={}", entityId, errMsg);
                 onError.accept(errMsg, player);
                 isProcessing = false;
             }, (characterSheet, shouldGreet, player) -> {
+                LOGGER.info("LLMCompleter/doneProcessing/Greeting entityId={} characterSheet={} shouldGreet={}",
+                        entityId, characterSheet, shouldGreet);
                 onCharacterSheetAndShouldGreet.accept(characterSheet, shouldGreet, player);
                 isProcessing = !shouldGreet; // if we do not greet, then we continue processing.
             });
@@ -62,7 +69,7 @@ public class EventQueueManager {
     }
 
     public static void addGreeting(Entity entity, String userLangauge, ServerPlayerEntity player) {
-        if(player == null){
+        if (player == null) {
             throw new RuntimeException("Null player for addGreeting");
         }
         ClientSideEffects.setPending(entity.getUuid());
@@ -148,6 +155,17 @@ public class EventQueueManager {
                 iterator.remove();
             }
         }
+    }
+
+    public static void updateUUID(UUID oldId, UUID newId, Entity newEntity) {
+        EventQueueData data = queueData.remove(oldId);
+
+        if (data == null) {
+            LOGGER.info("Unable to update chat data, UUID not found: " + oldId);
+            return;
+        }
+        data.updateUUID(newId, newEntity);
+        queueData.put(newId, data);
     }
 
     public static void addUserMessage(Entity entity, String userLanguage, ServerPlayerEntity player,

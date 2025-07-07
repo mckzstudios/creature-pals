@@ -234,13 +234,33 @@ public class EntityChatData {
         // Get Entity details
         MobEntity entity = (MobEntity) ServerEntityFinder.getEntityByUUID(player.getServerWorld(),
                 entityId);
-        if (entity.getCustomName() == null) {
-            contextData.put("entity_name", "");
+        PlayerData playerData = this.getPlayerData(player.getUuid());
+        if (playerData != null) {
+            contextData.put("entity_friendship", String.valueOf(playerData.friendship));
         } else {
-            contextData.put("entity_name", entity.getCustomName().getString());
+            contextData.put("entity_friendship", String.valueOf(0));
         }
-        contextData.put("entity_type", entity.getType().getName().getString());
-        contextData.put("entity_health", Math.round(entity.getHealth()) + "/" + Math.round(entity.getMaxHealth()));
+        if (entity == null) {
+            contextData.put("entity_name", Optional.ofNullable(getCharacterProp("name"))
+                    .filter(s -> !s.isEmpty())
+                    .orElse("N/A"));
+
+            return contextData;
+        }
+        else{
+            if (entity.getCustomName() == null) {
+                contextData.put("entity_name", "");
+            } else {
+                contextData.put("entity_name", entity.getCustomName().getString());
+            }
+            contextData.put("entity_type", entity.getType().getName().getString());
+            contextData.put("entity_health", Math.round(entity.getHealth()) + "/" + Math.round(entity.getMaxHealth()));
+            if (entity.age < 0) {
+                contextData.put("entity_maturity", "Baby");
+            } else {
+                contextData.put("entity_maturity", "Adult");
+            }
+        }
         contextData.put("entity_personality", getCharacterProp("Personality"));
         contextData.put("entity_speaking_style", getCharacterProp("Speaking Style / Tone"));
         contextData.put("entity_likes", getCharacterProp("Likes"));
@@ -250,19 +270,6 @@ public class EntityChatData {
         contextData.put("entity_class", getCharacterProp("Class"));
         contextData.put("entity_skills", getCharacterProp("Skills"));
         contextData.put("entity_background", getCharacterProp("Background"));
-        if (entity.age < 0) {
-            contextData.put("entity_maturity", "Baby");
-        } else {
-            contextData.put("entity_maturity", "Adult");
-        }
-
-        PlayerData playerData = this.getPlayerData(player.getUuid());
-        if (playerData != null) {
-            contextData.put("entity_friendship", String.valueOf(playerData.friendship));
-        } else {
-            contextData.put("entity_friendship", String.valueOf(0));
-        }
-
         return contextData;
     }
 
