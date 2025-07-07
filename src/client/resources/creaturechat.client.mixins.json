@@ -6,7 +6,9 @@
 		"EntityRendererMixin",
 		"MixinPlayerCustomTexture",
 		"MixinPlayerSkinTexture",
-		"ClientUIMixin"
+		"ClientUIMixin",
+		"SoundOptionsScreenMixin",
+		"GameOptionsScreenAccessor"
 	],
 	"env": {
 		"client.MixinPlayerCustomTexture": {
