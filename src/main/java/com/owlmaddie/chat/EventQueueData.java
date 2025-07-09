@@ -20,10 +20,8 @@ import com.owlmaddie.network.ServerPackets;
 import com.owlmaddie.utils.ServerEntityFinder;
 import com.owlmaddie.utils.TriConsumer;
 
-import net.minecraft.block.entity.VaultBlockEntity.Server;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 
 public class EventQueueData {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");

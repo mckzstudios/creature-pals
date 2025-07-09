@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SoundOptionsScreen.class)
 public abstract class SoundOptionsScreenMixin extends Screen {
     private SoundOptionsScreenMixin(Text title) { super(title); }
-
     @Inject(method = "addOptions", at = @At("TAIL"))
     private void creaturechat$addTTSOption(CallbackInfo ci) {
         OptionListWidget list = ((GameOptionsScreenAccessor)this).creaturechat$getBody();
