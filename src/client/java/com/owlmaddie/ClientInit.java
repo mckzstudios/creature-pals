@@ -1,7 +1,7 @@
 package com.owlmaddie;
 
 import com.owlmaddie.chat.ChatDataManager;
-import com.owlmaddie.commands.Creature PalsCommands;
+import com.owlmaddie.commands.CreaturePalsCommands;
 import com.owlmaddie.network.ClientPackets;
 import com.owlmaddie.network.ServerPackets;
 import com.owlmaddie.particle.ClientParticle;
@@ -21,6 +21,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.util.TickDurationMonitor;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleFactory;
@@ -65,16 +66,18 @@ public class ClientInit implements ClientModInitializer {
 
         // Register an event callback to render text bubbles
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register((context) -> {
+            // TODO:
+            // Find TickDelta with static ::get(ctx)
             BubbleRenderer.drawTextAboveEntities(context, tickCounter, context.tickCounter().getTickDelta(false));
         });
-        
-        
+
+
         // Register an event callback for when the client disconnects from a server or
         // changes worlds
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             // Clear or reset the ChatDataManager
             ChatDataManager.getClientInstance().clearData();
         });
-        
+
     }
 }

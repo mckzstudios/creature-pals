@@ -20,7 +20,7 @@ import static com.owlmaddie.particle.Particles.*;
 public class ParticleEmitter {
     public static void emitCreatureParticle(ServerWorld world, Entity entity, ParticleEffect particleType, double spawnSize, int count) {
         // Calculate the offset for the particle to appear above and in front of the entity
-        float yaw = entity.getHeadYaw();
+        float yaw = entity.getLerpTargetY(); // TODO: Check this line
         double offsetX = -MathHelper.sin(yaw * ((float) Math.PI / 180F)) * 0.9;
         double offsetY = entity.getHeight() + 0.5;
         double offsetZ = MathHelper.cos(yaw * ((float) Math.PI / 180F)) * 0.9;

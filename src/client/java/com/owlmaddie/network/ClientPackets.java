@@ -48,10 +48,6 @@ public class ClientPackets {
     }
 
     public static void sendUpdateLineNumber(Entity entity, Integer lineNumber) {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        buf.writeString(entity.getUuidAsString());
-        buf.writeInt(lineNumber);
-
         // Send C2S packet
         ClientPlayNetworking.send(new ReadNextPayload(entity.getUuid(), lineNumber));
     }
@@ -72,7 +68,7 @@ public class ClientPackets {
     }
 
     public static void sendChat(Entity entity, String message) {
-        // AAA use this to actually send a chat msg to an entity.
+        // Use this to actually send a chat msg to an entity.
         // Get user language
         String userLanguageCode = MinecraftClient.getInstance().getLanguageManager().getLanguage();
         String userLanguageName = MinecraftClient.getInstance().getLanguageManager().getLanguage(userLanguageCode).getDisplayText().getString();
@@ -163,8 +159,6 @@ public class ClientPackets {
                     LOGGER.warn("Client not fully initialized. Dropping message for sender '{}'.", senderPlayerId);
                     return;
                 }
-                // AAA trigger for player message
-                LOGGER.info("Player message" + message);
 
                 // Add player message to queue for rendering
                 PlayerMessageManager.addMessage(senderPlayerId, message, senderPlayerName, ChatDataManager.TICKS_TO_DISPLAY_USER_MESSAGE);

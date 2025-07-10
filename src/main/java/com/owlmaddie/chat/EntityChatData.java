@@ -1,3 +1,8 @@
+// Fork maintained by Elefant AI
+// SPDX-FileCopyrightText: 2025 owlmaddie LLC
+// SPDX-FileCopyrightText: 2025 Elefant AI LLC
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Assets CC-BY-NC-SA-4.0; CreatureChat™ trademark © owlmaddie LLC - unauthorized use prohibited
 package com.owlmaddie.chat;
 
 import com.google.gson.annotations.Expose;
@@ -171,6 +176,15 @@ public class EntityChatData {
         return "N/A";
     }
 
+    // Get list of status effects for player (handle different Minecraft versions)
+    private static MobEffect effectOf(MobEffectInstance inst) {
+        Object raw = inst.getEffect();        // 1.20.4: StatusEffect
+        if (raw instanceof MobEffect se) {     // J 17-compatible pattern match
+            return se;
+        }
+        return ((Holder<MobEffect>) raw).value();
+    }
+
     // Generate context object
     public Map<String, String> getPlayerContext(ServerPlayerEntity player, String userLanguage,
             ConfigurationHandler.Config config) {
@@ -254,7 +268,7 @@ public class EntityChatData {
             } else {
                 contextData.put("entity_name", entity.getCustomName().getString());
             }
-            contextData.put("entity_type", entity.getType().getName().getString());
+        contextData.put("entity_type", entity.getType().getName().getString());
             contextData.put("entity_health", Math.round(entity.getHealth()) + "/" + Math.round(entity.getMaxHealth()));
             if (entity.age < 0) {
                 contextData.put("entity_maturity", "Baby");

@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2025 owlmaddie LLC
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Assets CC-BY-NC-SA-4.0; CreatureChat™ trademark © owlmaddie LLC - unauthorized use prohibited
 package com.owlmaddie.mixin.client;
 
 import com.owlmaddie.skin.PlayerCustomTexture;
 import com.owlmaddie.skin.SkinUtils;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -21,7 +24,7 @@ public abstract class MixinPlayerCustomTexture {
      * @author jonoomph
      */
     @Overwrite
-    public static boolean hasCustomIcon(Identifier skinId) {
+    public static boolean hasCustomIcon(ResourceLocation skinId) {
         // Delegate to SkinUtils to check for custom skin properties
         return SkinUtils.checkCustomSkinKey(skinId);
     }

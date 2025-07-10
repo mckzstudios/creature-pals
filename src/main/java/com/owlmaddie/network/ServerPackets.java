@@ -57,15 +57,12 @@ public class ServerPackets {
     public static ChatDataSaverScheduler scheduler = null;
 
     public static void register() {
-
-
-
         PayloadTypeRegistry.playC2S().register(GreetingPayload.ID, GreetingPayload.CODEC);
         // Handle packet for Greeting
         ServerPlayNetworking.registerGlobalReceiver(GreetingPayload.ID, (payload, context) -> {
 
             ServerPlayerEntity player = context.player();
-            String userLanguage =payload.userLanguage(); 
+            String userLanguage =payload.userLanguage();
             // Ensure that the task is synced with the server thread
             context.server().execute(() -> {
                 MobEntity entity = (MobEntity)ServerEntityFinder.getEntityByUUID(player.getServerWorld(), payload.entityId());
@@ -259,7 +256,6 @@ public class ServerPackets {
                         .currentTimeMillis();
             }
         });
-
     }
 
     public static void send_whitelist_blacklist(ServerPlayerEntity player) {
@@ -283,7 +279,7 @@ public class ServerPackets {
         }
     }
 
-    
+
 
 
     // Writing a Map<String, PlayerData> to the buffer

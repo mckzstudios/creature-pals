@@ -27,10 +27,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The {@code Creature PalsCommands} class registers custom commands to set new API key, model, and url.
+ * The {@code CreaturePalsCommands} class registers custom commands to set new API key, model, and url.
  * Permission level set to 4 (server owner), since this deals with API keys and potential costs.
  */
-public class Creature PalsCommands {
+public class CreaturePalsCommands {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
 
     public static void register() {
@@ -76,13 +76,14 @@ public class Creature PalsCommands {
     }
 
     private static List<Identifier> getLivingEntityIds() {
-        List<Identifier> livingEntityIds = Registries.ENTITY_TYPE.getIds().stream()
+        return Registries.ENTITY_TYPE
+                .getIds()
+                .stream()
                 .filter(id -> {
                     EntityType<?> entityType = Registries.ENTITY_TYPE.get(id);
                     return entityType != null && (entityType.getSpawnGroup() != SpawnGroup.MISC  || isIncludedEntity(entityType));
                 })
                 .collect(Collectors.toList());
-        return livingEntityIds;
     }
 
     private static boolean isIncludedEntity(EntityType<?> entityType) {

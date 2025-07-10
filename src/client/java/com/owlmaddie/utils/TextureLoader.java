@@ -1,3 +1,8 @@
+// Fork maintained by Elefant AI
+// SPDX-FileCopyrightText: 2025 owlmaddie LLC
+// SPDX-FileCopyrightText: 2025 Elefant AI
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Assets CC-BY-NC-SA-4.0; CreatureChat™ trademark © owlmaddie LLC - unauthorized use prohibited
 package com.owlmaddie.utils;
 
 import net.minecraft.client.MinecraftClient;
@@ -13,6 +18,7 @@ import java.util.Set;
 /**
  * The {@code TextureLoader} class registers and returns texture identifiers for resources
  * contained for this mod. UI and Entity icons. Missing textures are logged once.
+ * Pre-1.21.5: RenderSystem.setShaderTexture(int, Identifier) is used.
  */
 public class TextureLoader {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
@@ -27,11 +33,10 @@ public class TextureLoader {
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(textureId);
 
         if (resource.isPresent()) {
-            // Bind texture, and return Identity
-            MinecraftClient.getInstance().getTextureManager().bindTexture(textureId);
+            // replace bindTexture(...) with RenderSystem
+            RenderSystem.setShaderTexture(0, textureId);
             return textureId;
         } else {
-            // Resource not found
             logMissingTextureOnce(texturePath);
             return null;
         }
@@ -42,15 +47,14 @@ public class TextureLoader {
         Optional<Resource> resource = MinecraftClient.getInstance().getResourceManager().getResource(textureId);
 
         if (resource.isPresent()) {
-            // Texture found, bind it and return the Identifier
-            MinecraftClient.getInstance().getTextureManager().bindTexture(textureId);
+            RenderSystem.setShaderTexture(0, textureId);
             return textureId;
         } else {
             // Texture not found, log a message and return the "not_found" texture Identifier
-            Identifier notFoundTextureId = Identifier.of("creaturepals", "textures/entity/not_found.png");
-            MinecraftClient.getInstance().getTextureManager().bindTexture(notFoundTextureId);
+            Identifier notFoundId = new Identifier.of("creaturepals", "textures/entity/not_found.png");
+            RenderSystem.setShaderTexture(0, notFoundId);
             logMissingTextureOnce(texturePath);
-            return notFoundTextureId;
+            return notFoundId;
         }
     }
 
@@ -60,5 +64,12 @@ public class TextureLoader {
             LOGGER.info(texturePath + " was not found");
             missingTextures.add(texturePath);
         }
+    }
+
+    /**
+     * Binds the given Identifier to the specified texture unit.
+     */
+    public static void bind(int unit, ResourceLocation textureId) {
+        RenderSystem.setShaderTexture(unit, textureId);
     }
 }

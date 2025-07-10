@@ -34,7 +34,7 @@ for FILE in creaturepals*.jar; do
     echo "--------------$FILE----------------"
     FILE_BASENAME=$(basename "$FILE")
     OUR_VERSION=$(echo "$FILE_BASENAME" | sed -n 's/creaturepals-\(.*\)+.*\.jar/\1/p')
-    MINECRAFT_VERSION=$(echo "$FILE_BASENAME" | sed -n 's/.*+\([0-9.]*\)\(-forge\)*\.jar/\1/p')
+    MINECRAFT_VERSION=$(echo "$FILE_BASENAME" | sed -n 's/.*+\([0-9.]*\)\(-forge\|-neoforge\)*\.jar/\1/p')
     VERSION_NUMBER="$OUR_VERSION+$MINECRAFT_VERSION"
 
     # Verify that OUR_VERSION and MINECRAFT_VERSION are not empty and OUR_VERSION matches VERSION
@@ -46,6 +46,9 @@ for FILE in creaturepals*.jar; do
     # Determine the loaders and dependencies based on the file name
     if [[ "$FILE_BASENAME" == *"-forge.jar" ]]; then
       LOADERS='["forge"]'
+      DEPENDENCIES='[{"project_id": "u58R1TMW", "dependency_type": "required"}, {"project_id": "Aqlf1Shp", "dependency_type": "required"}]'
+    elif [[ "$FILE_BASENAME" == *"-neoforge.jar" ]]; then
+      LOADERS='["neoforge"]'
       DEPENDENCIES='[{"project_id": "u58R1TMW", "dependency_type": "required"}, {"project_id": "Aqlf1Shp", "dependency_type": "required"}]'
     else
       LOADERS='["fabric"]'
