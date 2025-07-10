@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * messages.
  */
 public class ChatGPTRequest {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
     public static String lastErrorMessage;
 
     static class ChatGPTRequestMessage {

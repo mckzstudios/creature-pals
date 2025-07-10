@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * to manage goals, while avoiding concurrent modification issues.
  */
 public class EntityBehaviorManager {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
 
     public static void addGoal(MobEntity entity, Goal goal, GoalPriority priority) {
         if (!(entity.getWorld() instanceof ServerWorld)) {

@@ -23,17 +23,17 @@ public class Particles {
     public static void register() {
 
         // Register custom particles
-        Registry.register(Registries.PARTICLE_TYPE, Identifier.of("creaturechat", "heart_small"), HEART_SMALL_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "heart_big"), HEART_BIG_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "fire_small"), FIRE_SMALL_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "fire_big"), FIRE_BIG_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "attack"), ATTACK_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "flee"), FLEE_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "follow_enemy"), FOLLOW_ENEMY_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "follow_friend"), FOLLOW_FRIEND_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "protect"), PROTECT_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "lead_enemy"), LEAD_ENEMY_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturechat", "lead_friend"), LEAD_FRIEND_PARTICLE);
-        Registry.register(Registries.PARTICLE_TYPE, Identifier.of("creaturechat", "lead"), LeadParticleEffect.TYPE);
+        Registry.register(Registries.PARTICLE_TYPE, Identifier.of("creaturepals", "heart_small"), HEART_SMALL_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "heart_big"), HEART_BIG_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "fire_small"), FIRE_SMALL_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "fire_big"), FIRE_BIG_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "attack"), ATTACK_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "flee"), FLEE_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "follow_enemy"), FOLLOW_ENEMY_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "follow_friend"), FOLLOW_FRIEND_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "protect"), PROTECT_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "lead_enemy"), LEAD_ENEMY_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE,  Identifier.of("creaturepals", "lead_friend"), LEAD_FRIEND_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, Identifier.of("creaturepals", "lead"), LeadParticleEffect.TYPE);
     }
 }

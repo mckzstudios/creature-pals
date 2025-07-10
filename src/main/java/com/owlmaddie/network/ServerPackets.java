@@ -52,7 +52,7 @@ import static com.owlmaddie.network.NetworkingConstants.PACKET_C2S_READ_NEXT;
  * updating message details, and sending user messages.
  */
 public class ServerPackets {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
     public static MinecraftServer serverInstance;
     public static ChatDataSaverScheduler scheduler = null;
 
@@ -368,7 +368,7 @@ public class ServerPackets {
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             // Check if the player is an operator
             if (server.getPlayerManager().isOperator(player.getGameProfile())) {
-                ServerPackets.SendClickableError(player, message, "https://elefant.gg/discord");
+                ServerPackets.SendClickableError(player, message, "https://player2.game/discord");
             }
         }
     }

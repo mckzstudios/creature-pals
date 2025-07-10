@@ -81,9 +81,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.tag }}
-          name: CreatureChat Evolved ${{ env.tag }}
+          name: Creature Pals ${{ env.tag }}
           body: |
             To download, install [Player2 app](https://player2.game/), install fabric, the fabric API, then drag the jar file into your mod folder
-          files: build/outputs/creaturechatevolved-*.jar
+          files: build/outputs/creaturepals-*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
