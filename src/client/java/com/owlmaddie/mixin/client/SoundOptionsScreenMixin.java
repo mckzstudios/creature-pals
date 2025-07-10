@@ -17,8 +17,8 @@ public abstract class SoundOptionsScreenMixin extends Screen {
     private SoundOptionsScreenMixin(Text title) { super(title); }
 
     @Inject(method = "addOptions", at = @At("TAIL"))
-    private void creaturechat$addTTSOption(CallbackInfo ci) {
-        OptionListWidget list = ((GameOptionsScreenAccessor)this).creaturechat$getBody();
+    private void creaturepals$addTTSOption(CallbackInfo ci) {
+        OptionListWidget list = ((GameOptionsScreenAccessor)this).creaturepals$getBody();
         ButtonWidget ttsButton = ButtonWidget.builder(getTTSLabel(), button -> {
             TTS.enabled = !TTS.enabled;
             button.setMessage(getTTSLabel());
@@ -27,6 +27,6 @@ public abstract class SoundOptionsScreenMixin extends Screen {
     }
 
     private Text getTTSLabel() {
-        return Text.literal("Creaturechat TTS: " + (TTS.enabled ? "ON" : "OFF"));
+        return Text.literal("Creature Pals TTS: " + (TTS.enabled ? "ON" : "OFF"));
     }
 }

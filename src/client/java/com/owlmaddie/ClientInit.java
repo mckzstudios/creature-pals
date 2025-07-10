@@ -1,7 +1,7 @@
 package com.owlmaddie;
 
 import com.owlmaddie.chat.ChatDataManager;
-import com.owlmaddie.commands.CreatureChatCommands;
+import com.owlmaddie.commands.Creature PalsCommands;
 import com.owlmaddie.network.ClientPackets;
 import com.owlmaddie.network.ServerPackets;
 import com.owlmaddie.particle.ClientParticle;

@@ -26,7 +26,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 
 public class EventQueueData {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
     private static long waitTimeAfterError = 10_000_000_000L; // wait 10 sec after err before doing any polling
 
     private UUID entityId;

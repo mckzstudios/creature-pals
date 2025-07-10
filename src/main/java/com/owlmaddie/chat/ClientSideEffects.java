@@ -26,7 +26,7 @@ import net.minecraft.text.Text;
 
 // side effects that are broadcast to client or modify chatData
 public class ClientSideEffects {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
 
     private static EntityChatData getChatData(UUID entityId) {
         return ChatDataManager.getServerInstance().getOrCreateChatData(entityId);
@@ -96,25 +96,25 @@ public class ClientSideEffects {
         LOGGER.error("Side effect: onLLMGenerateError, clearing msg. errMsg={}", errMsg);
         String errorMessage = "Error: ";
         errorMessage += EntityChatData.truncateString(errMsg, 55) + "\n";
-        errorMessage += "Help is available at elefant.gg/discord";
+        errorMessage += "Help is available at player2.game/discord";
         EntityChatData data = getChatData(entityId);
         data.setError(errorMessage);
 
         if (errMsg.contains("Connection refused")) {
             LOGGER.info("Connection refused error! handling case");
-            String displayedErrorMessage = "Error: Player2 must be running. Download and run Player2.\nhttps://player2.gg\n";
+            String displayedErrorMessage = "Error: Player2 must be running. Download and run Player2.\nhttps://player2.game\n";
             sendChatAsEntity(entityId, displayedErrorMessage, player, false);
-            ServerPackets.SendClickableError(player, displayedErrorMessage, "https://player2.gg");
+            ServerPackets.SendClickableError(player, displayedErrorMessage, "https://player2.game");
             ServerPackets.SendClickableError(player,
-                    "If Player2 is running and it still doesn't work, make a ticket on discord.\nhttps://elefant.gg/discord",
-                    "https://elefant.gg/discord");
+                    "If Player2 is running and it still doesn't work, make a ticket on discord.\nhttps://player2.game/discord",
+                    "https://player2.game/discord");
             return;
         }
         sendChatAsEntity(entityId, errorMessage, player, false);
         LOGGER.error("After chat as ent ");
         getChatData(entityId).status = ChatStatus.DISPLAY;
         LOGGER.info("Sending clickable error");
-        ServerPackets.SendClickableError(player, errorMessage, "https://elefant.gg/discord");
+        ServerPackets.SendClickableError(player, errorMessage, "https://player2.game/discord");
     }
 
     public static void sendChatAsEntity(UUID entityId, String message, ServerPlayerEntity player,

@@ -6,7 +6,7 @@ CURSEFORGE_API_KEY=${CURSEFORGE_API_KEY}
 CHANGELOG_FILE="./CHANGELOG.md"
 API_URL="https://minecraft.curseforge.com/api"
 PROJECT_ID=1012118
-USER_AGENT="CreatureChat-Minecraft-Mod:curseforge@owlmaddie.com"
+USER_AGENT="CreaturePals-Minecraft-Mod:curseforge@elefant.gg"
 SLEEP_DURATION=5
 
 # Function to fetch version types and return the base game type ID
@@ -85,11 +85,11 @@ echo "$VERSION"
 echo ""
 
 # Iterate over each jar file in the artifacts
-for FILE in creaturechat*.jar; do
+for FILE in creaturepals*.jar; do
   if [ -f "$FILE" ]; then
     echo "--------------$FILE----------------"
     FILE_BASENAME=$(basename "$FILE")
-    OUR_VERSION=$(echo "$FILE_BASENAME" | sed -n 's/creaturechat-\(.*\)+.*\.jar/\1/p')
+    OUR_VERSION=$(echo "$FILE_BASENAME" | sed -n 's/creaturepals-\(.*\)+.*\.jar/\1/p')
     MINECRAFT_VERSION=$(echo "$FILE_BASENAME" | sed -n 's/.*+\([0-9.]*\)\(-forge\)*\.jar/\1/p')
     VERSION_NUMBER="$OUR_VERSION-$MINECRAFT_VERSION"
 
