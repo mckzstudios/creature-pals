@@ -27,7 +27,7 @@ import java.util.Random;
  * of many random waypoints. It supports PathAware and NonPathAware entities.
  */
 public class LeadPlayerGoal extends PlayerBaseGoal {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
     private final MobEntity entity;
     private final double speed;
     private final Random random = new Random();

@@ -16,13 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class SoundOptionsScreenMixin extends Screen {
     private SoundOptionsScreenMixin(Text title) { super(title); }
     @Inject(method = "init", at = @At("TAIL"))
-    private void creaturechat$addTTSOption(CallbackInfo ci) {
+    private void creaturepals$addTTSOption(CallbackInfo ci) {
         OptionListWidget list = ((SoundOptionsScreenAccessor)this).creaturechat$getOptionButtons();
         SimpleOption<Boolean> ttsOption = SimpleOption.ofBoolean("Creaturechat TTS", TTS.enabled, value -> TTS.enabled = value);
         list.addSingleOptionEntry(ttsOption);
     }
 
     private Text getTTSLabel() {
-        return Text.literal("TTS: " + (TTS.enabled ? "ON" : "OFF"));
+        return Text.literal("Creature Pals TTS: " + (TTS.enabled ? "ON" : "OFF"));
     }
 }

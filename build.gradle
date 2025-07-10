@@ -19,11 +19,11 @@ repositories {
 }
 
 loom {
-	accessWidenerPath = file("src/main/resources/creaturechat.accesswidener")
+	accessWidenerPath = file("src/main/resources/creaturepals.accesswidener")
     splitEnvironmentSourceSets()
 
 	mods {
-		"creaturechat" {
+		"creaturepals" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
@@ -114,7 +114,7 @@ task buildAllVersions {
             // [mc: "1.20.3", yarn: "1.20.3+build.1",  fabric: "0.91.1+1.20.3"],
             // [mc: "1.20.4", yarn: "1.20.4+build.3",  fabric: "0.97.2+1.20.4"]
 
-			// Ones from creaturechat:
+			// Ones from creaturepals:
 			[mc: "1.20", yarn: "1.20+build.1", fabric: "0.83.0+1.20"],
 			[mc: "1.20.1", yarn: "1.20.1+build.10", fabric: "0.92.1+1.20.1"],
 			[mc: "1.20.2", yarn: "1.20.2+build.4", fabric: "0.91.6+1.20.2"],
@@ -165,19 +165,19 @@ task buildAllVersions {
 				"connector:placeholder" = true
 
 				[[mods]]
-				modId = "creaturechatevolved"
+				modId = "creaturepalsevolved"
 				version = "${modVersion}"
-				displayName = "Creature chat evolved"
+				displayName = "Creature Pals"
 
 				# Forge and Minecraft dependencies
-				[[dependencies.creaturechatevolved]]
+				[[dependencies.creaturepalsevolved]]
 				modId="forge"      
 				mandatory=true
 				versionRange="[47,)" 
 				ordering="NONE"
 				side="BOTH"
 
-				[[dependencies.creaturechatevolved]]
+				[[dependencies.creaturepalsevolved]]
 				modId="minecraft"
 				mandatory=true
 				versionRange="[1.20.1]"
@@ -185,14 +185,14 @@ task buildAllVersions {
 				side="BOTH"
 
 				# Connector dependency
-				[[dependencies.creaturechatevolved]]
+				[[dependencies.creaturepalsevolved]]
 				modId="connector"
 				mandatory=true
 				versionRange="*"
 				ordering="NONE"
 				side="BOTH"
 
-				[[dependencies.creaturechatevolved]]
+				[[dependencies.creaturepalsevolved]]
 				modId="connector"
 				mandatory=true
 				versionRange="*"
@@ -219,14 +219,14 @@ task buildAllVersions {
 
 				copy {
 					from "build/libs"
-					include "creaturechat-*.jar"
+					include "creaturepals-*.jar"
 					into "build/outputs"
-					rename { "creaturechatevolved-${modVersion}-1.20.1-forge.jar" }
+					rename { "creaturepalsevolved-${modVersion}-1.20.1-forge.jar" }
 					duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 				}
 
 				delete fileTree('build/libs') {
-					include 'creaturechat-*.jar'
+					include 'creaturepals-*.jar'
 				}
 
 				file(neoforgeTomlPath).delete()
@@ -247,14 +247,14 @@ task buildAllVersions {
 
             copy {
                 from "build/libs"
-                include "creaturechat-*.jar"
+                include "creaturepals-*.jar"
                 into "build/outputs"
-                rename { "creaturechatevolved-${modVersion}-${v.mc}.jar" }
+                rename { "creaturepalsevolved-${modVersion}-${v.mc}.jar" }
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
 
             delete fileTree('build/libs') {
-                include 'creaturechat-*.jar'
+                include 'creaturepals-*.jar'
             }
         }
     }

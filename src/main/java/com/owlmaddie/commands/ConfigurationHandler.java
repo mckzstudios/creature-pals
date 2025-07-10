@@ -27,14 +27,14 @@ import java.util.List;
  */
 
 public class ConfigurationHandler {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private final Path serverConfigPath;
     private final Path defaultConfigPath;
 
     public ConfigurationHandler(MinecraftServer server) {
-        this.serverConfigPath = server.getSavePath(WorldSavePath.ROOT).resolve("creaturechat.json");
-        this.defaultConfigPath = Paths.get(".", "creaturechat.json"); // Assumes the default location is the server root
+        this.serverConfigPath = server.getSavePath(WorldSavePath.ROOT).resolve("creaturepals.json");
+        this.defaultConfigPath = Paths.get(".", "creaturepals.json"); // Assumes the default location is the server root
                                                                       // or a similar logical default
     }
 
@@ -52,7 +52,7 @@ public class ConfigurationHandler {
             gson.toJson(config, writer);
             return true;
         } catch (IOException e) {
-            String errorMessage = "Error saving `creaturechat.json`. CreatureChat config was not saved. "
+            String errorMessage = "Error saving `creaturepals.json`. Creature Pals config was not saved. "
                     + e.getMessage();
             LOGGER.error(errorMessage, e);
             ServerPackets.sendErrorToAllOps(ServerPackets.serverInstance, errorMessage);
@@ -88,8 +88,8 @@ public class ConfigurationHandler {
 
         public void setApiKey(String apiKey) {
             if (apiKey.startsWith("cc_") && apiKey.length() == 15) {
-                // Update URL if a CreatureChat API key is detected
-                setUrl("https://api.creaturechat.com/v1/chat/completions");
+                // Update URL if a Creature Pals API key is detected
+                setUrl("https://api.creaturepals.com/v1/chat/completions");
             } else if (apiKey.startsWith("sk-")) {
                 // Update URL if an OpenAI API key is detected
                 setUrl("https://api.openai.com/v1/chat/completions");

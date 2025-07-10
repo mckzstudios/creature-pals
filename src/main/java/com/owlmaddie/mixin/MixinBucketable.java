@@ -25,7 +25,7 @@ public interface MixinBucketable {
     //
     @Inject(method = "copyDataToStack(Lnet/minecraft/entity/mob/MobEntity;Lnet/minecraft/item/ItemStack;)V", at = @At("TAIL"))
     private static void addCCUUIDToStack(MobEntity entity, ItemStack stack, CallbackInfo ci) {
-        Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+        Logger LOGGER = LoggerFactory.getLogger("creaturepals");
         UUID originalUUID = entity.getUuid();
         LOGGER.info("Saving original UUID of bucketed entity: " + originalUUID);
 
@@ -37,7 +37,7 @@ public interface MixinBucketable {
     // New method to read CCUUID from NBT
     @Inject(method = "copyDataFromNbt(Lnet/minecraft/entity/mob/MobEntity;Lnet/minecraft/nbt/NbtCompound;)V", at = @At("TAIL"))
     private static void readCCUUIDFromNbt(MobEntity entity, NbtCompound nbt, CallbackInfo ci) {
-        Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+        Logger LOGGER = LoggerFactory.getLogger("creaturepals");
         UUID newUUID = entity.getUuid();
         if (nbt.contains("CCUUID")) {
             UUID originalUUID = nbt.getUuid("CCUUID");

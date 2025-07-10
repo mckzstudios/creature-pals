@@ -47,7 +47,7 @@ import static com.owlmaddie.network.ServerPackets.*;
  * and the status of the current displayed message.
  */
 public class EntityChatData {
-    public static final Logger LOGGER = LoggerFactory.getLogger("creaturechat");
+    public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
     public UUID entityId;
     public String currentMessage;
     public int currentLineNumber;

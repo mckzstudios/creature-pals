@@ -50,10 +50,10 @@ build_mod:
 
         ./gradlew build -x test
         find build/libs -type f -name '*sources*.jar' -exec rm {} \;
-        mv build/libs/creaturechat-*.jar .
+        mv build/libs/creaturepals-*.jar .
 
         if [ "$minecraft_version" == "1.20.1" ]; then
-            jar_name=$(ls creaturechat-*+1.20.1.jar)
+            jar_name=$(ls creaturepals-*+1.20.1.jar)
             cp "$jar_name" "${jar_name%.jar}-forge.jar"
             touch FORGE
             zip -r "${jar_name%.jar}-forge.jar" FORGE
@@ -66,7 +66,7 @@ build_mod:
       done
   artifacts:
     paths:
-      - creaturechat-*.jar
+      - creaturepals-*.jar
       - fabric-api-*.jar
   tags:
     - minecraft

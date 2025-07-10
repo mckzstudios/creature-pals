@@ -5,7 +5,7 @@ import net.minecraft.client.particle.SpriteBillboardParticle;
 import net.minecraft.client.world.ClientWorld;
 
 /**
- * The {@code BehaviorParticle} class defines a custom CreatureChat behavior particle with an initial upward velocity
+ * The {@code BehaviorParticle} class defines a custom Creature Pals behavior particle with an initial upward velocity
  * that gradually decreases, ensuring it never moves downward.
  */
 public class BehaviorParticle extends SpriteBillboardParticle {
