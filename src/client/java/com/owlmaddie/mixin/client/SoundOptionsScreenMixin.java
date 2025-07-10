@@ -27,6 +27,6 @@ public abstract class SoundOptionsScreenMixin extends Screen {
     }
 
     private Text getTTSLabel() {
-        return Text.literal("TTS: " + (TTS.enabled ? "ON" : "OFF"));
+        return Text.literal("Creaturechat TTS: " + (TTS.enabled ? "ON" : "OFF"));
     }
 }
