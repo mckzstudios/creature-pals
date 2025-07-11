@@ -160,19 +160,19 @@ task buildAllVersions {
 				"connector:placeholder" = true
 
 				[[mods]]
-				modId = "creaturepalsevolved"
+				modId = "creaturepals"
 				version = "${modVersion}"
 				displayName = "Creature Pals"
 
 				# Forge and Minecraft dependencies
-				[[dependencies.creaturepalsevolved]]
+				[[dependencies.creaturepals]]
 				modId="forge"      
 				mandatory=true
 				versionRange="[47,)" 
 				ordering="NONE"
 				side="BOTH"
 
-				[[dependencies.creaturepalsevolved]]
+				[[dependencies.creaturepals]]
 				modId="minecraft"
 				mandatory=true
 				versionRange="[1.20.1]"
@@ -180,14 +180,14 @@ task buildAllVersions {
 				side="BOTH"
 
 				# Connector dependency
-				[[dependencies.creaturepalsevolved]]
+				[[dependencies.creaturepals]]
 				modId="connector"
 				mandatory=true
 				versionRange="*"
 				ordering="NONE"
 				side="BOTH"
 
-				[[dependencies.creaturepalsevolved]]
+				[[dependencies.creaturepals]]
 				modId="connector"
 				mandatory=true
 				versionRange="*"
@@ -216,7 +216,7 @@ task buildAllVersions {
 					from "build/libs"
 					include "creaturepals-*.jar"
 					into "build/outputs"
-					rename { "creaturepalsevolved-${modVersion}-${v.mc}-forge.jar" }
+					rename { "creaturepals-${modVersion}-${v.mc}-forge.jar" }
 					duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 				}
 
@@ -244,7 +244,7 @@ task buildAllVersions {
                 from "build/libs"
                 include "creaturepals-*.jar"
                 into "build/outputs"
-                rename { "creaturepalsevolved-${modVersion}-${v.mc}.jar" }
+                rename { "creaturepals-${modVersion}-${v.mc}.jar" }
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             }
 
