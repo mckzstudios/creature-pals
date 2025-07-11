@@ -1,7 +1,7 @@
 package com.owlmaddie;
 
 import com.owlmaddie.chat.EventQueueManager;
-import com.owlmaddie.commands.Creature PalsCommands;
+import com.owlmaddie.commands.CreaturePalsCommands;
 import com.owlmaddie.network.ServerPackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -24,7 +24,7 @@ public class ModInit implements ModInitializer {
 		// Proceed with mild caution.
 
 		// Register server commands
-		Creature PalsCommands.register();
+		CreaturePalsCommands.register();
 
 		// Register events
 		ServerPackets.register();
