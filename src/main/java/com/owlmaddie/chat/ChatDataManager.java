@@ -3,6 +3,8 @@ package com.owlmaddie.chat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.owlmaddie.network.ServerPackets;
+import com.owlmaddie.utils.SerializationGSON;
+
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.WorldSavePath;
@@ -115,7 +117,7 @@ public class ChatDataManager {
         entityChatDataMap.values().removeIf(entityChatData -> entityChatData.status == ChatStatus.NONE);
 
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(saveFile), StandardCharsets.UTF_8)) {
-            GSON.toJson(this.entityChatDataMap, writer);
+            SerializationGSON.GSON.toJson(this.entityChatDataMap, writer);
         } catch (Exception e) {
             String errorMessage = "Error saving `chatdata.json`. No Creature Pals chat history was saved! " + e.getMessage();
             LOGGER.error(errorMessage, e);
@@ -130,8 +132,8 @@ public class ChatDataManager {
 
         if (loadFile.exists()) {
             try (InputStreamReader reader = new InputStreamReader(new FileInputStream(loadFile), StandardCharsets.UTF_8)) {
-                Type type = new TypeToken<ConcurrentHashMap<String, EntityChatData>>(){}.getType();
-                this.entityChatDataMap = GSON.fromJson(reader, type);
+                Type type = new TypeToken<ConcurrentHashMap<UUID, EntityChatData>>(){}.getType();
+                this.entityChatDataMap = SerializationGSON.GSON.fromJson(reader, type);
 
                 // Clean up blank, temp entities in data
                 entityChatDataMap.values().removeIf(entityChatData -> entityChatData.status == ChatStatus.NONE);
@@ -140,6 +142,7 @@ public class ChatDataManager {
                 for (EntityChatData entityChatData : entityChatDataMap.values()) {
                     entityChatData.postDeserializeInitialization();
                 }
+                
             } catch (Exception e) {
                 LOGGER.error("Error loading chat data", e);
                 this.entityChatDataMap = new ConcurrentHashMap<>();

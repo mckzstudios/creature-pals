@@ -12,6 +12,8 @@ import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.PlayerMessageManager;
 import com.owlmaddie.utils.ClientEntityFinder;
 import com.owlmaddie.utils.Decompression;
+import com.owlmaddie.utils.SerializationGSON;
+
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
@@ -227,11 +229,10 @@ public class ClientPackets {
                                 return;
                             }
 
-                            // Parse JSON and update client chat data
-                            Gson GSON = new Gson();
-                            Type type = new TypeToken<ConcurrentHashMap<String, EntityChatData>>() {
-                            }.getType();
-                            ChatDataManager.getClientInstance().entityChatDataMap = GSON.fromJson(chatDataJSON, type);
+                    // Parse JSON and update client chat data
+                    Gson GSON = new Gson();
+                    Type type = new TypeToken<ConcurrentHashMap<String, EntityChatData>>(){}.getType();
+                    ChatDataManager.getClientInstance().entityChatDataMap = SerializationGSON.GSON.fromJson(chatDataJSON, type);
 
                             // Clear receivedChunks for future use
                             receivedChunks.clear();
