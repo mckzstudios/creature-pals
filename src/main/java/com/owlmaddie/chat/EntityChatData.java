@@ -49,28 +49,40 @@ import static com.owlmaddie.particle.Particles.*;
  */
 public class EntityChatData {
     public static final Logger LOGGER = LoggerFactory.getLogger("creaturepals");
-    public UUID entityId;
-    public String currentMessage;
-    public int currentLineNumber;
-    public ChatDataManager.ChatStatus status;
-    public String characterSheet;
-    public ChatDataManager.ChatSender sender;
-    public int auto_generated;
-    public List<ChatMessage> previousMessages;
-    public Long born;
-    public Long death;
-    public ServerPlayerEntity lastPlayer;
-    public ChatMessage errorMessage = null;
 
+    @Expose
+    public UUID entityId;
+    @Expose
+    public String currentMessage;
+    @Expose
+    public int currentLineNumber;
+    @Expose
+    public ChatDataManager.ChatStatus status;
+    @Expose
+    public String characterSheet;
+    @Expose
+    public ChatDataManager.ChatSender sender;
+    @Expose
+    public int auto_generated;
+    @Expose
+    public List<ChatMessage> previousMessages;
+    @Expose
+    public Long born;
+    @Expose
+    public Long death;
+    @Expose(serialize = false, deserialize = false)
+    public ServerPlayerEntity lastPlayer;
+    @Expose
+    public ChatMessage errorMessage = null;
     @SerializedName("playerId")
     @Expose(serialize = false)
     private String legacyPlayerId;
-
     @SerializedName("friendship")
     @Expose(serialize = false)
     public Integer legacyFriendship;
 
     // The map to store data for each player interacting with this entity
+    @Expose
     public Map<UUID, PlayerData> players;
 
     public EntityChatData(UUID entityId) {

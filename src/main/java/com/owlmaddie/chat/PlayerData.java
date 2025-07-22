@@ -1,5 +1,7 @@
 package com.owlmaddie.chat;
 
+import com.google.gson.annotations.Expose;
+
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -10,7 +12,7 @@ import net.minecraft.network.codec.PacketCodecs;
  */
 public class PlayerData {
 
-
+    @Expose
     public int friendship;
 
     public PlayerData() {
