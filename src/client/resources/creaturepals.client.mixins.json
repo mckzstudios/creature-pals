@@ -8,7 +8,8 @@
 		"MixinPlayerSkinTexture",
 		"ClientUIMixin",
 		"SoundOptionsScreenMixin",
-		"GameOptionsScreenAccessor"
+		"GameOptionsScreenAccessor",
+		"TitleScreenMixin"
 	],
 	"env": {
 		"client.MixinPlayerCustomTexture": {

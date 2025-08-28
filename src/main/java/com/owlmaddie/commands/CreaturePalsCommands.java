@@ -50,6 +50,7 @@ public class CreaturePalsCommands {
                 .then(registerWhitelistCommand())
                 .then(registerBlacklistCommand())
                 .then(registerChatBubbleCommand())
+                .then(registerPlayer2Command())
                 .then(registerHelpCommand()));
     }
 
@@ -168,6 +169,8 @@ public class CreaturePalsCommands {
                             + "/creaturepals chatbubbles set <on | off> - Show player chat bubbles\n"
                             + "/creaturepals whitelist <entityType | all | clear> - Show chat bubbles\n"
                             + "/creaturepals blacklist <entityType | all | clear> - Hide chat bubbles\n"
+                            + "/creaturepals player2 set <key> - Sets Player2 API key\n"
+                            + "/creaturepals player2 status - Shows Player2 API status\n"
                             + "\n"
                             + "Optional: Append [--config default | server] to any command to specify configuration scope.\n"
                             + "\n"
@@ -175,6 +178,50 @@ public class CreaturePalsCommands {
                     context.getSource().sendFeedback(() -> Text.literal(helpMessage), false);
                     return 1;
                 });
+    }
+    
+    private static LiteralArgumentBuilder<ServerCommandSource> registerPlayer2Command() {
+        return CommandManager.literal("player2")
+                .requires(source -> source.hasPermissionLevel(4))
+                .then(CommandManager.literal("set")
+                        .then(CommandManager.argument("key", StringArgumentType.string())
+                                .executes(context -> {
+                                    String apiKey = StringArgumentType.getString(context, "key");
+                                    // Set the API key in system properties for this session
+                                    System.setProperty("PLAYER2_API_KEY", apiKey);
+                                    context.getSource().sendFeedback(() -> 
+                                        Text.literal("Player2 API key set for this session. Use environment variable for permanent storage.").formatted(Formatting.GREEN), 
+                                        true);
+                                    return 1;
+                                })))
+                .then(CommandManager.literal("status")
+                        .executes(context -> {
+                            String apiKey = System.getProperty("PLAYER2_API_KEY");
+                            String envKey = System.getenv("PLAYER2_API_KEY");
+                            
+                            if (apiKey != null && !apiKey.isEmpty()) {
+                                context.getSource().sendFeedback(() -> 
+                                    Text.literal("Player2 API key: " + apiKey.substring(0, Math.min(8, apiKey.length())) + "... (session)").formatted(Formatting.GREEN), 
+                                    false);
+                            } else if (envKey != null && !envKey.isEmpty()) {
+                                context.getSource().sendFeedback(() -> 
+                                    Text.literal("Player2 API key: " + envKey.substring(0, Math.min(8, envKey.length())) + "... (environment)").formatted(Formatting.GREEN), 
+                                    false);
+                            } else {
+                                context.getSource().sendFeedback(() -> 
+                                    Text.literal("No Player2 API key set").formatted(Formatting.RED), 
+                                    false);
+                            }
+                            return 1;
+                        }))
+                .then(CommandManager.literal("clear")
+                        .executes(context -> {
+                            System.clearProperty("PLAYER2_API_KEY");
+                            context.getSource().sendFeedback(() -> 
+                                Text.literal("Player2 API key cleared from session").formatted(Formatting.YELLOW), 
+                                true);
+                            return 1;
+                        }));
     }
 
     private static LiteralArgumentBuilder<ServerCommandSource> registerStoryCommand() {

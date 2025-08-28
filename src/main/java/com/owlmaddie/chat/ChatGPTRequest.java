@@ -128,6 +128,7 @@ public class ChatGPTRequest {
         // Init API & LLM details
         String apiUrl = config.getUrl();
         String apiKey = config.getApiKey();
+        System.out.println("API Key is: " + apiKey);
         String modelName = config.getModel();
         Integer timeout = config.getTimeout() * 1000;
         LOGGER.info("[CHATGPTRequest]/fetchMessageFromChatGPT with timeout in seconds: " + config.getTimeout());
@@ -148,7 +149,7 @@ public class ChatGPTRequest {
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(timeout); // connection timeout
                 connection.setReadTimeout(timeout); // read timeout
-                connection.setRequestProperty("player2-game-key", "creature-chat-evolved");
+                // Player2 API key is now handled via Authorization header
 
                 // Create messages list (for chat history)
                 List<ChatGPTRequestMessage> messages = new ArrayList<>();

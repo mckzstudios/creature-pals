@@ -8,6 +8,7 @@ import com.owlmaddie.particle.ClientParticle;
 import com.owlmaddie.particle.CreatureParticleFactory;
 import com.owlmaddie.particle.Particles;
 import com.owlmaddie.player2.HeartbeatManager;
+import com.owlmaddie.player2.Player2StartupHandler;
 import com.owlmaddie.player2.TTS;
 import com.owlmaddie.ui.BubbleRenderer;
 import com.owlmaddie.ui.ClickHandler;
@@ -74,6 +75,12 @@ public class ClientInit implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             // Clear or reset the ChatDataManager
             ChatDataManager.getClientInstance().clearData();
+        });
+        
+        // Also check when the client is ready
+        ClientLifecycleEvents.CLIENT_STARTED.register(world -> {
+            // Initialize TTS voices after a short delay to ensure everything is loaded
+            TTS.initializeVoices();
         });
         
     }

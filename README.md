@@ -16,10 +16,11 @@ This is a Player2 mod developed by Elefant AI and is not affiliated with the ori
 **Creature Pals Evolved** is a Minecraft mod that lets you chat with any creature in the game using AI. With built-in [Player2](https://player2.game/) integration, creatures can speak, remember past interactions, and react dynamically to your actions — no extra setup required. 
 
 ## New Features Compared to CreatureChat
-- **No LLM/API Setup:** All you need is the [Player2 App](https://player2.game/), no need to set up your own API account.
+- **Official Player2 API Integration:** Now uses the official [Player2 API](https://player2.game/docs/api-reference) for enhanced AI capabilities
+- **Advanced AI Features:** Access to GPT models, DALL-E image generation, Whisper transcription, and high-quality TTS
 - **Multi-Player:** New chat system that allow players including AI player to chat with mobs through Minecraft's own messaging system.
 - **Version Updates:** Re-write particle effects to supports 1.21.1 Fabric and Neoforge
-- **Coming:** TTS/STT capabilities
+- **Enhanced TTS/STT:** Professional-grade text-to-speech and speech-to-text capabilities
 
 ## Maintained features from CreatureChat
 - **Behaviors:** Creatures can make decisions on their own and **Follow, Flee, Attack, Protect**, and more!
@@ -30,6 +31,17 @@ This is a Player2 mod developed by Elefant AI and is not affiliated with the ori
 
 ## Installation Instructions
 👉 Check [releases](https://github.com/elefant-ai/creature-pals/releases) and download the appropriate jar file for your Minecraft version.
+
+### Player2 API Setup (Required)
+This mod now uses the official Player2 API. You'll need to:
+
+1. **Get a Player2 API Key:** Visit [Player2 Game](https://player2.game) and sign up for an account
+2. **Set Environment Variable:** Set `PLAYER2_API_KEY` to your API key
+   - **Windows:** `set PLAYER2_API_KEY=your_key_here` (PowerShell: `$env:PLAYER2_API_KEY="your_key_here"`)
+   - **Linux/macOS:** `export PLAYER2_API_KEY="your_key_here"`
+3. **Restart Minecraft:** After setting the environment variable
+
+📖 **Detailed setup instructions:** See [PLAYER2_SETUP.md](PLAYER2_SETUP.md)
 
 Then follow either of the following:
 
@@ -52,11 +64,11 @@ Then follow either of the following:
 
 # In-game Commands / Configuration
 - **OPTIONAL:** `/creaturepals url set "<url>"`
-  - Sets the URL of the API used to make LLM requests. Defaults to `"https://api.openai.com/v1/chat/completions"`.
+  - Sets the URL of the API used to make LLM requests. Defaults to `"https://api.player2.game/v1/chat/completions"`.
 - **OPTIONAL:** `/creaturepals model set <model>`
   - Sets the model used for generating responses in chats. Defaults to `gpt-3.5-turbo`.
 - **OPTIONAL:** `/creaturepals timeout set <seconds>`
-  - Sets the timeout (in seconds) for API HTTP requests. Defaults to `10` seconds.
+  - Sets the timeout (in seconds) for API HTTP requests. Defaults to `20` seconds.
 - **OPTIONAL:** `/creaturepals whitelist <entityType | all | clear>` - Show chat bubbles
   - Shows chat bubbles for the specified entity type or all entities, or clears the whitelist.
 - **OPTIONAL:** `/creaturepals blacklist <entityType | all | clear>` - Hide chat bubbles

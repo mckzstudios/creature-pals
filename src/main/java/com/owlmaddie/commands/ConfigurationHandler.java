@@ -70,7 +70,7 @@ public class ConfigurationHandler {
 
     public static class Config {
         private String apiKey = "";
-        private String url = "http://127.0.0.1:4315/v1/chat/completions";
+        private String url = "https://api.player2.game/v1/chat/completions";
         private String model = "gpt-3.5-turbo";
         private int maxContextTokens = 16385;
         private int maxOutputTokens = 200;
@@ -83,7 +83,33 @@ public class ConfigurationHandler {
 
         // Getters and setters for existing fields
         public String getApiKey() {
-            return apiKey;
+            String apiKey = System.getProperty("PLAYER2_API_KEY");
+            if (apiKey != null && !apiKey.trim().isEmpty()) {
+                return apiKey.trim();
+            }
+
+            // Then try environment variable
+            apiKey = System.getenv("PLAYER2_API_KEY");
+            if (apiKey != null && !apiKey.trim().isEmpty()) {
+                return apiKey.trim();
+            }
+
+            // Finally try reading from file
+            try {
+                String minecraftDir = System.getProperty("user.home") + "/AppData/Roaming/.minecraft";
+                java.io.File file = new java.io.File(minecraftDir, "p2key.txt");
+                if (file.exists()) {
+                    apiKey = new String(java.nio.file.Files.readAllBytes(file.toPath())).trim();
+                    if (!apiKey.isEmpty()) {
+                        // Store in system properties for this session
+                        System.setProperty("PLAYER2_API_KEY", apiKey);
+                        return apiKey;
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to read API key from file: " + e.getMessage());
+            }
+            return null;
         }
 
         public void setApiKey(String apiKey) {
@@ -93,6 +119,9 @@ public class ConfigurationHandler {
             } else if (apiKey.startsWith("sk-")) {
                 // Update URL if an OpenAI API key is detected
                 setUrl("https://api.openai.com/v1/chat/completions");
+            } else if (apiKey.startsWith("p2_") || apiKey.length() >= 32) {
+                // Update URL if a Player2 API key is detected
+                setUrl("https://api.player2.game/v1/chat/completions");
             }
             this.apiKey = apiKey;
         }
