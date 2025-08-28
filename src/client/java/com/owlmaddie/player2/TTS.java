@@ -72,7 +72,7 @@ public class TTS {
                 return;
             }
             data.lastMessage = message;
-            Player2APIService.textToSpeech(message, data.voiceId);
+            Player2APIService.textToSpeech(message, data.voiceId, entityId);
         });
     }
 

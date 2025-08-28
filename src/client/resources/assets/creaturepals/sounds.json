@@ -1,0 +1,11 @@
+{
+  "creaturepals.tts_audio": {
+    "sounds": [
+      {
+        "name": "creaturepals:tts_audio",
+        "stream": true
+      }
+    ],
+    "subtitle": "TTS Audio"
+  }
+}

@@ -8,6 +8,7 @@ import com.owlmaddie.particle.ClientParticle;
 import com.owlmaddie.particle.CreatureParticleFactory;
 import com.owlmaddie.particle.Particles;
 import com.owlmaddie.player2.HeartbeatManager;
+import com.owlmaddie.player2.Player2AudioHandler;
 import com.owlmaddie.player2.Player2StartupHandler;
 import com.owlmaddie.player2.TTS;
 import com.owlmaddie.ui.BubbleRenderer;
@@ -81,6 +82,11 @@ public class ClientInit implements ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STARTED.register(world -> {
             // Initialize TTS voices after a short delay to ensure everything is loaded
             TTS.initializeVoices();
+        });
+        
+        // Clean up audio files when client shuts down
+        ClientLifecycleEvents.CLIENT_STOPPING.register(world -> {
+            Player2AudioHandler.cleanupAllAudio();
         });
         
     }

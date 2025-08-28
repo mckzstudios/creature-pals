@@ -122,24 +122,50 @@ public class Player2APIService {
      * 
      * @param message The text message to convert to speech
      * @param voiceId The voice ID to use for TTS
+     * @param entityId The entity ID this TTS is for (for audio tracking)
      */
-    public static void textToSpeech(String message, String voiceId) {
+    public static void textToSpeech(String message, String voiceId, UUID entityId) {
         try {
             JsonObject requestBody = new JsonObject();
             requestBody.addProperty("text", message);
-            requestBody.addProperty("voice_id", voiceId);
-            requestBody.addProperty("model", "tts-1"); // Using OpenAI TTS model
-            requestBody.addProperty("response_format", "mp3");
+            requestBody.addProperty("voice_ids", voiceId);
             requestBody.addProperty("speed", 1.0);
+            requestBody.addProperty("audio_format", "mp3");
             
             System.out.println("Sending TTS request: " + message);
-            Map<String, JsonElement> response = sendRequest("/v1/audio/speech", true, requestBody);
+            Map<String, JsonElement> response = sendRequest("/v1/tts/speak", true, requestBody);
             
             // Handle the audio response - Player2 returns audio data
             if (response.containsKey("audio_url")) {
                 String audioUrl = response.get("audio_url").getAsString();
                 System.out.println("TTS audio generated: " + audioUrl);
-                // TODO: Implement audio playback logic
+
+                // Download the audio file from the audioUrl and play it using Minecraft's sound system
+                try {
+                    java.net.URL url = new java.net.URL(audioUrl);
+                    java.io.InputStream in = url.openStream();
+                    java.io.File tempFile = java.io.File.createTempFile("player2_tts_", ".mp3");
+                    java.nio.file.Files.copy(in, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    in.close();
+
+                    // Now play the audio file using our custom audio handler
+                    System.out.println("Downloaded TTS audio to: " + tempFile.getAbsolutePath());
+                    
+                    // Use the audio handler to play the file
+                    // Pass the actual entity ID for proper tracking
+                    boolean playbackStarted = Player2AudioHandler.playAudioFile(tempFile, entityId);
+                    
+                    if (playbackStarted) {
+                        System.out.println("TTS audio playback started successfully");
+                    } else {
+                        System.err.println("Failed to start TTS audio playback");
+                    }
+                    
+                    // Clean up the temporary file after a delay
+                    tempFile.deleteOnExit();
+                } catch (Exception ex) {
+                    System.err.println("Failed to play TTS audio: " + ex.getMessage());
+                }
             }
         } catch (Exception e) {
             System.err.println("TTS request failed: " + e.getMessage());
