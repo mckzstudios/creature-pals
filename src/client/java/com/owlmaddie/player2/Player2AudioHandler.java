@@ -1,12 +1,14 @@
 package com.owlmaddie.player2;
 
+import com.owlmaddie.utils.ClientEntityFinder;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
 
+import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Handles audio playback for Player2 TTS in Fabric
+ * Handles 3D audio playback for Player2 TTS in Fabric using Java's audio system
  */
 public class Player2AudioHandler {
     private static final ConcurrentHashMap<UUID, String> activeAudioFiles = new ConcurrentHashMap<>();
@@ -24,9 +26,9 @@ public class Player2AudioHandler {
     private static final String TTS_SOUND_NAME = "tts_audio";
     
     /**
-     * Play an MP3 audio file using Minecraft's sound system
+     * Play an OGG audio file using Java's audio system with 3D positioning
      * 
-     * @param audioFile The MP3 file to play
+     * @param audioFile The OGG file to play
      * @param entityId The entity ID this audio is for (for tracking)
      * @return true if playback started successfully
      */
@@ -43,72 +45,161 @@ public class Player2AudioHandler {
         }
         
         try {
-            // Create a unique identifier for this audio file
-            String audioId = "tts_" + entityId.toString().replace("-", "_");
+            System.out.println("Source audio file: " + audioFile.getAbsolutePath());
+            System.out.println("Source file size: " + audioFile.length() + " bytes");
             
-            // Copy the file to a permanent location in the mod's resources
-            Path modSoundsDir = getModSoundsDirectory();
-            if (modSoundsDir == null) {
-                System.err.println("Could not create mod sounds directory");
-                return false;
+            // Track this audio file for cleanup
+            activeAudioFiles.put(entityId, audioFile.getAbsolutePath());
+            
+            // Get the entity for 3D positioning
+            Entity entity = ClientEntityFinder.getEntityByUUID(mc.world, entityId);
+            if (entity == null) {
+                System.out.println("Entity not found, playing TTS at player location");
+                entity = mc.player;
             }
             
-            // Create the sounds directory if it doesn't exist
-            Files.createDirectories(modSoundsDir);
-            
-            // Copy the audio file to the mod's sounds directory
-            Path targetPath = modSoundsDir.resolve(audioId + ".mp3");
-            Files.copy(audioFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            
-            // Track this audio file
-            activeAudioFiles.put(entityId, targetPath.toString());
-            
-            // Create a custom sound event for this audio
-            Identifier soundId = Identifier.of(SOUND_NAMESPACE, audioId);
-            
-            // Play the sound using Minecraft's sound system
-            // For now, we'll play a placeholder sound to indicate TTS is ready
-            // and log the file location for manual testing
-            System.out.println("TTS audio ready for playback: " + targetPath.toString());
-            System.out.println("Sound ID: " + soundId.toString());
-            
-            // Play a notification sound to indicate TTS is ready
-            // This is a workaround until we implement proper MP3 playback
-            try {
-                // Play a UI sound to indicate TTS is ready
-                mc.getSoundManager().play(PositionedSoundInstance.master(
-                    net.minecraft.sound.SoundEvents.UI_BUTTON_CLICK.value(),
-                    1.0f, 1.0f
-                ));
-                System.out.println("TTS notification sound played - audio file ready at: " + targetPath.toString());
-            } catch (Exception e) {
-                System.err.println("Failed to play TTS notification sound: " + e.getMessage());
-            }
+            // Play the audio with 3D positioning
+            play3DAudio(audioFile, entity, mc);
             
             return true;
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Failed to prepare audio file for playback: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
     
     /**
-     * Get the mod's sounds directory
+     * Play 3D audio using Java's audio system
      */
-    private static Path getModSoundsDirectory() {
+    private static void play3DAudio(File audioFile, Entity entity, MinecraftClient mc) {
         try {
-            // Try to get the mod's resource directory
-            String userDir = System.getProperty("user.dir");
-            if (userDir != null) {
-                Path projectDir = Path.of(userDir);
-                Path modSoundsDir = projectDir.resolve("src").resolve("client").resolve("resources").resolve("assets").resolve(SOUND_NAMESPACE).resolve("sounds");
-                return modSoundsDir;
-            }
+            // Get entity position for 3D sound
+            Vec3d entityPos = entity.getPos();
+            Vec3d playerPos = mc.player.getPos();
+            
+            // Calculate distance and direction for 3D audio
+            double distance = entityPos.distanceTo(playerPos);
+            Vec3d direction = entityPos.subtract(playerPos).normalize();
+            
+            System.out.println("Playing 3D TTS audio at entity position: " + entityPos);
+            System.out.println("Distance from player: " + String.format("%.2f", distance) + " blocks");
+            
+            // Start audio playback in a separate thread to avoid blocking
+            Thread audioThread = new Thread(() -> {
+                try {
+                    // Load the audio file
+                    AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+                    AudioFormat format = audioStream.getFormat();
+                    
+                    // Create a data line for playback
+                    DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+                    if (!AudioSystem.isLineSupported(info)) {
+                        System.err.println("Audio format not supported: " + format);
+                        return;
+                    }
+                    
+                    SourceDataLine audioLine = (SourceDataLine) AudioSystem.getLine(info);
+                    audioLine.open(format);
+                    audioLine.start();
+                    
+                    // Calculate 3D audio parameters
+                    float volume = calculate3DVolume(distance);
+                    float pan = calculate3DPan(direction);
+                    
+                    System.out.println("3D Audio - Volume: " + String.format("%.2f", volume) + ", Pan: " + String.format("%.2f", pan));
+                    
+                    // Apply 3D audio effects
+                    apply3DEffects(audioLine, volume, pan);
+                    
+                    // Play the audio
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    
+                    while ((bytesRead = audioStream.read(buffer)) != -1) {
+                        audioLine.write(buffer, 0, bytesRead);
+                    }
+                    
+                    // Clean up
+                    audioLine.drain();
+                    audioLine.close();
+                    audioStream.close();
+                    
+                    System.out.println("3D TTS audio playback completed successfully");
+                    
+                } catch (Exception e) {
+                    System.err.println("Failed to play 3D audio: " + e.getMessage());
+                    e.printStackTrace();
+                    
+                    // Fallback to notification sound
+                    try {
+                        mc.execute(() -> {
+                            mc.getSoundManager().play(PositionedSoundInstance.master(
+                                net.minecraft.sound.SoundEvents.UI_BUTTON_CLICK.value(),
+                                0.5f, 1.0f
+                            ));
+                        });
+                        System.out.println("Fallback notification sound played");
+                    } catch (Exception fallbackEx) {
+                        System.err.println("Failed to play fallback sound: " + fallbackEx.getMessage());
+                    }
+                }
+            });
+            
+            audioThread.setDaemon(true);
+            audioThread.start();
+            
         } catch (Exception e) {
-            System.err.println("Could not determine mod sounds directory: " + e.getMessage());
+            System.err.println("Failed to start 3D audio playback: " + e.getMessage());
+            e.printStackTrace();
         }
-        return null;
+    }
+    
+    /**
+     * Calculate 3D volume based on distance
+     */
+    private static float calculate3DVolume(double distance) {
+        // Volume decreases with distance (inverse square law)
+        // Max volume at 0 blocks, min volume at 64+ blocks
+        double maxDistance = 64.0;
+        double volume = Math.max(0.1, 1.0 - (distance / maxDistance));
+        return (float) volume;
+    }
+    
+    /**
+     * Calculate 3D panning based on direction
+     */
+    private static float calculate3DPan(Vec3d direction) {
+        // Convert 3D direction to stereo panning
+        // Left = -1.0, Center = 0.0, Right = 1.0
+        double pan = direction.x;
+        return (float) Math.max(-1.0, Math.min(1.0, pan));
+    }
+    
+    /**
+     * Apply 3D audio effects to the audio line
+     */
+    private static void apply3DEffects(SourceDataLine audioLine, float volume, float pan) {
+        try {
+            // Set volume
+            FloatControl volumeControl = (FloatControl) audioLine.getControl(FloatControl.Type.MASTER_GAIN);
+            if (volumeControl != null) {
+                float minGain = volumeControl.getMinimum();
+                float maxGain = volumeControl.getMaximum();
+                float gain = minGain + (maxGain - minGain) * volume;
+                volumeControl.setValue(gain);
+            }
+            
+            // Set panning
+            FloatControl panControl = (FloatControl) audioLine.getControl(FloatControl.Type.BALANCE);
+            if (panControl != null) {
+                panControl.setValue(pan);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Failed to apply 3D audio effects: " + e.getMessage());
+        }
     }
     
     /**

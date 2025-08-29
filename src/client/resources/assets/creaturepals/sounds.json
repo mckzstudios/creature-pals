@@ -1,5 +1,5 @@
 {
-  "creaturepals.tts_audio": {
+  "tts_audio": {
     "sounds": [
       {
         "name": "creaturepals:tts_audio",

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.JsonArray;
 import com.google.gson.*;
 
 import java.io.*;
@@ -128,47 +129,64 @@ public class Player2APIService {
         try {
             JsonObject requestBody = new JsonObject();
             requestBody.addProperty("text", message);
-            requestBody.addProperty("voice_ids", voiceId);
+
+            // voice_ids should be an array of strings according to the API docs
+            JsonArray voiceIdsArray = new JsonArray();
+            voiceIdsArray.add(voiceId);
+            requestBody.add("voice_ids", voiceIdsArray);
+
             requestBody.addProperty("speed", 1.0);
-            requestBody.addProperty("audio_format", "mp3");
-            
+            requestBody.addProperty("audio_format", "wav");
+
             System.out.println("Sending TTS request: " + message);
-            Map<String, JsonElement> response = sendRequest("/v1/tts/speak", true, requestBody);
-            
-            // Handle the audio response - Player2 returns audio data
-            if (response.containsKey("audio_url")) {
-                String audioUrl = response.get("audio_url").getAsString();
-                System.out.println("TTS audio generated: " + audioUrl);
+            Map<String, JsonElement> response = null;
+            try {
+                response = sendRequest("/v1/tts/speak", true, requestBody);
+                // Handle the audio response - Player2 returns audio data
+                if (response.containsKey("data")) {
+                    String audioData = response.get("data").getAsString();
+                    System.out.println("TTS audio generated: " + audioData);
 
-                // Download the audio file from the audioUrl and play it using Minecraft's sound system
-                try {
-                    java.net.URL url = new java.net.URL(audioUrl);
-                    java.io.InputStream in = url.openStream();
-                    java.io.File tempFile = java.io.File.createTempFile("player2_tts_", ".mp3");
-                    java.nio.file.Files.copy(in, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                    in.close();
+                    try {
+                        java.io.File tempFile = java.io.File.createTempFile("player2_tts_", ".wav");
 
-                    // Now play the audio file using our custom audio handler
-                    System.out.println("Downloaded TTS audio to: " + tempFile.getAbsolutePath());
-                    
-                    // Use the audio handler to play the file
-                    // Pass the actual entity ID for proper tracking
-                    boolean playbackStarted = Player2AudioHandler.playAudioFile(tempFile, entityId);
-                    
-                    if (playbackStarted) {
-                        System.out.println("TTS audio playback started successfully");
-                    } else {
-                        System.err.println("Failed to start TTS audio playback");
+                        // Check if it's a data URL (base64 encoded) or regular URL
+                        if (audioData.startsWith("data:")) {
+                            // Handle base64 data URL
+                            String base64Data = audioData.substring(audioData.indexOf(",") + 1);
+                            byte[] audioBytes = java.util.Base64.getDecoder().decode(base64Data);
+                            java.nio.file.Files.write(tempFile.toPath(), audioBytes);
+                            System.out.println("Decoded base64 audio data to: " + tempFile.getAbsolutePath());
+                        } else {
+                            // Handle regular URL
+                            java.net.URL url = new java.net.URL(audioData);
+                            java.io.InputStream in = url.openStream();
+                            java.nio.file.Files.copy(in, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            in.close();
+                            System.out.println("Downloaded TTS audio to: " + tempFile.getAbsolutePath());
+                        }
+
+                        // Now play the audio file using our custom audio handler
+                        // Pass the actual entity ID for proper tracking
+                        boolean playbackStarted = Player2AudioHandler.playAudioFile(tempFile, entityId);
+
+                        if (playbackStarted) {
+                            System.out.println("TTS audio playback started successfully");
+                        } else {
+                            System.err.println("Failed to start TTS audio playback");
+                        }
+
+                        // Clean up the temporary file after a delay
+                        tempFile.deleteOnExit();
+                    } catch (Exception ex) {
+                        System.err.println("Failed to play TTS audio: " + ex.getMessage());
                     }
-                    
-                    // Clean up the temporary file after a delay
-                    tempFile.deleteOnExit();
-                } catch (Exception ex) {
-                    System.err.println("Failed to play TTS audio: " + ex.getMessage());
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception e) {
-            System.err.println("TTS request failed: " + e.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -179,7 +197,7 @@ public class Player2APIService {
      */
     public static List<JsonObject> getVoices() {
         try {
-            Map<String, JsonElement> responseMap = sendRequest("/v1/audio/voices", false, null);
+            Map<String, JsonElement> responseMap = sendRequest("/v1/tts/voices", false, null);
             JsonElement voicesJsonElement = responseMap.get("voices");
             if (voicesJsonElement != null && voicesJsonElement.isJsonArray()) {
                 JsonArray voicesJsonArray = voicesJsonElement.getAsJsonArray();
@@ -216,53 +234,6 @@ public class Player2APIService {
             return sendRequest("/v1/chat/completions", true, requestBody);
         } catch (Exception e) {
             System.err.println("Chat completion request failed: " + e.getMessage());
-            return Collections.emptyMap();
-        }
-    }
-
-    /**
-     * Create an image using Player2 DALL-E API
-     * 
-     * @param prompt The image generation prompt
-     * @param size The image size (e.g., "1024x1024", "1792x1024", "1024x1792")
-     * @return The image generation response
-     */
-    public static Map<String, JsonElement> createImage(String prompt, String size) {
-        try {
-            JsonObject requestBody = new JsonObject();
-            requestBody.addProperty("prompt", prompt);
-            requestBody.addProperty("model", "dall-e-3");
-            requestBody.addProperty("size", size);
-            requestBody.addProperty("quality", "standard");
-            requestBody.addProperty("n", 1);
-            
-            System.out.println("Sending image generation request: " + prompt);
-            return sendRequest("/v1/images/generations", true, requestBody);
-        } catch (Exception e) {
-            System.err.println("Image generation request failed: " + e.getMessage());
-            return Collections.emptyMap();
-        }
-    }
-
-    /**
-     * Transcribe audio using Player2 Whisper API
-     * 
-     * @param audioData Base64 encoded audio data
-     * @param model The Whisper model to use (e.g., "whisper-1")
-     * @return The transcription response
-     */
-    public static Map<String, JsonElement> transcribeAudio(String audioData, String model) {
-        try {
-            JsonObject requestBody = new JsonObject();
-            requestBody.addProperty("file", audioData);
-            requestBody.addProperty("model", model);
-            requestBody.addProperty("response_format", "json");
-            requestBody.addProperty("language", "en");
-            
-            System.out.println("Sending audio transcription request");
-            return sendRequest("/v1/audio/transcriptions", true, requestBody);
-        } catch (Exception e) {
-            System.err.println("Audio transcription request failed: " + e.getMessage());
             return Collections.emptyMap();
         }
     }

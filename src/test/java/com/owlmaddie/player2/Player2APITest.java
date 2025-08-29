@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Test class for the new Player2 API implementation
@@ -63,7 +64,7 @@ public class Player2APITest {
     void testTextToSpeech() {
         try {
             // Test with a simple message and default voice
-            Player2APIService.textToSpeech("Hello, this is a test message.", "alloy");
+            Player2APIService.textToSpeech("Hello, this is a test message.", "alloy", UUID.randomUUID());
             // If no exception is thrown, the test passes
             assertTrue(true);
         } catch (Exception e) {
@@ -102,55 +103,6 @@ public class Player2APITest {
                 assertTrue(true);
             } else {
                 fail("Chat completion failed with unexpected error: " + e.getMessage());
-            }
-        }
-    }
-
-    @Test
-    void testImageGeneration() {
-        try {
-            Map<String, JsonElement> response = Player2APIService.createImage("A cute cat", "1024x1024");
-            
-            // Should return a response (even if empty due to no API key)
-            assertNotNull(response);
-            
-            if (!response.isEmpty()) {
-                System.out.println("Image generation response received");
-            } else {
-                System.out.println("Image generation returned empty response (expected without API key)");
-            }
-        } catch (Exception e) {
-            if (e.getMessage().contains("PLAYER2_API_KEY environment variable is not set")) {
-                System.out.println("Skipping image generation test - no API key available");
-                assertTrue(true);
-            } else {
-                fail("Image generation failed with unexpected error: " + e.getMessage());
-            }
-        }
-    }
-
-    @Test
-    void testAudioTranscription() {
-        try {
-            // Test with dummy audio data
-            String dummyAudioData = "dGVzdCBhdWRpbyBkYXRh"; // Base64 encoded "test audio data"
-            
-            Map<String, JsonElement> response = Player2APIService.transcribeAudio(dummyAudioData, "whisper-1");
-            
-            // Should return a response (even if empty due to no API key)
-            assertNotNull(response);
-            
-            if (!response.isEmpty()) {
-                System.out.println("Audio transcription response received");
-            } else {
-                System.out.println("Audio transcription returned empty response (expected without API key)");
-            }
-        } catch (Exception e) {
-            if (e.getMessage().contains("PLAYER2_API_KEY environment variable is not set")) {
-                System.out.println("Skipping audio transcription test - no API key available");
-                assertTrue(true);
-            } else {
-                fail("Audio transcription failed with unexpected error: " + e.getMessage());
             }
         }
     }
